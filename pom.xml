@@ -27,9 +27,9 @@
         <maven.assembly.plugin.version>3.8.0</maven.assembly.plugin.version>
     </properties>
     <scm>
-        <connection>scm:git:git://github.com/the-thing/zam.git</connection>
-        <developerConnection>scm:git:git@github.com:the-thing/zam.git</developerConnection>
-        <url>https://github.com/the-thing/zam</url>
+        <connection>scm:git:git://github.com/the-thing/chip-groove.git</connection>
+        <developerConnection>scm:git:git@github.com:the-thing/chip-groove.git</developerConnection>
+        <url>https://github.com/the-thing/chip-groove</url>
         <tag>main</tag>
     </scm>
     <dependencyManagement>
@@ -104,11 +104,6 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.plugin.version}</version>
-                    <configuration>
-                        <excludes>
-                            <exclude>com/github/thething/zam/demo/**</exclude>
-                        </excludes>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
