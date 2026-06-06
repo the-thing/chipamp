@@ -9,7 +9,7 @@ import java.io.IOException;
 public final class Main {
 
     public static void main(String[] args) throws IOException {
-        try (DataInputStream in = new DataInputStream(Resources.getResourceAsStream("h0ffman-eon.mod"))) {
+        try (DataInputStream in = new DataInputStream(Resources.getResourceAsStream("h0ffman - Eon.mod"))) {
             ModLoader.load((DataInput) in);
         }
     }
