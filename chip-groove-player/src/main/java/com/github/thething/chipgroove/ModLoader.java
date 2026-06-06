@@ -42,10 +42,10 @@ public class ModLoader {
         int truePatternCount = ChipArrays.max(patternSequence) + 1;
         byte[][] sampleData = new byte[SAMPLE_COUNT][];
 
-        for (int i = 0; i < SAMPLE_COUNT; i++) {
-            sampleData[i] = new byte[sampleHeaders[i].length()];
-            in.readFully(sampleData[i]);
-        }
+//        for (int i = 0; i < SAMPLE_COUNT; i++) {
+//            sampleData[i] = new byte[sampleHeaders[i].length()];
+//            in.readFully(sampleData[i]);
+//        }
     }
 
     private static int[] getPatternSequences(DataInput in) throws IOException {
