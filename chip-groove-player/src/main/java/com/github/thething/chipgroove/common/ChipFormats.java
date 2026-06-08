@@ -7,18 +7,23 @@ public final class ChipFormats {
     private ChipFormats() {
     }
 
-    public static String format(Pattern[][][] patterns) {
+    // TODO format mod file
+
+    public static String formatPatterns(Pattern[][][] patterns) {
         StringBuilder out = new StringBuilder();
-        format(patterns, out);
+        formatPatterns(patterns, out);
         return out.toString();
     }
 
-    public static void format(Pattern[][][] patterns, StringBuilder out) {
+    public static void formatPatterns(Pattern[][][] patterns, StringBuilder out) {
         for (int pattern = 0; pattern < patterns.length; pattern++) {
             for (int row = 0; row < patterns[pattern].length; row++) {
                 for (int channel = 0; channel < patterns[pattern][row].length; channel++) {
-                    out.append(patterns[pattern][row][channel]);
+                    out.append(patterns[pattern][row][channel].pitch());
+                    out.append(" ");
                 }
+
+                out.append('\n');
             }
         }
     }

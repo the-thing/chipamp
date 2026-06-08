@@ -143,7 +143,7 @@ public class ModLoader {
         int sample = (b0 & 0xF0) | (b2 >> 4);
         int pitch = ((b0 & 0x0F) << 8) | b1;
         int effect = b2 & 0x0F;
-        int effectArgument = b3;
+        int effectArgument = b3 & 0xFF;
 
         return new Pattern(sample, pitch, effect, effectArgument);
     }

@@ -1,5 +1,6 @@
 package com.github.thething.chipgroove;
 
+import com.github.thething.chipgroove.common.ChipFormats;
 import com.github.thething.chipgroove.io.Resources;
 
 import java.io.DataInput;
@@ -10,7 +11,9 @@ public final class Main {
 
     public static void main(String[] args) throws IOException {
         try (DataInputStream in = new DataInputStream(Resources.getResourceAsStream("h0ffman - Eon.mod"))) {
-            ModLoader.load((DataInput) in);
+            Mod mod = ModLoader.load((DataInput) in);
+
+            System.out.println(ChipFormats.formatPatterns(mod.getPatterns()));
         }
     }
 }
