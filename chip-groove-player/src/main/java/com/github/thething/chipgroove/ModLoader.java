@@ -1,6 +1,6 @@
 package com.github.thething.chipgroove;
 
-import com.github.thething.chipgroove.common.ChipArrays;
+import com.github.thething.chipgroove.common.ExtraArrays;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -31,7 +31,7 @@ public class ModLoader {
         int[] patternSequences = loadPatternSequences(in);
         String trackerId = loadTrackerId(in);
 
-        int patternCount = ChipArrays.max(patternSequences) + 1;
+        int patternCount = ExtraArrays.max(patternSequences) + 1;
 
         Pattern[][][] patterns = loadPatterns(in, patternCount);
         Sample[] samples = loadSamples(in, sampleHeaders);
@@ -43,7 +43,7 @@ public class ModLoader {
         byte[] title = new byte[20];
         in.readFully(title, 0, 20);
 
-        int index = ChipArrays.indexOf(title, (byte) 0);
+        int index = ExtraArrays.indexOf(title, (byte) 0);
         String name;
 
         if (index == -1) {
@@ -111,7 +111,7 @@ public class ModLoader {
         byte[] nameArray = new byte[22];
         in.readFully(nameArray, 0, nameArray.length);
 
-        int index = ChipArrays.indexOf(nameArray, (byte) 0);
+        int index = ExtraArrays.indexOf(nameArray, (byte) 0);
 
         if (index == -1) {
             return new String(nameArray, StandardCharsets.US_ASCII);

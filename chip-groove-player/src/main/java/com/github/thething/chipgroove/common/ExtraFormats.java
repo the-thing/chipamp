@@ -3,7 +3,7 @@ package com.github.thething.chipgroove.common;
 import com.github.thething.chipgroove.ModTables;
 import com.github.thething.chipgroove.Pattern;
 
-public final class ChipFormats {
+public final class ExtraFormats {
 
     private static final char[] HEX_CHARACTERS = new char[]{
             '0', '1', '2', '3', '4', '5', '6', '7',
@@ -45,7 +45,7 @@ public final class ChipFormats {
             "F8", "F9", "FA", "FB", "FC", "FD", "FE", "FF"
     };
 
-    private ChipFormats() {
+    private ExtraFormats() {
     }
 
     public static String formatPatterns(Pattern[][][] patterns) {

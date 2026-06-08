@@ -1,8 +1,8 @@
 package com.github.thething.chipgroove.common;
 
-public final class ChipArrays {
+public final class ExtraArrays {
 
-    private ChipArrays() {
+    private ExtraArrays() {
     }
 
     public static int indexOf(byte[] values, byte value) {
