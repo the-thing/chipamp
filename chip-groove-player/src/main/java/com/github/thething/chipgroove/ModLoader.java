@@ -1,54 +1,60 @@
 package com.github.thething.chipgroove;
 
 import com.github.thething.chipgroove.common.ChipArrays;
-import org.jspecify.annotations.NonNull;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 public class ModLoader {
 
     private static final int SAMPLE_COUNT = 31;
     private static final int PATTERN_COUNT = 128;
+    private static final int ROW_COUNT = 64;
     private static final int CHANNEL_COUNT = 4;
 
-    public static void load(InputStream in) throws IOException {
-        load((DataInput) new DataInputStream(in));
+    public static Mod load(InputStream in) throws IOException {
+        return load((DataInput) new DataInputStream(in));
     }
 
-    public static void load(DataInput in) throws IOException {
-        StringBuilder builder = new StringBuilder(20);
+    public static Mod load(DataInput in) throws IOException {
+        String title = loadTitle(in);
+        SampleHeader[] sampleHeaders = loadSampleHeaders(in);
 
-        byte[] name = new byte[20];
-        in.readFully(name, 0, 20);
+        // skip
+        // song length in patterns (0-80h)
+        // restart byte for song looping (Noisetracker?)
+        in.skipBytes(2);
 
-        SampleHeader[] sampleHeaders = new SampleHeader[SAMPLE_COUNT];
+        int[] patternSequences = loadPatternSequences(in);
+        String trackerId = loadTrackerId(in);
 
-        for (int i = 0; i < SAMPLE_COUNT; i++) {
-            sampleHeaders[i] = loadSampleHeader(in);
-            System.out.println(sampleHeaders[i]);
+        int patternCount = ChipArrays.max(patternSequences) + 1;
+
+        Pattern[][][] patterns = loadPatterns(in, patternCount);
+        Sample[] samples = loadSamples(in, sampleHeaders);
+
+        // return new Mod(title, samples);
+        return new Mod(title, samples, patternSequences, trackerId, patternCount, patterns);
+    }
+
+    private static String loadTitle(DataInput in) throws IOException {
+        byte[] title = new byte[20];
+        in.readFully(title, 0, 20);
+
+        int index = ChipArrays.indexOf(title, (byte) 0);
+        String name;
+
+        if (index == -1) {
+            return new String(title, StandardCharsets.US_ASCII);
+        } else {
+            return new String(title, 0, index, StandardCharsets.US_ASCII);
         }
-
-        int patternCount = in.readUnsignedByte();
-        int songEnd = in.readUnsignedByte();
-
-        int[] patternSequence = getPatternSequences(in);
-        String trackerFormat = getTrackerFormat(in);
-
-        int truePatternCount = ChipArrays.max(patternSequence) + 1;
-        byte[][] sampleData = new byte[SAMPLE_COUNT][];
-
-//        for (int i = 0; i < SAMPLE_COUNT; i++) {
-//            sampleData[i] = new byte[sampleHeaders[i].length()];
-//            in.readFully(sampleData[i]);
-//        }
     }
 
-    private static int[] getPatternSequences(DataInput in) throws IOException {
+    private static int[] loadPatternSequences(DataInput in) throws IOException {
         byte[] bytes = new byte[PATTERN_COUNT];
         in.readFully(bytes);
 
@@ -61,38 +67,88 @@ public class ModLoader {
         return patternSequences;
     }
 
-    private static String getTrackerFormat(DataInput in) throws IOException {
+    private static String loadTrackerId(DataInput in) throws IOException {
         byte[] trackerData = new byte[4];
         in.readFully(trackerData, 0, 4);
-
         return new String(trackerData, StandardCharsets.US_ASCII);
     }
 
-    public static SampleHeader loadSampleHeader(DataInput in) throws IOException {
+    private static Sample[] loadSamples(DataInput in, SampleHeader[] sampleHeaders) throws IOException {
+        Sample[] samples = new Sample[sampleHeaders.length];
+
+        for (int i = 0; i < SAMPLE_COUNT; i++) {
+            byte[] sampleData = new byte[sampleHeaders[i].length()];
+            in.readFully(sampleData);
+        }
+
+        return samples;
+    }
+
+    private static SampleHeader[] loadSampleHeaders(DataInput in) throws IOException {
+        SampleHeader[] sampleHeaders = new SampleHeader[SAMPLE_COUNT];
+
+        for (int i = 0; i < SAMPLE_COUNT; i++) {
+            sampleHeaders[i] = loadSampleHeader(in);
+        }
+
+        return sampleHeaders;
+    }
+
+    private static SampleHeader loadSampleHeader(DataInput in) throws IOException {
+        String name = loadSampleName(in);
+
+        // sample length is double
+        int length = in.readUnsignedShort() << 1;
+        int finetune = in.readByte();
+        int volume = in.readUnsignedByte();
+
+        int loopStart = in.readUnsignedShort() << 1;
+        int loopLength = in.readUnsignedShort() << 1;
+
+        return new SampleHeader(name, length, finetune, volume, loopStart, loopLength);
+    }
+
+    private static String loadSampleName(DataInput in) throws IOException {
         byte[] nameArray = new byte[22];
         in.readFully(nameArray, 0, nameArray.length);
 
         int index = ChipArrays.indexOf(nameArray, (byte) 0);
-        String name;
 
         if (index == -1) {
-            name = new String(nameArray, StandardCharsets.US_ASCII);
+            return new String(nameArray, StandardCharsets.US_ASCII);
         } else {
-            name = new String(nameArray, 0, index, StandardCharsets.US_ASCII);
+            return new String(nameArray, 0, index, StandardCharsets.US_ASCII);
         }
-
-        // sample length is double
-        int length = in.readUnsignedShort() * 2;
-        int finetune = in.readByte();
-        int volume = in.readUnsignedByte();
-
-        // TODO rename these
-        int repeatOffset = in.readUnsignedShort();
-        int repeatLength = in.readUnsignedShort();
-
-        return new SampleHeader(name, length, finetune, volume, repeatOffset, repeatLength);
     }
 
-    private record SampleHeader(String name, int length, int finetune, int volume, int repeatOffset, int repeatLength) {
+    private static Pattern[][][] loadPatterns(DataInput in, int patternCount) throws IOException {
+        Pattern[][][] patterns = new Pattern[patternCount][ROW_COUNT][CHANNEL_COUNT];
+
+        for (int i = 0; i < patternCount; i++) {
+            for (int j = 0; j < ROW_COUNT; j++) {
+                for (int k = 0; k < CHANNEL_COUNT; k++) {
+                    patterns[i][j][k] = loadPattern(in);
+                }
+            }
+        }
+
+        return patterns;
+    }
+
+    public static Pattern loadPattern(DataInput in) throws IOException {
+        int b0 = in.readUnsignedByte();
+        int b1 = in.readUnsignedByte();
+        int b2 = in.readUnsignedByte();
+        int b3 = in.readUnsignedByte();
+
+        int sample = (b0 & 0xF0) | (b2 >> 4);
+        int pitch = ((b0 & 0x0F) << 8) | b1;
+        int effect = b2 & 0x0F;
+        int effectArgument = b3;
+
+        return new Pattern(sample, pitch, effect, effectArgument);
+    }
+
+    private record SampleHeader(String name, int length, int finetune, int volume, int loopStart, int loopLength) {
     }
 }
