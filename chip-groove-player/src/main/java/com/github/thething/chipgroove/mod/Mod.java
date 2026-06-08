@@ -1,4 +1,4 @@
-package com.github.thething.chipgroove;
+package com.github.thething.chipgroove.mod;
 
 public class Mod {
 

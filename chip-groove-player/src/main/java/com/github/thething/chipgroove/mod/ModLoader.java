@@ -1,4 +1,4 @@
-package com.github.thething.chipgroove;
+package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.ExtraArrays;
 
@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class ModLoader {
+public final class ModLoader {
 
     private static final int SAMPLE_COUNT = 31;
     private static final int PATTERN_COUNT = 128;
@@ -23,9 +23,9 @@ public class ModLoader {
         String title = loadTitle(in);
         SampleHeader[] sampleHeaders = loadSampleHeaders(in);
 
-        // skip
-        // song length in patterns (0-80h)
-        // restart byte for song looping (Noisetracker)
+        // skip 2 unused bytes
+        // 1 - song length in patterns (0-80h)
+        // 2 - restart byte for song looping (NoiseTracker)
         in.skipBytes(2);
 
         int[] patternSequences = loadPatternSequences(in);
@@ -44,7 +44,6 @@ public class ModLoader {
         in.readFully(title, 0, 20);
 
         int index = ExtraArrays.indexOf(title, (byte) 0);
-        String name;
 
         if (index == -1) {
             return new String(title, StandardCharsets.US_ASCII);

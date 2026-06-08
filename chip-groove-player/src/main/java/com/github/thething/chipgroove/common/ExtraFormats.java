@@ -1,7 +1,7 @@
 package com.github.thething.chipgroove.common;
 
-import com.github.thething.chipgroove.ModTables;
-import com.github.thething.chipgroove.Pattern;
+import com.github.thething.chipgroove.mod.ModTables;
+import com.github.thething.chipgroove.mod.Pattern;
 
 public final class ExtraFormats {
 
@@ -113,6 +113,10 @@ public final class ExtraFormats {
 
     public static String formatHexByte(int value) {
         return HEX_VALUES[value];
+    }
+
+    public static void formatHexByte(int value, StringBuilder out) {
+        out.append(HEX_VALUES[value]);
     }
 
     public static String formatHexInt(int value) {
