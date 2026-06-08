@@ -42,4 +42,8 @@ public class Mod {
     public Pattern[][][] getPatterns() {
         return patterns;
     }
+
+    public Pattern getPattern(int patternIndex, int rowIndex, int channelIndex)  {
+        return patterns[patternIndex][rowIndex][channelIndex];
+    }
 }

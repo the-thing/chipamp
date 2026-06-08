@@ -25,7 +25,7 @@ public class ModLoader {
 
         // skip
         // song length in patterns (0-80h)
-        // restart byte for song looping (Noisetracker?)
+        // restart byte for song looping (Noisetracker)
         in.skipBytes(2);
 
         int[] patternSequences = loadPatternSequences(in);
@@ -36,7 +36,6 @@ public class ModLoader {
         Pattern[][][] patterns = loadPatterns(in, patternCount);
         Sample[] samples = loadSamples(in, sampleHeaders);
 
-        // return new Mod(title, samples);
         return new Mod(title, samples, patternSequences, trackerId, patternCount, patterns);
     }
 
