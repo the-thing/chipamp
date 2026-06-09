@@ -1,19 +1,12 @@
 package com.github.thething.chipgroove.mod;
 
-import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import javax.swing.JOptionPane;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 class Channel {
@@ -22,25 +15,18 @@ class Channel {
     int sampleNumber;
     int volume;
     long samplePosition;
-    int sampleIncrement;
+    long sampleIncrement;
     int effect;
     int effectArgument;
-
-    int porta_target;
-    int vibrato_position;
-    int tremolo_position;
 
     void reset() {
         pitch = 0;
         sampleNumber = 0;
         volume = 0;
         samplePosition = 0L;
-        sampleIncrement = 0;
+        sampleIncrement = 0L;
         effect = 0;
         effectArgument = 0;
-        porta_target = 0;
-        vibrato_position = 0;
-        tremolo_position = 0;
     }
 }
 
@@ -95,12 +81,12 @@ public class Player {
             }
 
             Arrays.fill(buffer, (byte) 0);
-            tick(mod, patternIndex, rowIndex, buffer);
+            tick(mod, buffer);
             currentTick++;
 
             // TODO write to buffer
-              // line.write(buffer, 0, buffer.length);
-            stream.write(buffer, 0, buffer.length);
+            line.write(buffer, 0, buffer.length);
+            // stream.write(buffer, 0, buffer.length);
 
             if (currentTick == ticksPerRow) {
                 currentTick = 0;
@@ -116,15 +102,15 @@ public class Player {
         line.drain();
         line.close();
 
-        byte[] audio = stream.toByteArray();
-
-        ByteArrayInputStream bais = new ByteArrayInputStream(audio);
-        AudioInputStream audioStream = new AudioInputStream(bais, audioFormat, audio.length);
-        try {
-            AudioSystem.write(audioStream, AudioFileFormat.Type.WAVE, new File("file.wav"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        byte[] audio = stream.toByteArray();
+//
+//        ByteArrayInputStream bais = new ByteArrayInputStream(audio);
+//        AudioInputStream audioStream = new AudioInputStream(bais, audioFormat, audio.length);
+//        try {
+//            AudioSystem.write(audioStream, AudioFileFormat.Type.WAVE, new File("file.wav"));
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     private static float convertPitchToFrequency(int pitch) {
@@ -153,7 +139,7 @@ public class Player {
             if (instrument.pitch() > 0) {
                 if (instrument.effect() != Effects.TONE_PORTAMENTO) {
                     channels[channelIndex].pitch = instrument.pitch();
-                    channels[channelIndex].effect = instrument.effect();
+                    channels[channelIndex].samplePosition = 0;
 
                     float frequency = convertPitchToFrequency(instrument.pitch());
                     channels[channelIndex].sampleIncrement = (int) ((frequency * 65536.0f) / SAMPLE_RATE);
@@ -165,9 +151,7 @@ public class Player {
         }
     }
 
-    private void tick(Mod mod, int position, int rowIndex, byte[] buffer) {
-        // TODO
-
+    private void tick(Mod mod, byte[] buffer) {
         for (int i = 0; i < buffer.length; i += 2) {
             int mixed = 0;
 
@@ -186,7 +170,7 @@ public class Player {
 
                             if (samplePosition < sample.getLength()) {
                                 int sampleValue = sample.getData(samplePosition);
-                                mixed += ((sampleValue * channel.volume) / 64) * 4;
+                                mixed += (sampleValue * channel.volume) / 64;
                                 channel.samplePosition += channel.sampleIncrement;
                             }
 
@@ -222,8 +206,8 @@ public class Player {
     }
 
     public static void main(String[] args) throws InterruptedException, IOException, LineUnavailableException {
-        // Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
-        Mod mod = ModLoader.load("Hoffman - Eon.mod");
+        Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
+//        Mod mod = ModLoader.load("Hoffman - Eon.mod");
 
         System.out.println("patternCount = " + mod.getPatternCount());
 
