@@ -55,6 +55,9 @@ public final class Formatters {
         return out.toString();
     }
 
+    // TODO add method to print specific pattern
+
+    // TODO formatting currently is done in pattern order but not in seqeunce playuer order
     public static void formatPatterns(Mod mod, StringBuilder out) {
         int offset = 0;
 

@@ -7,21 +7,21 @@ public class Mod {
     private final Sample[] samples;
     private final int[] patternSequences;
     private final String trackerId;
-    private final Instrument[][][] instruments;
+    private final Instrument[][][] patterns;
     private final int patternCount;
     private final int rowCount;
     private final int channelCount;
 
     public Mod(
             String title, int length, Sample[] samples, int[] patternSequences, String trackerId,
-            Instrument[][][] instruments, int patternCount, int rowCount, int channelCount) {
+            Instrument[][][] patterns, int patternCount, int rowCount, int channelCount) {
         this.title = title;
         this.length = length;
         this.samples = samples;
         this.patternSequences = patternSequences;
         this.trackerId = trackerId;
         this.patternCount = patternCount;
-        this.instruments = instruments;
+        this.patterns = patterns;
         this.rowCount = rowCount;
         this.channelCount = channelCount;
     }
@@ -71,6 +71,6 @@ public class Mod {
     }
 
     public Instrument getInstrument(int patternIndex, int rowIndex, int channelIndex) {
-        return instruments[patternIndex][rowIndex][channelIndex];
+        return patterns[patternIndex][rowIndex][channelIndex];
     }
 }
