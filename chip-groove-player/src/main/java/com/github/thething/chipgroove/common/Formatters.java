@@ -56,6 +56,7 @@ public final class Formatters {
     }
 
     // TODO add method to print specific pattern
+    // TODO format specfic for of specific pattern
 
     // TODO formatting currently is done in pattern order but not in seqeunce playuer order
     public static void formatPatterns(Mod mod, StringBuilder out) {
