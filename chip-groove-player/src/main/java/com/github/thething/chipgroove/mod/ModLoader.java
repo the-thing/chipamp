@@ -152,11 +152,11 @@ public final class ModLoader {
         int b3 = in.readUnsignedByte();
 
         int sampleNumber = (b0 & 0xF0) | (b2 >> 4);
-        int pitch = ((b0 & 0x0F) << 8) | b1;
+        int period = ((b0 & 0x0F) << 8) | b1;
         int effect = b2 & 0x0F;
         int effectArgument = b3 & 0xFF;
 
-        return new Instrument(sampleNumber, pitch, effect, effectArgument);
+        return new Instrument(sampleNumber, period, effect, effectArgument);
     }
 
     private record SampleHeader(String name, int length, int finetune, int volume, int loopStart, int loopLength) {

@@ -3,7 +3,7 @@ package com.github.thething.chipgroove.mod;
 public final class ModTables {
 
     /**
-     * ProTracker pitch table.
+     * ProTracker period table.
      *
      * <pre>
      *  C    C#   D    D#   E    F    F#   G    G#   A    A#   B
@@ -68,7 +68,7 @@ public final class ModTables {
     private ModTables() {
     }
 
-    public static String getNote(int pitch) {
-        return NOTES[pitch];
+    public static String getNote(int period) {
+        return NOTES[period];
     }
 }

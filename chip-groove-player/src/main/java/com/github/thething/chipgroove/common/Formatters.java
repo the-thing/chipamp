@@ -73,7 +73,7 @@ public final class Formatters {
 
                 for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
                     Instrument pattern = mod.getInstrument(patternIndex, rowIndex, channelIndex);
-                    String note = ModTables.getNote(pattern.pitch());
+                    String note = ModTables.getNote(pattern.period());
                     note = note != null ? note : "---";
 
                     int sampleInt = pattern.sampleNumber();

@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 class Channel {
 
-    int pitch;
+    int period;
     int sampleNumber;
     int volume;
     long samplePosition;
@@ -22,7 +22,7 @@ class Channel {
     boolean muted;
 
     void reset() {
-        pitch = 0;
+        period = 0;
         sampleNumber = 0;
         volume = 0;
         samplePosition = 0L;
@@ -105,8 +105,8 @@ public class Player {
         line.close();
     }
 
-    private static float convertPitchToFrequency(int pitch) {
-        return 7159090.5f / (pitch * 2);
+    private static float convertPeriodToFrequency(int period) {
+        return 7159090.5f / (period * 2);
     }
 
     private static int calculateTickSamples(int tempo) {
@@ -128,12 +128,12 @@ public class Player {
                 channels[channelIndex].volume = mod.getSample(instrument.sampleNumber() - 1).getVolume();
             }
 
-            if (instrument.pitch() > 0) {
+            if (instrument.period() > 0) {
                 if (instrument.effect() != Effects.TONE_PORTAMENTO) {
-                    channels[channelIndex].pitch = instrument.pitch();
+                    channels[channelIndex].period = instrument.period();
                     channels[channelIndex].samplePosition = 0;
 
-                    float frequency = convertPitchToFrequency(instrument.pitch());
+                    float frequency = convertPeriodToFrequency(instrument.period());
                     channels[channelIndex].sampleIncrement = (int) ((frequency * 65536.0f) / SAMPLE_RATE);
                 }
             }
@@ -151,7 +151,7 @@ public class Player {
             for (int channelIndex = 0; channelIndex < channels.length; channelIndex++) {
                 Channel channel = channels[channelIndex];
 
-                if (!channel.muted && channel.pitch > 0 && channel.sampleNumber > 0) {
+                if (!channel.muted && channel.period > 0 && channel.sampleNumber > 0) {
                     int sampleIndex = channel.sampleNumber - 1;
 
                     if (sampleIndex >= 0 && sampleIndex < 31) {
@@ -181,7 +181,7 @@ public class Player {
 
                             if (samplePosition >= sample.getLength()) {
                                 channel.samplePosition = 0;
-                                channel.pitch = 0;
+                                channel.period = 0;
                             }
                         }
                     }
