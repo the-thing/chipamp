@@ -1,5 +1,7 @@
 package com.github.thething.chipgroove.mod;
 
+import java.util.Arrays;
+
 public class Mod {
 
     private final String title;
@@ -23,12 +25,20 @@ public class Mod {
         return title;
     }
 
+    public int getSampleCount() {
+        return samples.length;
+    }
+
     public Sample[] getSamples() {
         return samples;
     }
 
-    public int[] getPatternSequences() {
-        return patternSequences;
+    public int getPatternSequenceCount() {
+        return patternSequences.length;
+    }
+
+    public int getPatternSequence(int index) {
+        return patterns[index].length;
     }
 
     public String getTrackerId() {
@@ -39,11 +49,7 @@ public class Mod {
         return patternCount;
     }
 
-    public Pattern[][][] getPatterns() {
-        return patterns;
-    }
-
-    public Pattern getPattern(int patternIndex, int rowIndex, int channelIndex)  {
+    public Pattern getPattern(int patternIndex, int rowIndex, int channelIndex) {
         return patterns[patternIndex][rowIndex][channelIndex];
     }
 }

@@ -3,7 +3,7 @@ package com.github.thething.chipgroove.common;
 import com.github.thething.chipgroove.mod.ModTables;
 import com.github.thething.chipgroove.mod.Pattern;
 
-public final class ExtraFormats {
+public final class Formatters {
 
     private static final char[] HEX_CHARACTERS = new char[]{
             '0', '1', '2', '3', '4', '5', '6', '7',
@@ -45,7 +45,7 @@ public final class ExtraFormats {
             "F8", "F9", "FA", "FB", "FC", "FD", "FE", "FF"
     };
 
-    private ExtraFormats() {
+    private Formatters() {
     }
 
     public static String formatPatterns(Pattern[][][] patterns) {
@@ -93,6 +93,10 @@ public final class ExtraFormats {
                     } else {
                         effect = getHexCharacter(patterns[pattern][row][channel].effect());
                         effectArgument = formatHexByte(patterns[pattern][row][channel].effectArgument());
+                    }
+
+                    if (effect == 'E') {
+                        System.out.print("effect E");
                     }
 
                     out.append(" ");
