@@ -1,24 +1,36 @@
 package com.github.thething.chipgroove.mod;
 
-import java.util.Arrays;
-
 public class Mod {
 
     private final String title;
     private final Sample[] samples;
     private final int[] patternSequences;
     private final String trackerId;
-    private final int patternCount;
     private final Pattern[][][] patterns;
+    private final int patternCount;
+    private final int rowCount;
+    private final int channelCount;
 
     // TODO validate
-    public Mod(String title, Sample[] samples, int[] patternSequences, String trackerId, int patternCount, Pattern[][][] patterns) {
+    public Mod(
+            String title, Sample[] samples, int[] patternSequences, String trackerId,
+            Pattern[][][] patterns, int patternCount, int rowCount, int channelCount) {
         this.title = title;
         this.samples = samples;
         this.patternSequences = patternSequences;
         this.trackerId = trackerId;
         this.patternCount = patternCount;
         this.patterns = patterns;
+        this.rowCount = rowCount;
+        this.channelCount = channelCount;
+    }
+
+    public int getRowCount() {
+        return rowCount;
+    }
+
+    public int getChannelCount() {
+        return channelCount;
     }
 
     public String getTitle() {

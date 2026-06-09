@@ -1,5 +1,6 @@
 package com.github.thething.chipgroove.common;
 
+import com.github.thething.chipgroove.mod.Mod;
 import com.github.thething.chipgroove.mod.ModTables;
 import com.github.thething.chipgroove.mod.Pattern;
 
@@ -48,34 +49,34 @@ public final class Formatters {
     private Formatters() {
     }
 
-    public static String formatPatterns(Pattern[][][] patterns) {
+    public static String formatPatterns(Mod mod) {
         StringBuilder out = new StringBuilder();
-        formatPatterns(patterns, out);
+        formatPatterns(mod, out);
         return out.toString();
     }
 
-    public static void formatPatterns(Pattern[][][] patterns, StringBuilder out) {
+    public static void formatPatterns(Mod mod, StringBuilder out) {
         int offset = 0;
 
-        for (int pattern = 0; pattern < patterns.length; pattern++) {
-            for (int row = 0; row < patterns[pattern].length; row++) {
-
+        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+            for (int rowIndex = 0; rowIndex < mod.getRowCount(); rowIndex++) {
                 formatHexInt(offset, out);
                 out.append(" |");
 
                 out.append(' ');
-                out.append(formatHexByte(row));
+                out.append(formatHexByte(rowIndex));
                 out.append(" |");
 
                 out.append(' ');
-                out.append(formatHexByte(pattern));
+                out.append(formatHexByte(patternIndex));
                 out.append(" |");
 
-                for (int channel = 0; channel < patterns[pattern][row].length; channel++) {
-                    String note = ModTables.getNote(patterns[pattern][row][channel].pitch());
+                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+                    Pattern pattern = mod.getPattern(patternIndex, rowIndex, channelIndex);
+                    String note = ModTables.getNote(pattern.pitch());
                     note = note != null ? note : "---";
 
-                    int sampleInt = patterns[pattern][row][channel].sample();
+                    int sampleInt = pattern.sample();
                     String sample;
 
                     if (sampleInt == 0) {
@@ -87,16 +88,12 @@ public final class Formatters {
                     char effect;
                     String effectArgument;
 
-                    if (patterns[pattern][row][channel].effect() == 0) {
+                    if (pattern.effect() == 0) {
                         effect = '-';
                         effectArgument = "--";
                     } else {
-                        effect = getHexCharacter(patterns[pattern][row][channel].effect());
-                        effectArgument = formatHexByte(patterns[pattern][row][channel].effectArgument());
-                    }
-
-                    if (effect == 'E') {
-                        System.out.print("effect E");
+                        effect = getHexCharacter(pattern.effect());
+                        effectArgument = formatHexByte(pattern.effectArgument());
                     }
 
                     out.append(" ");
@@ -109,7 +106,7 @@ public final class Formatters {
                     out.append(" |");
                 }
 
-                out.append('\n');
+                out.append("\r\n");
                 offset++;
             }
         }
@@ -117,10 +114,6 @@ public final class Formatters {
 
     public static String formatHexByte(int value) {
         return HEX_VALUES[value];
-    }
-
-    public static void formatHexByte(int value, StringBuilder out) {
-        out.append(HEX_VALUES[value]);
     }
 
     public static String formatHexInt(int value) {

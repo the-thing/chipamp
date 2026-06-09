@@ -2,8 +2,15 @@ package com.github.thething.chipgroove.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public final class Resources {
+
+    private static final int DEFAULT_BUFFER_LENGTH = 4096;
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     private Resources() {
     }
@@ -16,5 +23,24 @@ public final class Resources {
         }
 
         return in;
+    }
+
+    public static String readText(String name) throws IOException {
+        return readText(name, DEFAULT_CHARSET);
+    }
+
+    public static String readText(String name, Charset charset) throws IOException {
+        StringBuilder text = new StringBuilder();
+        char[] buffer = new char[DEFAULT_BUFFER_LENGTH];
+
+        try (Reader reader = new InputStreamReader(getResourceAsStream(name), charset)) {
+            int readCount;
+
+            while ((readCount = reader.read(buffer)) != -1) {
+                text.append(buffer, 0, readCount);
+            }
+        }
+
+        return text.toString();
     }
 }

@@ -1,6 +1,7 @@
 package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.ExtraArrays;
+import com.github.thething.chipgroove.io.Resources;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -14,6 +15,12 @@ public final class ModLoader {
     private static final int PATTERN_COUNT = 128;
     private static final int ROW_COUNT = 64;
     private static final int CHANNEL_COUNT = 4;
+
+    public static Mod load(String name) throws IOException {
+        try (DataInputStream in = new DataInputStream(Resources.getResourceAsStream(name))) {
+            return load((DataInput) in);
+        }
+    }
 
     public static Mod load(InputStream in) throws IOException {
         return load((DataInput) new DataInputStream(in));
@@ -36,7 +43,7 @@ public final class ModLoader {
         Pattern[][][] patterns = loadPatterns(in, patternCount);
         Sample[] samples = loadSamples(in, sampleHeaders);
 
-        return new Mod(title, samples, patternSequences, trackerId, patternCount, patterns);
+        return new Mod(title, samples, patternSequences, trackerId, patterns, patternCount, ROW_COUNT, CHANNEL_COUNT);
     }
 
     private static String loadTitle(DataInput in) throws IOException {
