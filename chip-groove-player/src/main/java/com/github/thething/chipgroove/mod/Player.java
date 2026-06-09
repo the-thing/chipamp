@@ -1,11 +1,12 @@
 package com.github.thething.chipgroove.mod;
 
+import com.github.thething.chipgroove.common.Maths;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -18,6 +19,7 @@ class Channel {
     long sampleIncrement;
     int effect;
     int effectArgument;
+    boolean muted;
 
     void reset() {
         pitch = 0;
@@ -27,6 +29,7 @@ class Channel {
         sampleIncrement = 0L;
         effect = 0;
         effectArgument = 0;
+        muted = false;
     }
 }
 
@@ -60,8 +63,6 @@ public class Player {
         line.open();
         line.start();
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-
         int currentTick = 0;
         int patternIndex = 0;
         int rowIndex = 0;
@@ -86,6 +87,7 @@ public class Player {
 
             // TODO write to buffer
             line.write(buffer, 0, buffer.length);
+
             // stream.write(buffer, 0, buffer.length);
 
             if (currentTick == ticksPerRow) {
@@ -101,16 +103,6 @@ public class Player {
 
         line.drain();
         line.close();
-
-//        byte[] audio = stream.toByteArray();
-//
-//        ByteArrayInputStream bais = new ByteArrayInputStream(audio);
-//        AudioInputStream audioStream = new AudioInputStream(bais, audioFormat, audio.length);
-//        try {
-//            AudioSystem.write(audioStream, AudioFileFormat.Type.WAVE, new File("file.wav"));
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
     private static float convertPitchToFrequency(int pitch) {
@@ -154,11 +146,12 @@ public class Player {
     private void tick(Mod mod, byte[] buffer) {
         for (int i = 0; i < buffer.length; i += 2) {
             int mixed = 0;
+            int rightMix = 0;
 
             for (int channelIndex = 0; channelIndex < channels.length; channelIndex++) {
                 Channel channel = channels[channelIndex];
 
-                if (channel.pitch > 0 && channel.sampleNumber > 0) {
+                if (!channel.muted && channel.pitch > 0 && channel.sampleNumber > 0) {
                     int sampleIndex = channel.sampleNumber - 1;
 
                     if (sampleIndex >= 0 && sampleIndex < 31) {
@@ -170,7 +163,8 @@ public class Player {
 
                             if (samplePosition < sample.getLength()) {
                                 int sampleValue = sample.getData(samplePosition);
-                                mixed += (sampleValue * channel.volume) / 64;
+                                int scaled = (sampleValue * channel.volume) / 64;
+                                mixed += scaled;
                                 channel.samplePosition += channel.sampleIncrement;
                             }
 
@@ -194,15 +188,9 @@ public class Player {
                 }
             }
 
-            // mixed /= count;
+            mixed = Maths.clamp(mixed, Short.MIN_VALUE, Short.MAX_VALUE);
 
-            if (mixed > Short.MAX_VALUE) {
-                mixed = Short.MAX_VALUE;
-            } else if (mixed < Short.MIN_VALUE) {
-                mixed = Short.MIN_VALUE;
-            }
-
-            buffer[i] = (byte) ((mixed >> 8) & 0xFF);
+            buffer[i] = (byte) (mixed >> 8);
             buffer[i + 1] = (byte) (mixed & 0xFF);
         }
     }
