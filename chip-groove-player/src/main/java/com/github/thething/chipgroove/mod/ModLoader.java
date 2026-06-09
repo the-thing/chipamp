@@ -30,20 +30,21 @@ public final class ModLoader {
         String title = loadTitle(in);
         SampleHeader[] sampleHeaders = loadSampleHeaders(in);
 
-        // skip 2 unused bytes
-        // 1 - song length in patterns (0-80h)
-        // 2 - restart byte for song looping (NoiseTracker)
-        in.skipBytes(2);
+        int length = in.readUnsignedByte();
+
+        // skip unused byte - restart byte for song looping (NoiseTracker)
+        in.skipBytes(1);
 
         int[] patternSequences = loadPatternSequences(in);
         String trackerId = loadTrackerId(in);
 
         int patternCount = ExtraArrays.max(patternSequences) + 1;
 
-        Pattern[][][] patterns = loadPatterns(in, patternCount);
+        Instrument[][][] patterns = loadPatterns(in, patternCount);
         Sample[] samples = loadSamples(in, sampleHeaders);
 
-        return new Mod(title, samples, patternSequences, trackerId, patterns, patternCount, ROW_COUNT, CHANNEL_COUNT);
+        return new Mod(title, length, samples, patternSequences, trackerId,
+                patterns, patternCount, ROW_COUNT, CHANNEL_COUNT);
     }
 
     private static String loadTitle(DataInput in) throws IOException {
@@ -84,6 +85,10 @@ public final class ModLoader {
         for (int i = 0; i < SAMPLE_COUNT; i++) {
             byte[] sampleData = new byte[sampleHeaders[i].length()];
             in.readFully(sampleData);
+
+            SampleHeader sampleHeader = sampleHeaders[i];
+            samples[i] = new Sample(sampleHeader.name, sampleHeader.length, sampleHeader.finetune, sampleHeader.volume,
+                    sampleHeader.loopStart, sampleHeader.loopLength, sampleData);
         }
 
         return samples;
@@ -102,7 +107,7 @@ public final class ModLoader {
     private static SampleHeader loadSampleHeader(DataInput in) throws IOException {
         String name = loadSampleName(in);
 
-        // sample length is double
+        // sampleNumber length is double
         int length = in.readUnsignedShort() << 1;
         int finetune = in.readByte();
         int volume = in.readUnsignedByte();
@@ -126,8 +131,8 @@ public final class ModLoader {
         }
     }
 
-    private static Pattern[][][] loadPatterns(DataInput in, int patternCount) throws IOException {
-        Pattern[][][] patterns = new Pattern[patternCount][ROW_COUNT][CHANNEL_COUNT];
+    private static Instrument[][][] loadPatterns(DataInput in, int patternCount) throws IOException {
+        Instrument[][][] patterns = new Instrument[patternCount][ROW_COUNT][CHANNEL_COUNT];
 
         for (int i = 0; i < patternCount; i++) {
             for (int j = 0; j < ROW_COUNT; j++) {
@@ -140,18 +145,18 @@ public final class ModLoader {
         return patterns;
     }
 
-    public static Pattern loadPattern(DataInput in) throws IOException {
+    public static Instrument loadPattern(DataInput in) throws IOException {
         int b0 = in.readUnsignedByte();
         int b1 = in.readUnsignedByte();
         int b2 = in.readUnsignedByte();
         int b3 = in.readUnsignedByte();
 
-        int sample = (b0 & 0xF0) | (b2 >> 4);
+        int sampleNumber = (b0 & 0xF0) | (b2 >> 4);
         int pitch = ((b0 & 0x0F) << 8) | b1;
         int effect = b2 & 0x0F;
         int effectArgument = b3 & 0xFF;
 
-        return new Pattern(sample, pitch, effect, effectArgument);
+        return new Instrument(sampleNumber, pitch, effect, effectArgument);
     }
 
     private record SampleHeader(String name, int length, int finetune, int volume, int loopStart, int loopLength) {

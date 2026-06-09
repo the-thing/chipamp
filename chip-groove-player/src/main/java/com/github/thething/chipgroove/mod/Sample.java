@@ -48,4 +48,8 @@ public final class Sample {
     public byte getData(int index) {
         return data[index];
     }
+
+    public byte[] getData() {
+        return data;
+    }
 }

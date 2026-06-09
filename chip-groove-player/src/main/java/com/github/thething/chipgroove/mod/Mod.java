@@ -3,26 +3,35 @@ package com.github.thething.chipgroove.mod;
 public class Mod {
 
     private final String title;
+    private final int length;
     private final Sample[] samples;
     private final int[] patternSequences;
     private final String trackerId;
-    private final Pattern[][][] patterns;
+    private final Instrument[][][] instruments;
     private final int patternCount;
     private final int rowCount;
     private final int channelCount;
 
-    // TODO validate
     public Mod(
-            String title, Sample[] samples, int[] patternSequences, String trackerId,
-            Pattern[][][] patterns, int patternCount, int rowCount, int channelCount) {
+            String title, int length, Sample[] samples, int[] patternSequences, String trackerId,
+            Instrument[][][] instruments, int patternCount, int rowCount, int channelCount) {
         this.title = title;
+        this.length = length;
         this.samples = samples;
         this.patternSequences = patternSequences;
         this.trackerId = trackerId;
         this.patternCount = patternCount;
-        this.patterns = patterns;
+        this.instruments = instruments;
         this.rowCount = rowCount;
         this.channelCount = channelCount;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public int getLength() {
+        return length;
     }
 
     public int getRowCount() {
@@ -33,10 +42,6 @@ public class Mod {
         return channelCount;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
     public int getSampleCount() {
         return samples.length;
     }
@@ -45,12 +50,16 @@ public class Mod {
         return samples;
     }
 
+    public Sample getSample(int sample) {
+        return samples[sample];
+    }
+
     public int getPatternSequenceCount() {
         return patternSequences.length;
     }
 
-    public int getPatternSequence(int index) {
-        return patterns[index].length;
+    public int getPatternSequence(int position) {
+        return patternSequences[position];
     }
 
     public String getTrackerId() {
@@ -61,7 +70,7 @@ public class Mod {
         return patternCount;
     }
 
-    public Pattern getPattern(int patternIndex, int rowIndex, int channelIndex) {
-        return patterns[patternIndex][rowIndex][channelIndex];
+    public Instrument getInstrument(int patternIndex, int rowIndex, int channelIndex) {
+        return instruments[patternIndex][rowIndex][channelIndex];
     }
 }

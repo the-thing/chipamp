@@ -2,7 +2,7 @@ package com.github.thething.chipgroove.common;
 
 import com.github.thething.chipgroove.mod.Mod;
 import com.github.thething.chipgroove.mod.ModTables;
-import com.github.thething.chipgroove.mod.Pattern;
+import com.github.thething.chipgroove.mod.Instrument;
 
 public final class Formatters {
 
@@ -72,11 +72,11 @@ public final class Formatters {
                 out.append(" |");
 
                 for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                    Pattern pattern = mod.getPattern(patternIndex, rowIndex, channelIndex);
+                    Instrument pattern = mod.getInstrument(patternIndex, rowIndex, channelIndex);
                     String note = ModTables.getNote(pattern.pitch());
                     note = note != null ? note : "---";
 
-                    int sampleInt = pattern.sample();
+                    int sampleInt = pattern.sampleNumber();
                     String sample;
 
                     if (sampleInt == 0) {
