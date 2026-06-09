@@ -194,6 +194,8 @@ public class Player {
                 }
             }
 
+            // mixed /= count;
+
             if (mixed > Short.MAX_VALUE) {
                 mixed = Short.MAX_VALUE;
             } else if (mixed < Short.MIN_VALUE) {
