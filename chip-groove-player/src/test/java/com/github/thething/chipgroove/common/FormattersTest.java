@@ -38,6 +38,15 @@ class FormattersTest {
     }
 
     @Test
+    void shouldFormatEmptyModule() throws IOException {
+        String expected = Resources.readText("empty-patterns.txt");
+        Mod mod = ModLoader.load("empty.mod");
+        String formatted = Formatters.formatPatterns(mod);
+
+        assertThat(formatted).isEqualTo(expected);
+    }
+
+    @Test
     void shouldReturnFormattedHexByte() {
         assertThat(Formatters.formatHexByte(0)).isEqualTo("00");
         assertThat(Formatters.formatHexByte(1)).isEqualTo("01");

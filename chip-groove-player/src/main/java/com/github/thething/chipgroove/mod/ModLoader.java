@@ -34,15 +34,14 @@ public final class ModLoader {
 
         int[] patternSequences = loadPatternSequences(in);
         String trackerId = loadTrackerId(in);
+        // TODO add support for multiple channels based on tracker id
 
         int patternCount = ExtraArrays.max(patternSequences) + 1;
-        // TODO add support for multiple channels based on tracker id
 
         Instrument[][][] patterns = loadPatterns(in, patternCount);
         Sample[] samples = loadSamples(in, sampleHeaders);
 
-        return new Mod(title, length, samples, patternSequences, trackerId,
-                patterns, patternCount, CHANNEL_COUNT);
+        return new Mod(title, length, samples, patternSequences, trackerId, patterns);
     }
 
     private static String loadTitle(DataInput in) throws IOException {

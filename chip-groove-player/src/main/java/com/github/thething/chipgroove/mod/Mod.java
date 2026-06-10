@@ -3,7 +3,7 @@ package com.github.thething.chipgroove.mod;
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.requireNonNull;
 
-public class Mod {
+public final class Mod {
 
     public static final int ROW_COUNT = 64;
 
@@ -12,6 +12,8 @@ public class Mod {
     private static final int MIN_CHANNEL_COUNT = 4;
     private static final int MAX_CHANNEL_COUNT = 8;
     private static final int SAMPLE_COUNT = 31;
+    private static final int MIN_PATTERN_COUNT = 1;
+    private static final int MAX_PATTERN_COUNT = 128;
 
     /**
      * The module's title. Original ProTracker wrote letters only in uppercase.
@@ -44,31 +46,17 @@ public class Mod {
     private final String trackerId;
 
     /**
-     * Number of channels. In most case 4.
-     */
-    private final int channelCount;
-
-    /**
      * Pattern sheet. [patternCount][rowCount][channelCount]
      */
     private final Instrument[][][] patterns;
 
-    /**
-     * Number of different patterns.
-     */
-    private final int patternCount;
-
-    public Mod(
-            String title, int length, Sample[] samples, int[] patternSequences, String trackerId,
-            Instrument[][][] patterns, int patternCount, int channelCount) {
+    public Mod(String title, int length, Sample[] samples, int[] patternSequences, String trackerId, Instrument[][][] patterns) {
         this.title = requireNonNull(title);
         this.length = requireInRange(length, MIN_LENGTH, MAX_LENGTH);
         this.samples = checkSamples(samples);
         this.patternSequences = checkPatternSequences(patternSequences);
         this.trackerId = requireNonNull(trackerId);
-        this.patternCount = patternCount;
-        this.patterns = patterns;
-        this.channelCount = requireInRange(channelCount, MIN_CHANNEL_COUNT, MAX_CHANNEL_COUNT);
+        this.patterns = checkPatterns(patterns);
     }
 
     private Sample[] checkSamples(Sample[] samples) {
@@ -76,9 +64,9 @@ public class Mod {
             throw new IllegalArgumentException("Invalid sample count: " + samples.length);
         }
 
-        for (int i = 0; i < samples.length; i++) {
-            if (samples[i] == null) {
-                throw new IllegalArgumentException("Invalid sample: " + samples[i]);
+        for (Sample sample : samples) {
+            if (sample == null) {
+                throw new IllegalArgumentException("Invalid sample: " + sample);
             }
         }
 
@@ -86,13 +74,18 @@ public class Mod {
     }
 
     private int[] checkPatternSequences(int[] patternSequences) {
-
-        for (int i = 0; i < patternSequences.length; i++) {
-
+        for (int patternSequence : patternSequences) {
+            requireInRange(patternSequence, 0, MAX_LENGTH);
         }
 
-        // TODO make sure that patterns are valid and exist
         return patternSequences;
+    }
+
+    private Instrument[][][] checkPatterns(Instrument[][][] patterns) {
+        requireInRange(patterns.length, MIN_PATTERN_COUNT, MAX_PATTERN_COUNT);
+        requireInRange(patterns[0][0].length, MIN_CHANNEL_COUNT, MAX_CHANNEL_COUNT);
+
+        return patterns;
     }
 
     public String getTitle() {
@@ -104,7 +97,7 @@ public class Mod {
     }
 
     public int getChannelCount() {
-        return channelCount;
+        return patterns[0][0].length;
     }
 
     public int getSampleCount() {
@@ -128,7 +121,7 @@ public class Mod {
     }
 
     public int getPatternCount() {
-        return patternCount;
+        return patterns.length;
     }
 
     public Instrument getInstrument(int patternIndex, int rowIndex, int channelIndex) {
