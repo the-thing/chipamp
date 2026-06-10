@@ -14,6 +14,7 @@ class ModLoaderTest {
 
         mod = ModLoader.load("DJ Metune - Axel F.mod");
         assertThat(mod.getTitle()).isEqualTo("axel f - dj metune");
+        assertThat(mod.getLength()).isEqualTo(24);
         assertThat(mod.getSampleCount()).isEqualTo(31);
         assertThat(mod.getPatternSequenceCount()).isEqualTo(128);
         assertThat(mod.getTrackerId()).isEqualTo("M.K.");
@@ -21,9 +22,18 @@ class ModLoaderTest {
 
         mod = ModLoader.load("Hoffman - Eon.mod");
         assertThat(mod.getTitle()).isEqualTo("eon");
+        assertThat(mod.getLength()).isEqualTo(92);
         assertThat(mod.getSampleCount()).isEqualTo(31);
         assertThat(mod.getPatternSequenceCount()).isEqualTo(128);
         assertThat(mod.getTrackerId()).isEqualTo("M!K!");
         assertThat(mod.getPatternCount()).isEqualTo(77);
+
+        mod = ModLoader.load("Captain - Space Debris.mod");
+        assertThat(mod.getTitle()).isEqualTo("space_debris");
+        assertThat(mod.getLength()).isEqualTo(42);
+        assertThat(mod.getSampleCount()).isEqualTo(31);
+        assertThat(mod.getPatternSequenceCount()).isEqualTo(128);
+        assertThat(mod.getTrackerId()).isEqualTo("M.K.");
+        assertThat(mod.getPatternCount()).isEqualTo(41);
     }
 }
