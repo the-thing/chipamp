@@ -10,29 +10,6 @@ import javax.sound.sampled.SourceDataLine;
 import java.io.IOException;
 import java.util.Arrays;
 
-class Channel {
-
-    int period;
-    int sampleNumber;
-    int volume;
-    long samplePosition;
-    long sampleIncrement;
-    int effect;
-    int effectArgument;
-    boolean muted;
-
-    void reset() {
-        period = 0;
-        sampleNumber = 0;
-        volume = 0;
-        samplePosition = 0L;
-        sampleIncrement = 0L;
-        effect = 0;
-        effectArgument = 0;
-        muted = false;
-    }
-}
-
 public class Player {
 
     private static final float SAMPLE_RATE = 44_100.0f;
