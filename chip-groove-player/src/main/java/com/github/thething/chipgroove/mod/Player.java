@@ -67,7 +67,7 @@ public class Player {
         int patternIndex = 0;
         int rowIndex = 0;
         int ticksPerRow = 5;
-        int rowCount = mod.getRowCount();
+        int rowCount = Mod.ROW_COUNT;
 
         System.out.println("Song length: " + mod.getLength());
 
@@ -87,8 +87,6 @@ public class Player {
 
             // TODO write to buffer
             line.write(buffer, 0, buffer.length);
-
-            // stream.write(buffer, 0, buffer.length);
 
             if (currentTick == ticksPerRow) {
                 currentTick = 0;

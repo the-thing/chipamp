@@ -68,7 +68,7 @@ public final class Formatters {
     }
 
     public static void formatPattern(Mod mod, int patternIndex, StringBuilder out) {
-        for (int rowIndex = 0; rowIndex < mod.getRowCount(); rowIndex++) {
+        for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
             formatPattern(mod, patternIndex, rowIndex, out);
         }
     }
@@ -80,7 +80,7 @@ public final class Formatters {
     }
 
     public static void formatPattern(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
-        int offset = patternIndex * mod.getRowCount() + rowIndex;
+        int offset = patternIndex * Mod.ROW_COUNT + rowIndex;
 
         formatHexInt(offset, out);
         out.append(" |");
