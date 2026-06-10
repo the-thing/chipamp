@@ -36,4 +36,15 @@ class ModLoaderTest {
         assertThat(mod.getTrackerId()).isEqualTo("M.K.");
         assertThat(mod.getPatternCount()).isEqualTo(41);
     }
+
+    @Test
+    void shouldLoadEmptyAmigaModule() throws IOException {
+        Mod mod = ModLoader.load("empty.mod");
+        assertThat(mod.getTitle()).isEqualTo("");
+        assertThat(mod.getLength()).isEqualTo(1);
+        assertThat(mod.getSampleCount()).isEqualTo(31);
+        assertThat(mod.getPatternSequenceCount()).isEqualTo(128);
+        assertThat(mod.getTrackerId()).isEqualTo("M.K.");
+        assertThat(mod.getPatternCount()).isEqualTo(1);
+    }
 }

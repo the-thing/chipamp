@@ -9,6 +9,8 @@ public class Mod {
 
     private static final int MIN_LENGTH = 1;
     private static final int MAX_LENGTH = 128;
+    private static final int MIN_CHANNEL_COUNT = 4;
+    private static final int MAX_CHANNEL_COUNT = 8;
     private static final int SAMPLE_COUNT = 31;
 
     /**
@@ -66,7 +68,7 @@ public class Mod {
         this.trackerId = requireNonNull(trackerId);
         this.patternCount = patternCount;
         this.patterns = patterns;
-        this.channelCount = channelCount;
+        this.channelCount = requireInRange(channelCount, MIN_CHANNEL_COUNT, MAX_CHANNEL_COUNT);
     }
 
     private Sample[] checkSamples(Sample[] samples) {
@@ -84,6 +86,11 @@ public class Mod {
     }
 
     private int[] checkPatternSequences(int[] patternSequences) {
+
+        for (int i = 0; i < patternSequences.length; i++) {
+
+        }
+
         // TODO make sure that patterns are valid and exist
         return patternSequences;
     }
