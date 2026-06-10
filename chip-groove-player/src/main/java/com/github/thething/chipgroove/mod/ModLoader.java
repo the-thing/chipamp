@@ -13,7 +13,6 @@ public final class ModLoader {
     private static final int SAMPLE_COUNT = 31;
     private static final int PATTERN_COUNT = 128;
     private static final int ROW_COUNT = 64;
-    private static final int CHANNEL_COUNT = 4;
 
     public static Mod load(String name) throws IOException {
         try (DataInputStream in = new DataInputStream(Resources.getResourceAsStream(name))) {
@@ -34,14 +33,21 @@ public final class ModLoader {
 
         int[] patternSequences = loadPatternSequences(in);
         String trackerId = loadTrackerId(in);
-        // TODO add support for multiple channels based on tracker id
-
+        int channelCount = detectChannelCount(trackerId);
         int patternCount = ExtraArrays.max(patternSequences) + 1;
 
-        Instrument[][][] patterns = loadPatterns(in, patternCount);
+        Instrument[][][] patterns = loadPatterns(in, patternCount, channelCount);
         Sample[] samples = loadSamples(in, sampleHeaders);
 
         return new Mod(title, length, samples, patternSequences, trackerId, patterns);
+    }
+
+    private static int detectChannelCount(String trackerId) {
+        return switch (trackerId) {
+            case "FLT8", "8CHN" -> 8;
+            case "6CHN" -> 6;
+            default -> 4;
+        };
     }
 
     private static String loadTitle(DataInput in) throws IOException {
@@ -127,12 +133,12 @@ public final class ModLoader {
         }
     }
 
-    private static Instrument[][][] loadPatterns(DataInput in, int patternCount) throws IOException {
-        Instrument[][][] patterns = new Instrument[patternCount][ROW_COUNT][CHANNEL_COUNT];
+    private static Instrument[][][] loadPatterns(DataInput in, int patternCount, int channelCount) throws IOException {
+        Instrument[][][] patterns = new Instrument[patternCount][ROW_COUNT][channelCount];
 
         for (int i = 0; i < patternCount; i++) {
             for (int j = 0; j < ROW_COUNT; j++) {
-                for (int k = 0; k < CHANNEL_COUNT; k++) {
+                for (int k = 0; k < channelCount; k++) {
                     patterns[i][j][k] = loadPattern(in);
                 }
             }
