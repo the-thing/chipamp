@@ -6,14 +6,14 @@ import static java.util.Objects.requireNonNull;
 public final class Mod {
 
     public static final int ROW_COUNT = 64;
-
-    private static final int MIN_LENGTH = 1;
-    private static final int MAX_LENGTH = 128;
-    private static final int MIN_CHANNEL_COUNT = 4;
-    private static final int MAX_CHANNEL_COUNT = 8;
-    private static final int SAMPLE_COUNT = 31;
-    private static final int MIN_PATTERN_COUNT = 1;
-    private static final int MAX_PATTERN_COUNT = 128;
+    public static final int PATTERN_SEQUENCE_COUNT = 128;
+    public static final int MIN_LENGTH = 1;
+    public static final int MAX_LENGTH = 128;
+    public static final int MIN_CHANNEL_COUNT = 4;
+    public static final int MAX_CHANNEL_COUNT = 8;
+    public static final int SAMPLE_LENGTH = 31;
+    public static final int MIN_PATTERN_COUNT = 1;
+    public static final int MAX_PATTERN_COUNT = 128;
 
     /**
      * The module's title. Original ProTracker wrote letters only in uppercase.
@@ -60,20 +60,22 @@ public final class Mod {
     }
 
     private Sample[] checkSamples(Sample[] samples) {
-        if (samples.length != SAMPLE_COUNT) {
-            throw new IllegalArgumentException("Invalid sample count: " + samples.length);
+        if (samples.length != SAMPLE_LENGTH) {
+            throw new IllegalArgumentException("Invalid sample length: " + samples.length);
         }
 
         for (Sample sample : samples) {
-            if (sample == null) {
-                throw new IllegalArgumentException("Invalid sample: " + sample);
-            }
+            requireNonNull(sample);
         }
 
         return samples;
     }
 
     private int[] checkPatternSequences(int[] patternSequences) {
+        if (patternSequences.length != PATTERN_SEQUENCE_COUNT) {
+            throw new IllegalArgumentException("Invalid pattern sequences length: " + patternSequences.length);
+        }
+
         for (int patternSequence : patternSequences) {
             requireInRange(patternSequence, 0, MAX_LENGTH);
         }

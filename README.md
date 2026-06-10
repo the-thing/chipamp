@@ -2,5 +2,4 @@
 
 # Backlog
 
-- do todo work
 - experiment with resampling

@@ -10,8 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 public final class ModLoader {
 
-    private static final int SAMPLE_COUNT = 31;
-    private static final int PATTERN_COUNT = 128;
+    private static final int PATTERN_SEQUENCE_COUNT = 128;
     private static final int ROW_COUNT = 64;
 
     public static Mod load(String name) throws IOException {
@@ -64,10 +63,10 @@ public final class ModLoader {
     }
 
     private static int[] loadPatternSequences(DataInput in) throws IOException {
-        byte[] bytes = new byte[PATTERN_COUNT];
+        byte[] bytes = new byte[PATTERN_SEQUENCE_COUNT];
         in.readFully(bytes);
 
-        int[] patternSequences = new int[PATTERN_COUNT];
+        int[] patternSequences = new int[PATTERN_SEQUENCE_COUNT];
 
         for (int i = 0; i < bytes.length; i++) {
             patternSequences[i] = Byte.toUnsignedInt(bytes[i]);
@@ -98,9 +97,9 @@ public final class ModLoader {
     }
 
     private static SampleHeader[] loadSampleHeaders(DataInput in) throws IOException {
-        SampleHeader[] sampleHeaders = new SampleHeader[SAMPLE_COUNT];
+        SampleHeader[] sampleHeaders = new SampleHeader[Mod.SAMPLE_LENGTH];
 
-        for (int i = 0; i < SAMPLE_COUNT; i++) {
+        for (int i = 0; i < Mod.SAMPLE_LENGTH; i++) {
             sampleHeaders[i] = loadSampleHeader(in);
         }
 
