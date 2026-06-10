@@ -56,7 +56,14 @@ public final class Formatters {
     }
 
     // TODO add method to print specific pattern
-    // TODO format specfic for of specific pattern
+    // TODO format specfic row for of specific pattern
+
+    public static void formatPattern(Mod mod, StringBuilder out) {
+
+    }
+
+    public static void formatPattern(Mod mod, int patternIndex, StringBuilder out) {
+    }
 
     // TODO formatting currently is done in pattern order but not in seqeunce playuer order
     public static void formatPatterns(Mod mod, StringBuilder out) {

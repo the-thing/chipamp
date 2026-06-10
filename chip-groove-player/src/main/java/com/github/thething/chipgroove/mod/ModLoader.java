@@ -6,7 +6,6 @@ import com.github.thething.chipgroove.io.Resources;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 public final class ModLoader {
@@ -18,12 +17,8 @@ public final class ModLoader {
 
     public static Mod load(String name) throws IOException {
         try (DataInputStream in = new DataInputStream(Resources.getResourceAsStream(name))) {
-            return load((DataInput) in);
+            return load(in);
         }
-    }
-
-    public static Mod load(InputStream in) throws IOException {
-        return load((DataInput) new DataInputStream(in));
     }
 
     public static Mod load(DataInput in) throws IOException {
