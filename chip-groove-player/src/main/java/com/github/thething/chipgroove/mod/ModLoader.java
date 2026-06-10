@@ -10,9 +10,6 @@ import java.nio.charset.StandardCharsets;
 
 public final class ModLoader {
 
-    private static final int PATTERN_SEQUENCE_COUNT = 128;
-    private static final int ROW_COUNT = 64;
-
     public static Mod load(String name) throws IOException {
         try (DataInputStream in = new DataInputStream(Resources.getResourceAsStream(name))) {
             return load(in);
@@ -63,10 +60,10 @@ public final class ModLoader {
     }
 
     private static int[] loadPatternSequences(DataInput in) throws IOException {
-        byte[] bytes = new byte[PATTERN_SEQUENCE_COUNT];
+        byte[] bytes = new byte[Mod.PATTERN_SEQUENCE_COUNT];
         in.readFully(bytes);
 
-        int[] patternSequences = new int[PATTERN_SEQUENCE_COUNT];
+        int[] patternSequences = new int[Mod.PATTERN_SEQUENCE_COUNT];
 
         for (int i = 0; i < bytes.length; i++) {
             patternSequences[i] = Byte.toUnsignedInt(bytes[i]);
@@ -133,10 +130,10 @@ public final class ModLoader {
     }
 
     private static Instrument[][][] loadPatterns(DataInput in, int patternCount, int channelCount) throws IOException {
-        Instrument[][][] patterns = new Instrument[patternCount][ROW_COUNT][channelCount];
+        Instrument[][][] patterns = new Instrument[patternCount][Mod.ROW_COUNT][channelCount];
 
         for (int i = 0; i < patternCount; i++) {
-            for (int j = 0; j < ROW_COUNT; j++) {
+            for (int j = 0; j < Mod.ROW_COUNT; j++) {
                 for (int k = 0; k < channelCount; k++) {
                     patterns[i][j][k] = loadPattern(in);
                 }
