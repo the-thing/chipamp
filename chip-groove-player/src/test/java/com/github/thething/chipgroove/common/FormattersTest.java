@@ -8,17 +8,33 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.INTEGER;
 
 class FormattersTest {
 
     @Test
     void shouldReturnFormattedPatterns() throws IOException {
-        String expected = Resources.readText("DJ Metune - Axel F.txt");
+        String expected = Resources.readText("axel-patterns.txt");
         Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
         String formatted = Formatters.formatPatterns(mod);
 
         assertThat(formatted).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldReturnFormattedPattern() throws IOException {
+        String expected = Resources.readText("axel-pattern-2.txt");
+        Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
+        String formatted = Formatters.formatPattern(mod, 2);
+
+        assertThat(formatted).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldReturnFormattedRow() throws IOException {
+        Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
+        String formatted = Formatters.formatPattern(mod, 5, 10);
+
+        assertThat(formatted).isEqualTo("0000014A | 05 | 0A | A-3 12 --- | F-3 05 A01 | --- -- --- | --- -- EB1 |\r\n");
     }
 
     @Test

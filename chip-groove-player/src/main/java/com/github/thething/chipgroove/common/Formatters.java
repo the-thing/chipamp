@@ -55,72 +55,80 @@ public final class Formatters {
         return out.toString();
     }
 
-    // TODO add method to print specific pattern
-    // TODO format specfic row for of specific pattern
+    public static void formatPatterns(Mod mod, StringBuilder out) {
+        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+            formatPattern(mod, patternIndex, out);
+        }
+    }
 
-    public static void formatPattern(Mod mod, StringBuilder out) {
-
+    public static String formatPattern(Mod mod, int patternIndex) {
+        StringBuilder out = new StringBuilder();
+        formatPattern(mod, patternIndex, out);
+        return out.toString();
     }
 
     public static void formatPattern(Mod mod, int patternIndex, StringBuilder out) {
+        for (int rowIndex = 0; rowIndex < mod.getRowCount(); rowIndex++) {
+            formatPattern(mod, patternIndex, rowIndex, out);
+        }
     }
 
-    // TODO formatting currently is done in pattern order but not in seqeunce playuer order
-    public static void formatPatterns(Mod mod, StringBuilder out) {
-        int offset = 0;
+    public static String formatPattern(Mod mod, int patternIndex, int rowIndex) {
+        StringBuilder out = new StringBuilder();
+        formatPattern(mod, patternIndex, rowIndex, out);
+        return out.toString();
+    }
 
-        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
-            for (int rowIndex = 0; rowIndex < mod.getRowCount(); rowIndex++) {
-                formatHexInt(offset, out);
-                out.append(" |");
+    public static void formatPattern(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
+        int offset = patternIndex * mod.getRowCount() + rowIndex;
 
-                out.append(' ');
-                out.append(formatHexByte(rowIndex));
-                out.append(" |");
+        formatHexInt(offset, out);
+        out.append(" |");
 
-                out.append(' ');
-                out.append(formatHexByte(patternIndex));
-                out.append(" |");
+        out.append(' ');
+        out.append(formatHexByte(patternIndex));
+        out.append(" |");
 
-                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                    Instrument pattern = mod.getInstrument(patternIndex, rowIndex, channelIndex);
-                    String note = ModTables.getNote(pattern.period());
-                    note = note != null ? note : "---";
+        out.append(' ');
+        out.append(formatHexByte(rowIndex));
+        out.append(" |");
 
-                    int sampleInt = pattern.sampleNumber();
-                    String sample;
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            Instrument pattern = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+            String note = ModTables.getNote(pattern.period());
+            note = note != null ? note : "---";
 
-                    if (sampleInt == 0) {
-                        sample = "--";
-                    } else {
-                        sample = formatHexByte(sampleInt);
-                    }
+            int sampleInt = pattern.sampleNumber();
+            String sample;
 
-                    char effect;
-                    String effectArgument;
-
-                    if (pattern.effect() == 0) {
-                        effect = '-';
-                        effectArgument = "--";
-                    } else {
-                        effect = getHexCharacter(pattern.effect());
-                        effectArgument = formatHexByte(pattern.effectArgument());
-                    }
-
-                    out.append(" ");
-                    out.append(note);
-                    out.append(' ');
-                    out.append(sample);
-                    out.append(' ');
-                    out.append(effect);
-                    out.append(effectArgument);
-                    out.append(" |");
-                }
-
-                out.append("\r\n");
-                offset++;
+            if (sampleInt == 0) {
+                sample = "--";
+            } else {
+                sample = formatHexByte(sampleInt);
             }
+
+            char effect;
+            String effectArgument;
+
+            if (pattern.effect() == 0) {
+                effect = '-';
+                effectArgument = "--";
+            } else {
+                effect = getHexCharacter(pattern.effect());
+                effectArgument = formatHexByte(pattern.effectArgument());
+            }
+
+            out.append(" ");
+            out.append(note);
+            out.append(' ');
+            out.append(sample);
+            out.append(' ');
+            out.append(effect);
+            out.append(effectArgument);
+            out.append(" |");
         }
+
+        out.append("\r\n");
     }
 
     public static String formatHexByte(int value) {
