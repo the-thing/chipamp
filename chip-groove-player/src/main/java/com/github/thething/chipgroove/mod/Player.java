@@ -158,10 +158,10 @@ public class Player {
                         Sample sample = mod.getSample(sampleIndex);
 
                         // TODO validate that data length matches sample length
-                        if (sample.getData().length != 0 && sample.getLength() > 0) {
+                        if (sample.getDataLength() != 0 && sample.getDataLength() > 0) {
                             int samplePosition = Math.toIntExact(channel.samplePosition >> 16);
 
-                            if (samplePosition < sample.getLength()) {
+                            if (samplePosition < sample.getDataLength()) {
                                 int sampleValue = sample.getData(samplePosition);
                                 int scaled = (sampleValue * channel.volume) / 64;
                                 mixed += scaled;
@@ -179,7 +179,7 @@ public class Player {
                                 }
                             }
 
-                            if (samplePosition >= sample.getLength()) {
+                            if (samplePosition >= sample.getDataLength()) {
                                 channel.samplePosition = 0;
                                 channel.period = 0;
                             }

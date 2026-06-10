@@ -27,7 +27,9 @@ public final class ModLoader {
 
         int length = in.readUnsignedByte();
 
-        // skip unused byte - restart byte for song looping (NoiseTracker)
+        // Historically set to 127, but can be safely ignored.
+        // NoiseTracker uses this byte to indicate restart position.
+        // This has been made redundant by the 'Position Jump' effect.
         in.skipBytes(1);
 
         int[] patternSequences = loadPatternSequences(in);
@@ -77,12 +79,12 @@ public final class ModLoader {
     private static Sample[] loadSamples(DataInput in, SampleHeader[] sampleHeaders) throws IOException {
         Sample[] samples = new Sample[sampleHeaders.length];
 
-        for (int i = 0; i < SAMPLE_COUNT; i++) {
+        for (int i = 0; i < samples.length; i++) {
             byte[] sampleData = new byte[sampleHeaders[i].length()];
             in.readFully(sampleData);
 
             SampleHeader sampleHeader = sampleHeaders[i];
-            samples[i] = new Sample(sampleHeader.name, sampleHeader.length, sampleHeader.finetune, sampleHeader.volume,
+            samples[i] = new Sample(sampleHeader.name, sampleHeader.finetune, sampleHeader.volume,
                     sampleHeader.loopStart, sampleHeader.loopLength, sampleData);
         }
 
@@ -102,13 +104,12 @@ public final class ModLoader {
     private static SampleHeader loadSampleHeader(DataInput in) throws IOException {
         String name = loadSampleName(in);
 
-        // sampleNumber length is double
-        int length = in.readUnsignedShort() << 1;
+        int length = in.readUnsignedShort() << 1; // in words - multiply by 2
         int finetune = in.readByte();
         int volume = in.readUnsignedByte();
 
-        int loopStart = in.readUnsignedShort() << 1;
-        int loopLength = in.readUnsignedShort() << 1;
+        int loopStart = in.readUnsignedShort() << 1; // in words - multiply by 2
+        int loopLength = in.readUnsignedShort() << 1; // in words - multiply by 2
 
         return new SampleHeader(name, length, finetune, volume, loopStart, loopLength);
     }
