@@ -172,7 +172,6 @@ public class Player {
 
     public static void main(String[] args) throws InterruptedException, IOException, LineUnavailableException {
         Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
-//        Mod mod = ModLoader.load("Hoffman - Eon.mod");
 
         System.out.println("patternCount = " + mod.getPatternCount());
 
