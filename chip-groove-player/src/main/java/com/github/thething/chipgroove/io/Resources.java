@@ -1,11 +1,20 @@
 package com.github.thething.chipgroove.io;
 
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
+import static java.util.Objects.checkFromIndexSize;
 
 public final class Resources {
 
@@ -42,5 +51,17 @@ public final class Resources {
         }
 
         return text.toString();
+    }
+
+    public static void saveAudio(File file, AudioFormat format, byte[] audio) throws IOException {
+        saveAudio(file, format, audio, 0, audio.length);
+    }
+
+    public static void saveAudio(File file, AudioFormat format, byte[] audio, int offset, int length) throws IOException {
+        checkFromIndexSize(offset, length, audio.length);
+
+        try (AudioInputStream in = new AudioInputStream(new ByteArrayInputStream(audio), format, audio.length)) {
+            AudioSystem.write(in, AudioFileFormat.Type.WAVE, file);
+        }
     }
 }

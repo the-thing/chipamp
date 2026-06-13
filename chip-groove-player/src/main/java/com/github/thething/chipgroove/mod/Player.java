@@ -1,18 +1,22 @@
 package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.Maths;
+import com.github.thething.chipgroove.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
 public class Player {
 
-    private static final float SAMPLE_RATE = 44_100.0f;
+    // private static final float SAMPLE_RATE = 8_287.0f;
+    // private static final float SAMPLE_RATE = 44_100.0f;
+    private static final float SAMPLE_RATE = 28_604.0f;
 
     private final Channel[] channels;
 
@@ -173,35 +177,42 @@ public class Player {
     public static void main(String[] args) throws InterruptedException, IOException, LineUnavailableException {
         Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
 
-        System.out.println("patternCount = " + mod.getPatternCount());
+        Sample sample = mod.getSample(1);
 
-        Player player = new Player();
-        player.play(mod);
+        byte[] sampleData8bit = sample.getData();
+        byte[] sampleData16bit = new byte[sampleData8bit.length * 2];
 
-//        System.out.println(Integer.MAX_VALUE & 0xFFFF_FFFF);
+        for (int i = 0; i < sampleData8bit.length; i++) {
+            short sampleValue = (short) (sampleData8bit[i] << 8);
+            sampleData16bit[i * 2] = (byte) (sampleValue & 0xFF);
+            sampleData16bit[i * 2 + 1] = (byte) (sampleValue >> 8);
+        }
 
-        /**
-         *   Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
-         *
-         *          Sample sample = mod.getSample(0xa - 1);
-         *         byte[] audio = sample.getData();
-         *
-         *         int tickSamples = calculateTickSamples(125);
-         *         System.out.println("Tick samples: " + tickSamples);
-         *
-         *
-         *         // float sampleRate = 44_100f;
-         *          // float sampleRate = 8_363f;
-         *         float sampleRate =  16_574f; // PAL
-         *         AudioFormat audioFormat = new AudioFormat(sampleRate, 8, 1, true, true);
-         *         DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
-         *         SourceDataLine line = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
-         *
-         *         line.open();
-         *         line.start();
-         *         line.write(audio, 0, audio.length);
-         *         line.drain();
-         *         line.close();
-         */
+        AudioFormat audioFormat = new AudioFormat(SAMPLE_RATE, 8, 1, true, false);
+        DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
+        SourceDataLine line = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
+
+        line.open();
+        line.start();
+        line.write(sampleData8bit, 0, sampleData8bit.length);
+        line.drain();
+        line.close();
+
+        System.out.println("dupa: " + sampleData8bit.length * 214);
+
+        Resources.saveAudio(new File("dupa.wav"), audioFormat, sampleData8bit);
+        byte[] resample = resample(sampleData8bit, sampleData8bit.length * 2);
+        Resources.saveAudio(new File("dupa2.wav"), audioFormat, resample);
+    }
+
+    public static byte[] resample(byte[] audio, int newLength) {
+        byte[] newAudio = new byte[newLength];
+
+        for (int i = 0; i < newLength; i++) {
+            float ratio = (float) i / (float) newLength;
+            newAudio[i] = audio[(int) (audio.length * ratio)];
+        }
+
+        return newAudio;
     }
 }

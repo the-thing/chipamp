@@ -1,5 +1,8 @@
 package com.github.thething.chipgroove.mod;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
 import static java.util.Objects.requireNonNull;
@@ -80,8 +83,31 @@ public final class Sample {
         return loopLength;
     }
 
+    /**
+     * Loop enabled flag. The first word of the sample is overwritten by the tracker, so a length of 2 still means an
+     * empty sample.
+     *
+     * @return sample length in bytes
+     */
+    public boolean isLoopEnabled() {
+        return loopLength > 2;
+    }
+
     public byte getData(int index) {
         return data[index];
+    }
+
+    public byte[] getData() {
+        return Arrays.copyOf(data, data.length);
+    }
+
+    public int readData(byte[] dst, int offset, int length) {
+        checkFromIndexSize(offset, length, dst.length);
+
+        int copyLength = Math.min(length, data.length);
+        System.arraycopy(data, 0, dst, offset, copyLength);
+
+        return copyLength;
     }
 
     /**
