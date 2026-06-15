@@ -48,6 +48,7 @@ public final class Mod {
     /**
      * Pattern sheet. [patternCount][rowCount][channelCount]
      */
+    // TODO this should probably be channel / pattern / row
     private final Instrument[][][] patterns;
 
     public Mod(String title, int length, Sample[] samples, int[] patternSequences, String trackerId, Instrument[][][] patterns) {
@@ -114,8 +115,8 @@ public final class Mod {
         return patternSequences.length;
     }
 
-    public int getPatternSequence(int position) {
-        return patternSequences[position];
+    public int getPatternIndex(int sequenceIndex) {
+        return patternSequences[sequenceIndex];
     }
 
     public String getTrackerId() {

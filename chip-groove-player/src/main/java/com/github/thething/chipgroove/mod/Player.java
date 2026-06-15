@@ -1,14 +1,12 @@
 package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.Maths;
-import com.github.thething.chipgroove.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -35,7 +33,7 @@ public class Player {
     }
 
     public void play(Mod mod) throws LineUnavailableException {
-        byte[] buffer = new byte[2048];
+        byte[] buffer = new byte[4096];
 
         AudioFormat audioFormat = new AudioFormat(SAMPLE_RATE, 16, 1, true, false);
         DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
@@ -86,13 +84,6 @@ public class Player {
 
     private static float convertPeriodToFrequency(int period) {
         return 7159090.5f / (period * 2);
-    }
-
-    private static int calculateTickSamples(int tempo) {
-        // Calculate samples per tick based on tempo
-        // 2500 / tempo = milliseconds per tick
-        // (ms * sample_rate) / 1000 = samples per tick
-        return (2500 * (int) SAMPLE_RATE) / (tempo * 1000);
     }
 
     private void newRow(Mod mod, int position, int rowIndex) {

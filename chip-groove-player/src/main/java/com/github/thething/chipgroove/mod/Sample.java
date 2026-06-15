@@ -92,6 +92,8 @@ public final class Sample {
         return loopLength > 2;
     }
 
+    // TODO is data present
+
     public byte getData(int index) {
         return data[index];
     }

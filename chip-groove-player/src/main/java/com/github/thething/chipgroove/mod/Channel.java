@@ -13,6 +13,9 @@ final class Channel {
     int effectArgumentY;
     boolean muted;
 
+    double samplePositionDouble;
+    double sampleIncrementDouble;
+
     Channel() {
         reset();
     }
@@ -27,5 +30,41 @@ final class Channel {
         extendedEffect = ExtendedEffect.NONE;
         effectArgumentX = 0;
         effectArgumentY = 0;
+    }
+
+    float nextSample(Mod mod) {
+        if (sampleNumber <= 0) {
+            return 0.0f;
+        }
+
+        Sample sample = mod.getSample(sampleNumber - 1);
+
+        if (sample.getDataLength() <= 2) {
+            return 0.0f;
+        }
+
+        int samplePosition = (int) samplePositionDouble;
+        float out = 0.0f;
+
+        if (samplePosition < sample.getDataLength()) {
+            out = sample.getData(samplePosition) / 128.0f;
+        }
+
+        samplePositionDouble += sampleIncrementDouble;
+
+        if (sample.isLoopEnabled()) {
+            double loopEnd = sample.getLoopStart() + sample.getLoopLength();
+
+            if (samplePositionDouble >= loopEnd) {
+                samplePositionDouble = sample.getLoopStart() + (samplePositionDouble - loopEnd) % sample.getLoopLength();
+            }
+        } else {
+            if (samplePositionDouble >= sample.getDataLength()) {
+                samplePositionDouble = sample.getDataLength();
+                sampleIncrementDouble = 0.0;
+            }
+        }
+
+        return out * (volume / 64f);
     }
 }
