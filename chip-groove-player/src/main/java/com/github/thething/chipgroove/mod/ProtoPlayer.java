@@ -10,8 +10,8 @@ public class ProtoPlayer {
 
     private final Channel[] channels;
 
-    private int speed;
-    private int tempo;
+    private int speed; //
+    private int tempo; // beats per minute
 
     public ProtoPlayer() {
         this.channels = new Channel[CHANNEL_COUNT];
