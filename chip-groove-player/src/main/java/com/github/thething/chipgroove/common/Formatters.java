@@ -99,6 +99,9 @@ public final class Formatters {
             String note = ModTables.getNote(pattern.period());
             note = note != null ? note : "---";
 
+            // TODO check if there are any modules where non standard note samples are used
+            // TODD if found, we probably want to search for the closest note and print it as a custom note e.g "C-X"
+
             int sampleInt = pattern.sampleNumber();
             String sample;
 
