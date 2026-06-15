@@ -92,8 +92,6 @@ public final class Sample {
         return loopLength > 2;
     }
 
-    // TODO is data present
-
     public byte getData(int index) {
         return data[index];
     }
@@ -119,5 +117,9 @@ public final class Sample {
      */
     public int getDataLength() {
         return data.length;
+    }
+
+    public boolean isEmpty() {
+        return data.length <= 2;
     }
 }

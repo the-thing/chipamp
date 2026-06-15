@@ -39,7 +39,7 @@ final class Channel {
 
         Sample sample = mod.getSample(sampleNumber - 1);
 
-        if (sample.getDataLength() <= 2) {
+        if (sample.isEmpty()) {
             return 0.0f;
         }
 
