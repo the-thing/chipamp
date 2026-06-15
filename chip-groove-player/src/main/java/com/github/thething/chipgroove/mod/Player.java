@@ -86,8 +86,8 @@ public class Player {
         return 7159090.5f / (period * 2);
     }
 
-    private void newRow(Mod mod, int position, int rowIndex) {
-        int patternIndex = mod.getPatternSequence(position);
+    private void newRow(Mod mod, int sequenceIndex, int rowIndex) {
+        int patternIndex = mod.getPatternIndex(sequenceIndex);
 
         for (int channelIndex = 0; channelIndex < channels.length; channelIndex++) {
             Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
