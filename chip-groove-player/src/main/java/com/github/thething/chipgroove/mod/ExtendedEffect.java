@@ -26,11 +26,8 @@ public enum ExtendedEffect {
 
     static {
         EFFECT_BY_CODE = new ExtendedEffect[256];
-        Arrays.fill(EFFECT_BY_CODE, NONE);
-
-        for (int i = 0; i < values().length; i++) {
-            EFFECT_BY_CODE[i] = values()[i];
-        }
+        Arrays.fill(EFFECT_BY_CODE, 16, EFFECT_BY_CODE.length, NONE);
+        System.arraycopy(values(), 0, EFFECT_BY_CODE, 0, values().length);
     }
 
     private final int code;
