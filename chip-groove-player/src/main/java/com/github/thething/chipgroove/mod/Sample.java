@@ -10,8 +10,8 @@ public final class Sample {
 
     private static final int MIN_DATA_LENGTH = 0;
     private static final int MAX_DATA_LENGTH = 131_072;
-    private static final int MIN_FINETUNE = -8;
-    private static final int MAX_FINETUNE = 7;
+    private static final int MIN_FINE_TUNE = -8;
+    private static final int MAX_FINE_TUNE = 7;
     private static final int MIN_VOLUME = 0;
     private static final int MAX_VOLUME = 64;
 
@@ -22,11 +22,11 @@ public final class Sample {
     private final String name;
 
     /**
-     * Lowest four bits represent a signed nibble (-8..7) which is the finetune value for the sample. Each finetune step
-     * changes the note 1/8th of a semitone. Implemented by switching to a different table of period-values for each
-     * finetune value.
+     * Lowest four bits represent a signed nibble (-8..7) which is the fine tune value for the sample. Each fine tune
+     * step changes the note 1/8th of a semitone. Implemented by switching to a different table of period-values for
+     * each fine tune value.
      */
-    private final int finetune;
+    private final int fineTune;
 
     /**
      * Volume of sample. Legal values are 0..64. Volume is the linear difference between sound intensities. 64 is full
@@ -51,9 +51,9 @@ public final class Sample {
      */
     private final byte[] data;
 
-    public Sample(String name, int finetune, int volume, int loopStart, int loopLength, byte[] data) {
+    public Sample(String name, int fineTune, int volume, int loopStart, int loopLength, byte[] data) {
         this.name = requireNonNull(name);
-        this.finetune = requireInRange(finetune, MIN_FINETUNE, MAX_FINETUNE);
+        this.fineTune = requireInRange(fineTune, MIN_FINE_TUNE, MAX_FINE_TUNE);
         this.volume = requireInRange(volume, MIN_VOLUME, MAX_VOLUME);
         this.loopStart = requireInRange(loopStart, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
         checkFromIndexSize(loopStart, loopLength - 2, data.length);
@@ -66,8 +66,8 @@ public final class Sample {
         return name;
     }
 
-    public int getFinetune() {
-        return finetune;
+    public int getFineTune() {
+        return fineTune;
     }
 
     public int getVolume() {

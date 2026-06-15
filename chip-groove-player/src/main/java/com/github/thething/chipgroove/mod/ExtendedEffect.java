@@ -5,11 +5,11 @@ import java.util.Arrays;
 public enum ExtendedEffect {
 
     SET_FILTER(0x00),
-    FINESLIDE_UP(0x01),
-    FINESLIDE_DOWN(0x02),
+    FINE_SLIDE_UP(0x01),
+    FINE_SLIDE_DOWN(0x02),
     SET_GLISSANDO(0x03),
     SET_VIBRATO_WAVEFORM(0x04),
-    SET_FINETUNE_VALUE(0x05),
+    SET_FINE_TUNE_VALUE(0x05),
     LOOP_PATTERN(0x06),
     SET_TREMOLO_WAVEFORM(0x07),
     ROUGH_PANNING(0x08),
@@ -37,6 +37,10 @@ public enum ExtendedEffect {
 
     ExtendedEffect(int code) {
         this.code = code;
+    }
+
+    public int getCode() {
+        return code;
     }
 
     public static ExtendedEffect valueOf(int code) {

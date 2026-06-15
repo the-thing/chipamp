@@ -86,7 +86,7 @@ public final class ModLoader {
             in.readFully(sampleData);
 
             SampleHeader sampleHeader = sampleHeaders[i];
-            samples[i] = new Sample(sampleHeader.name, sampleHeader.finetune, sampleHeader.volume,
+            samples[i] = new Sample(sampleHeader.name, sampleHeader.fineTune, sampleHeader.volume,
                     sampleHeader.loopStart, sampleHeader.loopLength, sampleData);
         }
 
@@ -107,13 +107,13 @@ public final class ModLoader {
         String name = loadSampleName(in);
 
         int length = in.readUnsignedShort() << 1; // in words - multiply by 2
-        int finetune = in.readByte();
+        int fineTune = in.readByte();
         int volume = in.readUnsignedByte();
 
         int loopStart = in.readUnsignedShort() << 1; // in words - multiply by 2
         int loopLength = in.readUnsignedShort() << 1; // in words - multiply by 2
 
-        return new SampleHeader(name, length, finetune, volume, loopStart, loopLength);
+        return new SampleHeader(name, length, fineTune, volume, loopStart, loopLength);
     }
 
     private static String loadSampleName(DataInput in) throws IOException {
@@ -174,6 +174,6 @@ public final class ModLoader {
         return new Instrument(sampleNumber, period, effect, extendedEffect, effectArgumentX, effectArgumentY);
     }
 
-    private record SampleHeader(String name, int length, int finetune, int volume, int loopStart, int loopLength) {
+    private record SampleHeader(String name, int length, int fineTune, int volume, int loopStart, int loopLength) {
     }
 }
