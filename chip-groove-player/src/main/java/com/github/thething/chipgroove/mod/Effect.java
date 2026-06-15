@@ -1,5 +1,7 @@
 package com.github.thething.chipgroove.mod;
 
+import java.util.Arrays;
+
 public enum Effect {
 
     ARPEGGIO(0x00),
@@ -17,12 +19,14 @@ public enum Effect {
     SET_VOLUME(0x0C),
     PATTERN_BREAK(0x0D),
     EXTENDED_EFFECT(0x0E),
-    SET_SPEED(0x0F);
+    SET_SPEED(0x0F),
+    NONE(0xFF);
 
     private static final Effect[] EFFECT_BY_CODE;
 
     static {
-        EFFECT_BY_CODE = new Effect[values().length];
+        EFFECT_BY_CODE = new Effect[256];
+        Arrays.fill(EFFECT_BY_CODE, NONE);
 
         for (int i = 0; i < values().length; i++) {
             EFFECT_BY_CODE[i] = values()[i];

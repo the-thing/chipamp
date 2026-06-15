@@ -1,7 +1,6 @@
 package com.github.thething.chipgroove.mod;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;

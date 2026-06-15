@@ -7,8 +7,10 @@ final class Channel {
     int volume;
     long samplePosition;
     long sampleIncrement;
-    int effect;
-    int effectArgument;
+    Effect effect;
+    ExtendedEffect extendedEffect;
+    int effectArgumentX;
+    int effectArgumentY;
     boolean muted;
 
     Channel() {
@@ -21,7 +23,9 @@ final class Channel {
         volume = 0;
         samplePosition = 0L;
         sampleIncrement = 0L;
-        effect = 0;
-        effectArgument = 0;
+        effect = Effect.NONE;
+        extendedEffect = ExtendedEffect.NONE;
+        effectArgumentX = 0;
+        effectArgumentY = 0;
     }
 }

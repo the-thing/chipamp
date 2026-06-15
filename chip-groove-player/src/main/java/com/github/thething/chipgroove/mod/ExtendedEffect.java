@@ -1,5 +1,7 @@
 package com.github.thething.chipgroove.mod;
 
+import java.util.Arrays;
+
 public enum ExtendedEffect {
 
     SET_FILTER(0x00),
@@ -17,12 +19,14 @@ public enum ExtendedEffect {
     CUT_SAMPLE(0x0C),
     DELAY_SAMPLE(0x0D),
     DELAY_PATTERN(0x0E),
-    INVERT_LOOP(0x0F);
+    INVERT_LOOP(0x0F),
+    NONE(0xFF);
 
     private static final ExtendedEffect[] EFFECT_BY_CODE;
 
     static {
-        EFFECT_BY_CODE = new ExtendedEffect[values().length];
+        EFFECT_BY_CODE = new ExtendedEffect[256];
+        Arrays.fill(EFFECT_BY_CODE, NONE);
 
         for (int i = 0; i < values().length; i++) {
             EFFECT_BY_CODE[i] = values()[i];

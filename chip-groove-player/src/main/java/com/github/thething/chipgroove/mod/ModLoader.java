@@ -151,10 +151,29 @@ public final class ModLoader {
 
         int sampleNumber = (b0 & 0xF0) | (b2 >> 4);
         int period = ((b0 & 0x0F) << 8) | b1;
-        int effect = b2 & 0x0F;
-        int effectArgument = b3 & 0xFF;
+        int effectCode = b2 & 0x0F;
+        // int effectArgument = b3 & 0xFF;
 
-        return new Instrument(sampleNumber, period, effect, effectArgument);
+        int effectArgumentX = b3 >> 4;
+        int effectArgumentY = b3 & 0x0F;
+
+        Effect effect;
+        ExtendedEffect extendedEffect;
+
+        if (effectCode == 0 && effectArgumentX == 0 && effectArgumentY == 0) {
+            effect = Effect.NONE;
+            extendedEffect = ExtendedEffect.NONE;
+        } else {
+            effect = Effect.valueOf(effectCode);
+
+            if (effect == Effect.EXTENDED_EFFECT) {
+                extendedEffect = ExtendedEffect.valueOf(effectArgumentX);
+            } else {
+                extendedEffect = ExtendedEffect.NONE;
+            }
+        }
+
+        return new Instrument(sampleNumber, period, effect, extendedEffect, effectArgumentX, effectArgumentY);
     }
 
     private record SampleHeader(String name, int length, int finetune, int volume, int loopStart, int loopLength) {

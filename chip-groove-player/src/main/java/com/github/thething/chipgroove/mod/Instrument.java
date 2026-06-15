@@ -1,13 +1,19 @@
 package com.github.thething.chipgroove.mod;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
+import static java.util.Objects.requireNonNull;
 
-public record Instrument(int sampleNumber, int period, int effect, int effectArgument) {
+public record Instrument(int sampleNumber, int period,
+                         Effect effect, ExtendedEffect extendedEffect, int effectArgumentX, int effectArgumentY) {
 
-    public Instrument(int sampleNumber, int period, int effect, int effectArgument) {
+    public Instrument(
+            int sampleNumber, int period,
+            Effect effect, ExtendedEffect extendedEffect, int effectArgumentX, int effectArgumentY) {
         this.sampleNumber = requireInRange(sampleNumber, 0, 255);
         this.period = requireInRange(period, 0, Short.MAX_VALUE);
-        this.effect = requireInRange(effect, 0, 255);
-        this.effectArgument = requireInRange(effectArgument, 0, 255);
+        this.effect = requireNonNull(effect);
+        this.extendedEffect = requireNonNull(extendedEffect);
+        this.effectArgumentX = requireInRange(effectArgumentX, 0, 15);
+        this.effectArgumentY = requireInRange(effectArgumentY, 0, 15);
     }
 }

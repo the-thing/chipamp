@@ -1,5 +1,6 @@
 package com.github.thething.chipgroove.common;
 
+import com.github.thething.chipgroove.mod.Effect;
 import com.github.thething.chipgroove.mod.Mod;
 import com.github.thething.chipgroove.mod.ModTables;
 import com.github.thething.chipgroove.mod.Instrument;
@@ -110,12 +111,12 @@ public final class Formatters {
             char effect;
             String effectArgument;
 
-            if (pattern.effect() == 0) {
+            if (pattern.effect() == Effect.NONE) {
                 effect = '-';
                 effectArgument = "--";
             } else {
-                effect = getHexCharacter(pattern.effect());
-                effectArgument = formatHexByte(pattern.effectArgument());
+                effect = getHexCharacter(pattern.effect().getCode());
+                effectArgument = formatHexByte(pattern.effectArgumentX(), pattern.effectArgumentY());
             }
 
             out.append(" ");
@@ -129,6 +130,10 @@ public final class Formatters {
         }
 
         out.append("\r\n");
+    }
+
+    public static String formatHexByte(int highNibble, int lowNibble) {
+        return formatHexByte(((highNibble & 0x0F) << 4) | (lowNibble & 0x0F));
     }
 
     public static String formatHexByte(int value) {

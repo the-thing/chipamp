@@ -60,6 +60,11 @@ class FormattersTest {
         assertThat(Formatters.formatHexByte(1)).isEqualTo("01");
         assertThat(Formatters.formatHexByte(15)).isEqualTo("0F");
         assertThat(Formatters.formatHexByte(255)).isEqualTo("FF");
+
+        assertThat(Formatters.formatHexByte(0, 0)).isEqualTo("00");
+        assertThat(Formatters.formatHexByte(0, 15)).isEqualTo("0F");
+        assertThat(Formatters.formatHexByte(15, 0)).isEqualTo("F0");
+        assertThat(Formatters.formatHexByte(15, 15)).isEqualTo("FF");
     }
 
     @Test

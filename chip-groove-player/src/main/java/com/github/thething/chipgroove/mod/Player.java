@@ -108,7 +108,7 @@ public class Player {
             }
 
             if (instrument.period() > 0) {
-                if (instrument.effect() != Effects.TONE_PORTAMENTO) {
+                if (instrument.effect() != Effect.TONE_PORTAMENTO) {
                     channels[channelIndex].period = instrument.period();
                     channels[channelIndex].samplePosition = 0;
 
@@ -118,7 +118,9 @@ public class Player {
             }
 
             channels[channelIndex].effect = instrument.effect();
-            channels[channelIndex].effectArgument = instrument.effectArgument();
+            channels[channelIndex].extendedEffect = instrument.extendedEffect();
+            channels[channelIndex].effectArgumentX = instrument.effectArgumentX();
+            channels[channelIndex].effectArgumentY = instrument.effectArgumentY();
         }
     }
 
