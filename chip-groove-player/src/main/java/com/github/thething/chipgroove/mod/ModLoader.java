@@ -10,13 +10,13 @@ import java.nio.charset.StandardCharsets;
 
 public final class ModLoader {
 
-    public static Mod load(String name) throws IOException {
+    public Mod load(String name) throws IOException {
         try (DataInputStream in = new DataInputStream(Resources.getResourceAsStream(name))) {
             return load(in);
         }
     }
 
-    public static Mod load(DataInput in) throws IOException {
+    public Mod load(DataInput in) throws IOException {
         String title = loadTitle(in);
         SampleHeader[] sampleHeaders = loadSampleHeaders(in);
 

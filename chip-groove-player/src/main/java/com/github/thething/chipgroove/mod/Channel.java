@@ -11,6 +11,10 @@ final class Channel {
     int effectArgument;
     boolean muted;
 
+    Channel() {
+        reset();
+    }
+
     void reset() {
         period = 0;
         sampleNumber = 0;
@@ -19,6 +23,5 @@ final class Channel {
         sampleIncrement = 0L;
         effect = 0;
         effectArgument = 0;
-        muted = false;
     }
 }

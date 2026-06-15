@@ -3,6 +3,7 @@ package com.github.thething.chipgroove.common;
 import com.github.thething.chipgroove.io.Resources;
 import com.github.thething.chipgroove.mod.Mod;
 import com.github.thething.chipgroove.mod.ModLoader;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -11,10 +12,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class FormattersTest {
 
+    private ModLoader modLoader;
+
+    @BeforeEach
+    void setUp() {
+        modLoader = new ModLoader();
+    }
+
     @Test
     void shouldReturnFormattedPatterns() throws IOException {
         String expected = Resources.readText("axel-patterns.txt");
-        Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
         String formatted = Formatters.formatPatterns(mod);
 
         assertThat(formatted).isEqualTo(expected);
@@ -23,7 +31,7 @@ class FormattersTest {
     @Test
     void shouldReturnFormattedPattern() throws IOException {
         String expected = Resources.readText("axel-pattern-2.txt");
-        Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
         String formatted = Formatters.formatPattern(mod, 2);
 
         assertThat(formatted).isEqualTo(expected);
@@ -31,7 +39,7 @@ class FormattersTest {
 
     @Test
     void shouldReturnFormattedRow() throws IOException {
-        Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
         String formatted = Formatters.formatPattern(mod, 5, 10);
 
         assertThat(formatted).isEqualTo("0000014A | 05 | 0A | A-3 12 --- | F-3 05 A01 | --- -- --- | --- -- EB1 |\r\n");
@@ -40,7 +48,7 @@ class FormattersTest {
     @Test
     void shouldFormatEmptyModule() throws IOException {
         String expected = Resources.readText("empty-patterns.txt");
-        Mod mod = ModLoader.load("empty.mod");
+        Mod mod = modLoader.load("empty.mod");
         String formatted = Formatters.formatPatterns(mod);
 
         assertThat(formatted).isEqualTo(expected);

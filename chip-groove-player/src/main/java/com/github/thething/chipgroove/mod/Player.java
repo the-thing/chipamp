@@ -175,7 +175,8 @@ public class Player {
     }
 
     public static void main(String[] args) throws InterruptedException, IOException, LineUnavailableException {
-        Mod mod = ModLoader.load("DJ Metune - Axel F.mod");
+        ModLoader modLoader = new ModLoader();
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
         Sample sample = mod.getSample(1);
 
