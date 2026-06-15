@@ -152,8 +152,6 @@ public final class ModLoader {
         int sampleNumber = (b0 & 0xF0) | (b2 >> 4);
         int period = ((b0 & 0x0F) << 8) | b1;
         int effectCode = b2 & 0x0F;
-        // int effectArgument = b3 & 0xFF;
-
         int effectArgumentX = b3 >> 4;
         int effectArgumentY = b3 & 0x0F;
 

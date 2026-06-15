@@ -5,6 +5,8 @@ import java.io.IOException;
 public class ProtoPlayer {
 
     private static final int CHANNEL_COUNT = 8;
+    private static final int PAL_CLOCK_HZ = 3_546_895;
+    private static final int NTSC_CLOCK_HZ = 3_579_545;
 
     private final Channel[] channels;
 
@@ -22,7 +24,6 @@ public class ProtoPlayer {
     }
 
     public void play(Mod mod) {
-
     }
 
     public static void main(String[] args) throws IOException {
