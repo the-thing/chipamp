@@ -15,8 +15,8 @@ import java.util.Arrays;
 public class Player {
 
     // private static final float SAMPLE_RATE = 8_287.0f;
-    // private static final float SAMPLE_RATE = 44_100.0f;
-    private static final float SAMPLE_RATE = 28_604.0f;
+    private static final float SAMPLE_RATE = 44_100.0f;
+    // private static final float SAMPLE_RATE = 28_604.0f;
 
     private final Channel[] channels;
 
@@ -176,36 +176,12 @@ public class Player {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException, IOException, LineUnavailableException {
+    public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
         Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
-        Sample sample = mod.getSample(1);
-
-        byte[] sampleData8bit = sample.getData();
-        byte[] sampleData16bit = new byte[sampleData8bit.length * 2];
-
-        for (int i = 0; i < sampleData8bit.length; i++) {
-            short sampleValue = (short) (sampleData8bit[i] << 8);
-            sampleData16bit[i * 2] = (byte) (sampleValue & 0xFF);
-            sampleData16bit[i * 2 + 1] = (byte) (sampleValue >> 8);
-        }
-
-        AudioFormat audioFormat = new AudioFormat(SAMPLE_RATE, 8, 1, true, false);
-        DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
-        SourceDataLine line = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
-
-        line.open();
-        line.start();
-        line.write(sampleData8bit, 0, sampleData8bit.length);
-        line.drain();
-        line.close();
-
-        System.out.println("dupa: " + sampleData8bit.length * 214);
-
-        Resources.saveAudio(new File("dupa.wav"), audioFormat, sampleData8bit);
-        byte[] resample = resample(sampleData8bit, sampleData8bit.length * 2);
-        Resources.saveAudio(new File("dupa2.wav"), audioFormat, resample);
+        Player player = new Player();
+        player.play(mod);
     }
 
     public static byte[] resample(byte[] audio, int newLength) {

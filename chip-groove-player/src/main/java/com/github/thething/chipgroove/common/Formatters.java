@@ -7,12 +7,12 @@ import com.github.thething.chipgroove.mod.Instrument;
 
 public final class Formatters {
 
-    private static final char[] HEX_CHARACTERS = new char[]{
+    private static final char[] HEX_NIBBLES = new char[]{
             '0', '1', '2', '3', '4', '5', '6', '7',
             '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };
 
-    private static final String[] HEX_VALUES = new String[]{
+    private static final String[] HEX_BYTES = new String[]{
             "00", "01", "02", "03", "04", "05", "06", "07",
             "08", "09", "0A", "0B", "0C", "0D", "0E", "0F",
             "10", "11", "12", "13", "14", "15", "16", "17",
@@ -137,7 +137,7 @@ public final class Formatters {
     }
 
     public static String formatHexByte(int value) {
-        return HEX_VALUES[value];
+        return HEX_BYTES[value & 0xFF];
     }
 
     public static String formatHexInt(int value) {
@@ -147,13 +147,13 @@ public final class Formatters {
     }
 
     public static void formatHexInt(int value, StringBuilder out) {
-        out.append(HEX_VALUES[value >> 24 & 0xFF]);
-        out.append(HEX_VALUES[value >> 16 & 0xFF]);
-        out.append(HEX_VALUES[value >> 8 & 0xFF]);
-        out.append(HEX_VALUES[value & 0xFF]);
+        out.append(HEX_BYTES[value >> 24 & 0xFF]);
+        out.append(HEX_BYTES[value >> 16 & 0xFF]);
+        out.append(HEX_BYTES[value >> 8 & 0xFF]);
+        out.append(HEX_BYTES[value & 0xFF]);
     }
 
     public static char getHexCharacter(int value) {
-        return HEX_CHARACTERS[value];
+        return HEX_NIBBLES[value & 0x0F];
     }
 }

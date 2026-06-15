@@ -39,10 +39,6 @@ public enum ExtendedEffect {
         this.code = code;
     }
 
-    public int getCode() {
-        return code;
-    }
-
     public static ExtendedEffect valueOf(int code) {
         return EFFECT_BY_CODE[code];
     }
