@@ -11,8 +11,6 @@ import javax.sound.sampled.SourceDataLine;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ProtoPlayer {
 
@@ -26,9 +24,11 @@ public class ProtoPlayer {
 
     private final Channel[] channels;
 
+    private int clock;
     private int speed; // ticks per row
     private int tempo; // beats per minute
-    private int clock;
+    private int samplesPerTick;
+    private int samplesLeftInTick;
 
     private int patternSequenceIndex;
     private int rowIndex;
@@ -97,8 +97,8 @@ public class ProtoPlayer {
         line.open(format);
         line.start();
 
-        int samplesPerTick = samplesPerTick(tempo, outputRate);
-        int samplesLeftInTick = samplesPerTick - (tickIndex * samplesPerTick);
+        samplesPerTick = samplesPerTick(tempo, outputRate);
+        samplesLeftInTick = samplesPerTick;
 
         while (patternSequenceIndex < mod.getLength()) {
 
@@ -118,6 +118,11 @@ public class ProtoPlayer {
                     if (rowIndex >= 64) {
                         rowIndex = 0;
                         patternSequenceIndex++;
+
+                        if (patternSequenceIndex < mod.getLength()) {
+                            int patternIndex = mod.getPatternIndex(patternSequenceIndex);
+                            System.out.println("new pattern: " + patternIndex);
+                        }
                     }
                 }
 
@@ -180,6 +185,22 @@ public class ProtoPlayer {
             }
 
             // TODO process some effects
+            switch (instrument.effect()) {
+                case SET_SPEED -> effectSetSpeed(instrument.effectArgumentX(), instrument.effectArgumentY());
+            }
+        }
+    }
+
+    private void effectSetSpeed(int argX, int argY) {
+        int arg = (argX << 4) | argY;
+
+        if (arg < 0x20) {
+            System.out.println("EFFECT SET SPEED: " + arg);
+            speed = arg;
+        } else {
+            System.out.println("EFFECT SET TEMPO: " + arg);
+            tempo = arg;
+            samplesPerTick = samplesPerTick(tempo, outputRate);
         }
     }
 
@@ -188,9 +209,9 @@ public class ProtoPlayer {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
+        Mod mod = modLoader.load("Hoffman - Eon.mod");
 
-        System.out.println(mod.getLength());
+        System.out.println("Mod length = " + mod.getLength());
 
         ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024 * 1024);
 
@@ -203,6 +224,6 @@ public class ProtoPlayer {
         buffer.get(audio);
 
         AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, DEFAULT_OUTPUT_RATE, 16, 2, 4, DEFAULT_OUTPUT_RATE, false);
-        Resources.saveAudio(new File("nearly.wav"), format, audio);
+        Resources.saveAudio(new File("eon.wav"), format, audio);
     }
 }

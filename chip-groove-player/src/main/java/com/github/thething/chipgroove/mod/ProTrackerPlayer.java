@@ -282,7 +282,7 @@ public class ProTrackerPlayer {
 
         // Global timing
         int  speed      = 6;    // ticks per row (Fxx effect with x<=1F)
-        int  bpm        = 125;  // beats per minute (Fxx effect with x>=20)
+        int tempo = 125;  // beats per minute (Fxx effect with x>=20)
 
         Channel[] channels = new Channel[4];
 
@@ -310,7 +310,7 @@ public class ProTrackerPlayer {
             int         outputRate,
             double      amigaClock)
     {
-        int sampTick = samplesPerTick(state.bpm, outputRate);
+        int sampTick = samplesPerTick(state.tempo, outputRate);
         int samplesLeftInTick = sampTick - (state.tick * sampTick); // simplified start offset
         // In a real implementation you'd persist "samplesRemainingInTick" across calls.
 
@@ -450,7 +450,7 @@ public class ProTrackerPlayer {
         if (param < 0x20)
             st.speed = param;             // 1..31  → ticks per row
         else
-            st.bpm   = param;             // 32..255 → BPM
+            st.tempo = param;             // 32..255 → BPM
     }
 
     private static void handlePatternBreak(PlayerState st, int param) {
@@ -535,11 +535,11 @@ public class ProTrackerPlayer {
 
         System.out.printf("Output rate : %d Hz%n", OUTPUT_RATE);
         System.out.printf("Amiga clock : %.0f Hz (PAL)%n", AMIGA_CLOCK);
-        System.out.printf("BPM         : %d%n", state.bpm);
+        System.out.printf("BPM         : %d%n", state.tempo);
         System.out.printf("Speed       : %d ticks/row%n", state.speed);
         System.out.printf("Tick length : %d samples  (%.2f ms)%n",
-            samplesPerTick(state.bpm, OUTPUT_RATE),
-            samplesPerTick(state.bpm, OUTPUT_RATE) * 1000.0 / OUTPUT_RATE);
+            samplesPerTick(state.tempo, OUTPUT_RATE),
+            samplesPerTick(state.tempo, OUTPUT_RATE) * 1000.0 / OUTPUT_RATE);
         System.out.printf("Period 440Hz: %d  → %.2f Hz%n",
             period440, periodToHz(period440, AMIGA_CLOCK));
 
