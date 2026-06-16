@@ -74,6 +74,7 @@ public class ProtoPlayer {
         return (int) Math.round((double) outputRate * 2_500_000.0 / (tempo * 1_000_000.0));
     }
 
+    // TODO not sure if this is required
     public int nextTickSamples(int tempo, int outputRate) {
         // Recompute exact rational each time in case BPM changed this tick
         long num = (long) outputRate * 5;
@@ -120,6 +121,7 @@ public class ProtoPlayer {
         line.open(format);
         line.start();
 
+        // TODO check if we can replace sample tick
         samplesPerTick = samplesPerTick(tempo, outputRate);
         samplesRemainingInCurrentTick = samplesPerTick;
 
@@ -127,9 +129,9 @@ public class ProtoPlayer {
 
             if (samplesRemainingInCurrentTick <= 0) {
                 if (tickIndex == 0) {
-                    processNewRow(mod, clockHz, outputRate);
+                    handleStartRow(mod, clockHz, outputRate);
                 } else {
-                    // TODO mid row effects
+                    handleMidRow(mod);
                 }
 
                 tickIndex++;
@@ -150,8 +152,8 @@ public class ProtoPlayer {
             right += channels[1].nextSample(mod);
             right += channels[2].nextSample(mod);
 
-            left = Maths.clamp(left * 0.5f, -1.0f, 1.0f);
-            right = Maths.clamp(right * 0.5f, -1.0f, 1.0f);
+            left = Maths.clamp(left * 2.0f, -1.0f, 1.0f);
+            right = Maths.clamp(right * 2.0f, -1.0f, 1.0f);
 
             short lefty = (short) (left * 32767.0f);
             short righty = (short) (right * 32767.0f);
@@ -195,10 +197,6 @@ public class ProtoPlayer {
                 rowIndex = breakRow;
             }
 
-            if (patternSequenceIndex >= modLength) {
-                patternSequenceIndex = 0;
-            }
-
             jumpPending = false;
             breakPending = false;
         } else {
@@ -208,14 +206,12 @@ public class ProtoPlayer {
                 rowIndex = 0;
                 patternSequenceIndex++;
 
-                if (patternSequenceIndex >= modLength) {
-                    patternSequenceIndex = 0;
-                }
+                System.out.println("Pattern sequence index: " + patternSequenceIndex);
             }
         }
     }
 
-    private void processNewRow(Mod mod, double clock, int rate) {
+    private void handleStartRow(Mod mod, double clock, int rate) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             int patternIndex = mod.getPatternIndex(patternSequenceIndex);
             Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
@@ -236,18 +232,81 @@ public class ProtoPlayer {
                 channel.volume = sample.getVolume();
             }
 
+            Effect previousEffect = channel.effect;
+            ExtendedEffect previousExtendedEffect = channel.extendedEffect;
+            int prevEffectArgumentX = channel.effectArgumentX;
+            int prevEffectArgumentY = channel.effectArgumentY;
+
+            channel.effect = instrument.effect();
+            channel.extendedEffect = instrument.extendedEffect();
+            channel.effectArgumentX = instrument.effectArgumentX();
+            channel.effectArgumentY = instrument.effectArgumentY();
+
             switch (instrument.effect()) {
+                case VOLUME_SLIDE ->
+                        effectVolumeSlideNewRow(channel, previousEffect, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
                 case SET_VOLUME -> effectSetVolume(channel, instrument.effectArgumentX(), instrument.effectArgumentY());
+                case PATTERN_BREAK -> effectPatternBreak(instrument.effectArgumentX(), instrument.effectArgumentY());
                 case SET_SPEED -> effectSetSpeed(instrument.effectArgumentX(), instrument.effectArgumentY());
+                case NONE -> {
+                }
+                default -> {
+                    if (instrument.effect() == Effect.EXTENDED_EFFECT) {
+                        System.out.println("UNKNOWN EFFECT: " + instrument.extendedEffect());
+                    } else {
+                        System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                    }
+                }
             }
         }
+    }
+
+    private void handleMidRow(Mod mod) {
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            Channel channel = channels[channelIndex];
+
+            switch (channel.effect) {
+                case VOLUME_SLIDE -> effectVolumeSlide(channel);
+            }
+        }
+    }
+
+    /**
+     * If the current effect is A00 (volume slide with both arguments equal to zero) and the previous effect was a
+     * volume slide than inherit arguments from previous slide.
+     */
+    private void effectVolumeSlideNewRow(Channel channel, Effect prevEffect, int prevArgX, int prevArgY, int argX, int argY) {
+        if (argX == 0 && argY == 0 && prevEffect == Effect.VOLUME_SLIDE) {
+            channel.effectArgumentX = prevArgX;
+            channel.effectArgumentY = prevArgY;
+        }
+    }
+
+    private void effectVolumeSlide(Channel channel) {
+        int delta;
+
+        if (channel.effectArgumentX != 0) {
+            delta = channel.effectArgumentX;
+        } else {
+            delta = -channel.effectArgumentY;
+        }
+
+        channel.volume = Maths.clamp(channel.volume + delta, 0, 64);
     }
 
     private void effectSetVolume(Channel channel, int argX, int argY) {
         int arg = (argX << 4) | argY;
         arg = Math.min(64, arg);
-        System.out.println("SET VOLUME " + arg);
+        // System.out.println("SET VOLUME " + arg);
         channel.volume = arg;
+    }
+
+    private void effectPatternBreak(int argX, int argY) {
+        int arg = argX * 10 + argY;
+        Math.min(arg, 63);
+        // System.out.println("PATTERN BREAK " + arg);
+        breakPending = true;
+        breakRow = arg;
     }
 
     // TODO speed at zero should probably stop playing
@@ -255,10 +314,10 @@ public class ProtoPlayer {
         int arg = (argX << 4) | argY;
 
         if (arg < 0x20) {
-            System.out.println("EFFECT SET SPEED: " + arg);
+            // System.out.println("EFFECT SET SPEED: " + arg);
             speed = arg;
         } else {
-            System.out.println("EFFECT SET TEMPO: " + arg);
+            // System.out.println("EFFECT SET TEMPO: " + arg);
             tempo = arg;
             samplesPerTick = samplesPerTick(tempo, outputRate);
         }
@@ -271,6 +330,8 @@ public class ProtoPlayer {
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
         Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+
+        System.out.println("length " + mod.getLength() + " / " + mod.getPatternSequenceCount());
 
         ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024 * 1024);
 
