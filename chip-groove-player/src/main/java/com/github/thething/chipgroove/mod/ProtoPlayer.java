@@ -209,7 +209,7 @@ public class ProtoPlayer {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Hoffman - Eon.mod");
+        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
 
         System.out.println("Mod length = " + mod.getLength());
 
@@ -224,6 +224,6 @@ public class ProtoPlayer {
         buffer.get(audio);
 
         AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, DEFAULT_OUTPUT_RATE, 16, 2, 4, DEFAULT_OUTPUT_RATE, false);
-        Resources.saveAudio(new File("eon.wav"), format, audio);
+        Resources.saveAudio(new File("nearly there.wav"), format, audio);
     }
 }

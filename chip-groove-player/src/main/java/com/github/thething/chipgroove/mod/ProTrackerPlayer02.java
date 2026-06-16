@@ -17,7 +17,7 @@ import java.util.Arrays;
  * Mixing is done in software at that rate; period→frequency conversion uses
  * the real Amiga clock so pitch is always correct regardless of output rate.
  */
-public class ProTrackerPlayerOld {
+public class ProTrackerPlayer02 {
 
     // -----------------------------------------------------------------------
     // Amiga hardware constants
@@ -38,6 +38,111 @@ public class ProTrackerPlayerOld {
     public static double periodToHz(int period, double amigaClock) {
         if (period <= 0) return 0.0;
         return amigaClock / period;
+    }
+
+    /**
+     * ProTracker finetune period table.
+     *
+     * ProTracker does NOT apply finetune with floating-point math — it looks up
+     * the pre-tuned period from this table, exactly as the original source does.
+     *
+     * Layout: FINETUNE_PERIODS[fineTune+8][note]
+     *   fineTune : -8..+7  → index 0..15   (stored nibble in .mod: 0..15, sign-extended: >7 → -16+v)
+     *   note     : 0..35   (3 octaves: C-1..B-3, the range ProTracker supports)
+     *
+     * Row  0 = finetune -8
+     * Row  8 = finetune  0  (no detuning)
+     * Row 15 = finetune +7
+     *
+     * Source: ProTracker 2.3D source, mt_PeriodTable
+     */
+    public static final int[][] FINETUNE_PERIODS = {
+        // finetune -8
+        { 907,856,808,762,720,678,640,604,570,538,508,480,
+          453,428,404,381,360,339,320,302,285,269,254,240,
+          226,214,202,190,180,170,160,151,143,135,127,120 },
+        // finetune -7
+        { 900,850,802,757,715,675,636,601,567,535,505,477,
+          450,425,401,379,357,337,318,300,284,268,253,238,
+          225,212,200,189,179,169,159,150,142,134,126,119 },
+        // finetune -6
+        { 894,844,796,752,709,670,632,597,563,532,502,474,
+          447,422,398,376,355,335,316,298,282,266,251,237,
+          223,211,199,188,177,167,158,149,141,133,125,118 },
+        // finetune -5
+        { 887,838,791,746,704,665,628,592,559,528,498,470,
+          444,419,395,373,352,332,314,296,280,264,249,235,
+          222,209,198,187,176,166,157,148,140,132,125,118 },
+        // finetune -4
+        { 881,832,785,741,699,660,623,588,555,524,494,467,
+          441,416,392,370,350,330,312,294,278,262,247,233,
+          220,208,196,185,175,165,156,147,139,131,123,117 },
+        // finetune -3
+        { 875,826,779,736,694,655,619,584,551,520,491,463,
+          437,413,390,368,347,328,309,292,276,260,245,232,
+          219,206,195,184,174,164,155,146,138,130,123,116 },
+        // finetune -2
+        { 868,820,774,730,689,651,614,580,547,516,487,460,
+          434,410,387,365,345,325,307,290,274,258,244,230,
+          217,205,193,183,172,163,154,145,137,129,122,115 },
+        // finetune -1
+        { 862,814,768,725,684,646,610,575,543,513,484,457,
+          431,407,384,363,342,323,305,288,272,256,242,228,
+          216,204,192,181,171,161,152,144,136,128,121,114 },
+        // finetune  0  (no detuning — the "normal" row)
+        { 856,808,762,720,678,640,604,570,538,508,480,453,
+          428,404,381,360,339,320,302,285,269,254,240,226,
+          214,202,190,180,170,160,151,143,135,127,120,113 },
+        // finetune +1
+        { 850,802,757,715,674,637,601,567,535,505,477,450,
+          425,401,379,357,337,318,300,284,268,253,238,225,
+          212,200,189,179,169,159,150,142,134,126,119,113 },
+        // finetune +2
+        { 844,796,752,709,670,632,597,563,532,502,474,447,
+          422,398,376,355,335,316,298,282,266,251,237,224,
+          211,199,188,177,167,158,149,141,133,125,118,112 },
+        // finetune +3
+        { 838,791,746,704,665,628,592,559,528,498,470,444,
+          419,395,373,352,332,314,296,280,264,249,235,222,
+          209,198,187,176,166,157,148,140,132,125,118,111 },
+        // finetune +4
+        { 832,785,741,699,660,623,588,555,524,494,467,441,
+          416,392,370,350,330,312,294,278,262,247,233,220,
+          208,196,185,175,165,156,147,139,131,123,117,110 },
+        // finetune +5
+        { 826,779,736,694,655,619,584,551,520,491,463,437,
+          413,390,368,347,328,309,292,276,260,245,232,219,
+          206,195,184,174,164,155,146,138,130,123,116,110 },
+        // finetune +6
+        { 820,774,730,689,651,614,580,547,516,487,460,434,
+          410,387,365,345,325,307,290,274,258,244,230,217,
+          205,193,183,172,163,154,145,137,129,122,115,109 },
+        // finetune +7
+        { 814,768,725,684,646,610,575,543,513,484,457,431,
+          407,384,363,342,323,305,288,272,256,242,228,216,
+          204,192,181,171,161,152,144,136,128,121,114,108 },
+    };
+
+    /**
+     * Look up the finetune-adjusted period for a given raw note period.
+     *
+     * ProTracker matches the raw period against the finetune-0 row to find the
+     * note index, then returns the value from the correct finetune row.
+     *
+     * @param rawPeriod  period value from the pattern data
+     * @param fineTune   -8..+7
+     * @return           finetune-adjusted period, or rawPeriod if not found
+     */
+    public static int applyFineTune(int rawPeriod, int fineTune) {
+        if (rawPeriod <= 0) return rawPeriod;
+        int[] baseRow = FINETUNE_PERIODS[8];   // finetune 0
+        for (int n = 0; n < baseRow.length; n++) {
+            if (baseRow[n] == rawPeriod) {
+                int ftIndex = fineTune + 8;    // -8..+7 → 0..15
+                return FINETUNE_PERIODS[ftIndex][n];
+            }
+        }
+        return rawPeriod;  // non-standard period: leave as-is
     }
 
     // -----------------------------------------------------------------------
@@ -113,9 +218,15 @@ public class ProTrackerPlayerOld {
         void trigger(Sample s, int period, double amigaClock, int outputRate) {
             this.sample    = s;
             this.volume    = s != null ? s.volume : 0;
-            this.period    = period;
             this.samplePos = 0.0;
-            updateIncrement(period, amigaClock, outputRate);
+            // Apply sample finetune: look up the detuned period from the table.
+            // fineTune is stored as 0..15 in the .mod nibble; values >7 mean negative
+            // (-8..-1), so the Sample loader must sign-extend: v > 7 ? v - 16 : v
+            int tunedPeriod = (s != null && s.fineTune != 0)
+                ? applyFineTune(period, s.fineTune)
+                : period;
+            this.period = tunedPeriod;
+            updateIncrement(tunedPeriod, amigaClock, outputRate);
         }
 
         void updateIncrement(int period, double amigaClock, int outputRate) {
@@ -171,7 +282,7 @@ public class ProTrackerPlayerOld {
 
         // Global timing
         int  speed      = 6;    // ticks per row (Fxx effect with x<=1F)
-        int  bpm        = 125;  // beats per minute (Fxx effect with x>=20)
+        int tempo = 125;  // beats per minute (Fxx effect with x>=20)
 
         Channel[] channels = new Channel[4];
 
@@ -199,7 +310,7 @@ public class ProTrackerPlayerOld {
             int         outputRate,
             double      amigaClock)
     {
-        int sampTick = samplesPerTick(state.bpm, outputRate);
+        int sampTick = samplesPerTick(state.tempo, outputRate);
         int samplesLeftInTick = sampTick - (state.tick * sampTick); // simplified start offset
         // In a real implementation you'd persist "samplesRemainingInTick" across calls.
 
@@ -339,7 +450,7 @@ public class ProTrackerPlayerOld {
         if (param < 0x20)
             st.speed = param;             // 1..31  → ticks per row
         else
-            st.bpm   = param;             // 32..255 → BPM
+            st.tempo = param;             // 32..255 → BPM
     }
 
     private static void handlePatternBreak(PlayerState st, int param) {
@@ -424,11 +535,11 @@ public class ProTrackerPlayerOld {
 
         System.out.printf("Output rate : %d Hz%n", OUTPUT_RATE);
         System.out.printf("Amiga clock : %.0f Hz (PAL)%n", AMIGA_CLOCK);
-        System.out.printf("BPM         : %d%n", state.bpm);
+        System.out.printf("BPM         : %d%n", state.tempo);
         System.out.printf("Speed       : %d ticks/row%n", state.speed);
         System.out.printf("Tick length : %d samples  (%.2f ms)%n",
-            samplesPerTick(state.bpm, OUTPUT_RATE),
-            samplesPerTick(state.bpm, OUTPUT_RATE) * 1000.0 / OUTPUT_RATE);
+            samplesPerTick(state.tempo, OUTPUT_RATE),
+            samplesPerTick(state.tempo, OUTPUT_RATE) * 1000.0 / OUTPUT_RATE);
         System.out.printf("Period 440Hz: %d  → %.2f Hz%n",
             period440, periodToHz(period440, AMIGA_CLOCK));
 

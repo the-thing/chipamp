@@ -17,7 +17,7 @@ import java.util.Arrays;
  * Mixing is done in software at that rate; period→frequency conversion uses
  * the real Amiga clock so pitch is always correct regardless of output rate.
  */
-public class ProTrackerPlayer {
+public class ProTrackerPlayer03 {
 
     // -----------------------------------------------------------------------
     // Amiga hardware constants
@@ -162,8 +162,49 @@ public class ProTrackerPlayer {
      *
      * At BPM=125, outputRate=44100:  44100 * 2.5 / 125 = 882 samples/tick  ✓
      */
+    /**
+     * Exact samples-per-tick as a rational number numerator/denominator.
+     * Use samplesPerTickAccurate() with a running accumulator to avoid drift.
+     *
+     * Exact value = outputRate * 2_500_000 / (BPM * 1_000_000)
+     *             = outputRate * 5 / (BPM * 2)
+     *
+     * E.g. BPM=125, rate=44100: 44100*5 / 250 = 220500/250 = 882.0 exactly — lucky!
+     * But BPM=120, rate=44100: 44100*5 / 240 = 220500/240 = 918.75 — fractional.
+     * Rounding 918.75 to 919 every tick = +0.25 sample/tick error → song runs 0.027% slow.
+     * Over a 3-minute song at speed=6: ~3500 rows * 6 ticks = 21000 ticks * 0.25 = 5250
+     * extra samples = ~119 ms. Fine for most songs, but some trackers are more sensitive.
+     *
+     * The CIA-accurate fix: keep a sub-sample accumulator and alternate floor/ceil.
+     */
     public static int samplesPerTick(int bpm, int outputRate) {
+        // Kept for simple cases and effect-tick recompute where BPM just changed.
+        // For the main loop use nextTickSamples() with the state accumulator.
         return (int) Math.round((double) outputRate * 2_500_000.0 / (bpm * 1_000_000.0));
+    }
+
+    /**
+     * Return the integer sample count for this tick and advance the sub-sample
+     * accumulator stored in PlayerState.  This is the Bresenham / DDA approach:
+     * we keep the fractional remainder and add it each tick, emitting an extra
+     * sample whenever it overflows 1.0 — exactly like the CIA timer counts.
+     *
+     * tickNumerator   = outputRate * 5
+     * tickDenominator = BPM * 2
+     * (derived from: outputRate * 2_500_000 / (BPM * 1_000_000) = outputRate*5/(BPM*2))
+     */
+    public static int nextTickSamples(PlayerState state, int outputRate) {
+        // Recompute exact rational each time in case BPM changed this tick
+        long num = (long) outputRate * 5;
+        long den = (long) state.bpm * 2;
+        long whole = num / den;
+        // accumulator tracks fractional remainder * den to stay in integer arithmetic
+        state.tickFracAccum += (num % den);
+        if (state.tickFracAccum >= den) {
+            state.tickFracAccum -= den;
+            whole++;
+        }
+        return (int) whole;
     }
 
     // -----------------------------------------------------------------------
@@ -282,9 +323,23 @@ public class ProTrackerPlayer {
 
         // Global timing
         int  speed      = 6;    // ticks per row (Fxx effect with x<=1F)
-        int tempo = 125;  // beats per minute (Fxx effect with x>=20)
+        int  bpm        = 125;  // beats per minute (Fxx effect with x>=20)
 
         Channel[] channels = new Channel[4];
+
+        // Persisted across renderAudio() calls — how many output samples remain
+        // in the current tick. Must survive buffer boundaries or timing drifts.
+        int  samplesRemainingInTick = 0;
+        // Sub-sample accumulator for drift-free tick timing (Bresenham DDA).
+        // Stores the fractional remainder * denominator in integer form.
+        long tickFracAccum = 0;
+
+        // Deferred jump state — set during processRow(), applied in advanceRow().
+        // ProTracker processes Bxx then Dxx; Dxx overrides the order increment from Bxx.
+        boolean jumpPending      = false;  // Bxx position jump pending
+        int     jumpOrder        = 0;
+        boolean breakPending     = false;  // Dxx pattern break pending
+        int     breakRow         = 0;
 
         PlayerState() {
             for (int i = 0; i < 4; i++) channels[i] = new Channel();
@@ -310,22 +365,26 @@ public class ProTrackerPlayer {
             int         outputRate,
             double      amigaClock)
     {
-        int sampTick = samplesPerTick(state.tempo, outputRate);
-        int samplesLeftInTick = sampTick - (state.tick * sampTick); // simplified start offset
-        // In a real implementation you'd persist "samplesRemainingInTick" across calls.
+        // samplesRemainingInTick is persisted in state across buffer calls.
+        // Initialise on very first call (tick==0, remaining==0).
+        if (state.samplesRemainingInTick <= 0) {
+            // Very first call: prime the counter so the main loop fires tick 0
+            // immediately on the first iteration without a special case.
+            state.samplesRemainingInTick = 1;
+        }
 
         int frameIdx = 0;
 
         while (frameIdx < numFrames) {
 
             // --- Process row/tick events if we're at a tick boundary ---
-            if (samplesLeftInTick <= 0) {
+            if (state.samplesRemainingInTick <= 0) {
 
                 if (state.tick == 0) {
-                    // --- Row trigger: read notes from the current pattern row ---
+                    // Tick 0: read notes from the current pattern row
                     processRow(state, amigaClock, outputRate);
                 } else {
-                    // --- Intra-row ticks: apply effects that run every tick ---
+                    // Ticks 1..speed-1: run per-tick effects only
                     processEffectTicks(state, amigaClock, outputRate);
                 }
 
@@ -335,11 +394,13 @@ public class ProTrackerPlayer {
                     advanceRow(state);
                 }
 
-                samplesLeftInTick = sampTick;
+                // Recompute tick length — BPM may have changed via Fxx.
+                // nextTickSamples() advances the sub-sample accumulator to avoid drift.
+                state.samplesRemainingInTick = nextTickSamples(state, outputRate);
             }
 
-            // --- Mix up to samplesLeftInTick frames (or buffer end) ---
-            int toMix = Math.min(samplesLeftInTick, numFrames - frameIdx);
+            // --- Mix up to samplesRemainingInTick frames (or buffer end) ---
+            int toMix = Math.min(state.samplesRemainingInTick, numFrames - frameIdx);
 
             for (int s = 0; s < toMix; s++) {
                 float left  = 0f;
@@ -356,8 +417,8 @@ public class ProTrackerPlayer {
                 outBuffer[(frameIdx + s) * 2 + 1] = clamp(right * 0.5f);
             }
 
-            frameIdx           += toMix;
-            samplesLeftInTick  -= toMix;
+            frameIdx                       += toMix;
+            state.samplesRemainingInTick -= toMix;
         }
     }
 
@@ -450,30 +511,52 @@ public class ProTrackerPlayer {
         if (param < 0x20)
             st.speed = param;             // 1..31  → ticks per row
         else
-            st.tempo = param;             // 32..255 → BPM
+            st.bpm   = param;             // 32..255 → BPM
     }
 
     private static void handlePatternBreak(PlayerState st, int param) {
-        // BCD-encoded row:  high nibble*10 + low nibble
+        // BCD-encoded row: high nibble*10 + low nibble
         int targetRow = ((param >> 4) * 10) + (param & 0xF);
-        st.orderPos   = Math.min(st.orderPos + 1, st.songLength - 1);
-        st.patternRow = Math.min(targetRow, 63);
-        st.tick       = st.speed;         // force row advance skip
+        st.breakPending = true;
+        st.breakRow     = Math.min(targetRow, 63);
+        // Note: do NOT touch st.tick here — advanceRow() will handle the jump
+        // at the natural end of the row (after all speed ticks are consumed).
     }
 
     private static void handlePositionJump(PlayerState st, int param) {
-        st.orderPos   = Math.min(param, st.songLength - 1);
-        st.patternRow = 0;
-        st.tick       = st.speed;
+        st.jumpPending = true;
+        st.jumpOrder   = Math.min(param, st.songLength - 1);
+        // Dxx on the same row will override the order target set here.
     }
 
     private static void advanceRow(PlayerState st) {
-        st.patternRow++;
-        if (st.patternRow >= 64) {
-            st.patternRow = 0;
-            st.orderPos++;
-            if (st.orderPos >= st.songLength)
-                st.orderPos = 0;   // loop song
+        if (st.jumpPending || st.breakPending) {
+            // Resolve Bxx + Dxx interaction (ProTracker rule):
+            //   Bxx alone  → jump to order jumpOrder, row 0
+            //   Dxx alone  → jump to orderPos+1, row breakRow
+            //   Both       → jump to order jumpOrder, row breakRow
+            if (st.jumpPending && !st.breakPending) {
+                st.orderPos   = st.jumpOrder;
+                st.patternRow = 0;
+            } else if (st.breakPending && !st.jumpPending) {
+                st.orderPos   = Math.min(st.orderPos + 1, st.songLength - 1);
+                st.patternRow = st.breakRow;
+            } else {
+                // Both: Bxx sets order, Dxx sets row
+                st.orderPos   = st.jumpOrder;
+                st.patternRow = st.breakRow;
+            }
+            if (st.orderPos >= st.songLength) st.orderPos = 0;
+            st.jumpPending  = false;
+            st.breakPending = false;
+        } else {
+            st.patternRow++;
+            if (st.patternRow >= 64) {
+                st.patternRow = 0;
+                st.orderPos++;
+                if (st.orderPos >= st.songLength)
+                    st.orderPos = 0;
+            }
         }
     }
 
@@ -535,11 +618,11 @@ public class ProTrackerPlayer {
 
         System.out.printf("Output rate : %d Hz%n", OUTPUT_RATE);
         System.out.printf("Amiga clock : %.0f Hz (PAL)%n", AMIGA_CLOCK);
-        System.out.printf("BPM         : %d%n", state.tempo);
+        System.out.printf("BPM         : %d%n", state.bpm);
         System.out.printf("Speed       : %d ticks/row%n", state.speed);
         System.out.printf("Tick length : %d samples  (%.2f ms)%n",
-            samplesPerTick(state.tempo, OUTPUT_RATE),
-            samplesPerTick(state.tempo, OUTPUT_RATE) * 1000.0 / OUTPUT_RATE);
+            samplesPerTick(state.bpm, OUTPUT_RATE),
+            samplesPerTick(state.bpm, OUTPUT_RATE) * 1000.0 / OUTPUT_RATE);
         System.out.printf("Period 440Hz: %d  → %.2f Hz%n",
             period440, periodToHz(period440, AMIGA_CLOCK));
 
