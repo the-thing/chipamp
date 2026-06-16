@@ -221,12 +221,12 @@ public class ProtoPlayer {
 
             if (sample != null && instrument.period() > 0) {
                 channel.sampleNumber = instrument.sampleNumber();
-                channel.samplePositionDouble = 0.0;
+                channel.samplePosition = 0.0;
                 channel.volume = sample.getVolume();
                 channel.period = instrument.period();
 
                 double noteHz = periodToHz(instrument.period(), clock);
-                channel.sampleIncrementDouble = (rate > 0 && noteHz > 0) ? noteHz / rate : 0;
+                channel.sampleIncrement = (rate > 0 && noteHz > 0) ? noteHz / rate : 0;
             }
 
             if (sample != null) {
@@ -314,7 +314,7 @@ public class ProtoPlayer {
             channel.sampleNumber = previousSampleNumber;
         }
 
-        channel.samplePositionDouble = offset;
+        channel.samplePosition = offset;
     }
 
     /**

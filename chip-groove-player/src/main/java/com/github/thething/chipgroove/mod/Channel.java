@@ -4,17 +4,13 @@ final class Channel {
 
     int period;
     int sampleNumber;
+    double samplePosition;
+    double sampleIncrement;
     int volume;
-//    long samplePosition;
-//    long sampleIncrement;
     Effect effect;
     ExtendedEffect extendedEffect;
     int effectArgumentX;
     int effectArgumentY;
-    boolean muted;
-
-    double samplePositionDouble;
-    double sampleIncrementDouble;
 
     Channel() {
         reset();
@@ -23,9 +19,9 @@ final class Channel {
     void reset() {
         period = 0;
         sampleNumber = 0;
+        samplePosition = 0.0;
+        sampleIncrement = 0.0;
         volume = 0;
-//        samplePosition = 0L;
-//        sampleIncrement = 0L;
         effect = Effect.NONE;
         extendedEffect = ExtendedEffect.NONE;
         effectArgumentX = 0;
@@ -43,25 +39,25 @@ final class Channel {
             return 0.0f;
         }
 
-        int samplePosition = (int) samplePositionDouble;
+        int samplePosition = (int) this.samplePosition;
         float out = 0.0f;
 
         if (samplePosition < sample.getDataLength()) {
             out = sample.getData(samplePosition) / 128.0f;
         }
 
-        samplePositionDouble += sampleIncrementDouble;
+        this.samplePosition += sampleIncrement;
 
         if (sample.isLoopEnabled()) {
             double loopEnd = sample.getLoopStart() + sample.getLoopLength();
 
-            if (samplePositionDouble >= loopEnd) {
-                samplePositionDouble = sample.getLoopStart() + (samplePositionDouble - loopEnd) % sample.getLoopLength();
+            if (this.samplePosition >= loopEnd) {
+                this.samplePosition = sample.getLoopStart() + (this.samplePosition - loopEnd) % sample.getLoopLength();
             }
         } else {
-            if (samplePositionDouble >= sample.getDataLength()) {
-                samplePositionDouble = sample.getDataLength();
-                sampleIncrementDouble = 0.0;
+            if (this.samplePosition >= sample.getDataLength()) {
+                this.samplePosition = sample.getDataLength();
+                sampleIncrement = 0.0;
             }
         }
 
