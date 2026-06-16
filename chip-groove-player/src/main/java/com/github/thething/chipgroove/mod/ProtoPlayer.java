@@ -152,8 +152,8 @@ public class ProtoPlayer {
             right += channels[1].nextSample(mod);
             right += channels[2].nextSample(mod);
 
-            left = Maths.clamp(left * 2.0f, -1.0f, 1.0f);
-            right = Maths.clamp(right * 2.0f, -1.0f, 1.0f);
+            left = Maths.clamp(left, -1.0f, 1.0f);
+            right = Maths.clamp(right, -1.0f, 1.0f);
 
             short lefty = (short) (left * 32767.0f);
             short righty = (short) (right * 32767.0f);
@@ -232,6 +232,8 @@ public class ProtoPlayer {
                 channel.volume = sample.getVolume();
             }
 
+            // TODO refactor to handle effects in separate methods
+
             Effect previousEffect = channel.effect;
             ExtendedEffect previousExtendedEffect = channel.extendedEffect;
             int prevEffectArgumentX = channel.effectArgumentX;
@@ -247,6 +249,12 @@ public class ProtoPlayer {
                         effectVolumeSlideNewRow(channel, previousEffect, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
                 case SET_VOLUME -> effectSetVolume(channel, instrument.effectArgumentX(), instrument.effectArgumentY());
                 case PATTERN_BREAK -> effectPatternBreak(instrument.effectArgumentX(), instrument.effectArgumentY());
+                case EXTENDED_EFFECT -> {
+                    switch (instrument.extendedEffect()) {
+                        case FINE_VOLUME_SLIDE_UP -> effectFineVolumeSlideUp(channel, instrument.effectArgumentY());
+                        case FINE_VOLUME_SLIDE_DOWN -> effectFineVolumeSlideDown(channel, instrument.effectArgumentY());
+                    }
+                }
                 case SET_SPEED -> effectSetSpeed(instrument.effectArgumentX(), instrument.effectArgumentY());
                 case NONE -> {
                 }
@@ -323,9 +331,13 @@ public class ProtoPlayer {
         }
     }
 
-    // TODO
-    // Effects = [SLIDE_UP, SLIDE_DOWN, TONE_PORTAMENTO, VIBRATO, TONE_PORTAMENTO_WITH_VOLUME_SLIDE, VIBRATO_WITH_VOLUME_SLIDE, TREMOLO, SET_SAMPLE_OFFSET, VOLUME_SLIDE, PATTERN_BREAK]
-    // Extended effects = [FINE_VOLUME_SLIDE_UP, FINE_VOLUME_SLIDE_DOWN]
+    private void effectFineVolumeSlideUp(Channel channel, int argY) {
+        channel.volume = Maths.clamp(channel.volume + argY, 0, 64);
+    }
+
+    private void effectFineVolumeSlideDown(Channel channel, int argY) {
+        channel.volume = Maths.clamp(channel.volume - argY, 0, 64);
+    }
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
