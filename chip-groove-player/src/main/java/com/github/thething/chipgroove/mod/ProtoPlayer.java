@@ -129,7 +129,7 @@ public class ProtoPlayer {
 
             if (samplesRemainingInCurrentTick <= 0) {
                 if (tickIndex == 0) {
-                    handleStartRow(mod, clockHz, outputRate);
+                    handleNewRow(mod, clockHz, outputRate);
                 } else {
                     handleMidRow(mod);
                 }
@@ -211,12 +211,13 @@ public class ProtoPlayer {
         }
     }
 
-    private void handleStartRow(Mod mod, double clock, int rate) {
+    private void handleNewRow(Mod mod, double clock, int rate) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             int patternIndex = mod.getPatternIndex(patternSequenceIndex);
             Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
             Channel channel = channels[channelIndex];
             Sample sample = instrument.sampleNumber() > 0 ? mod.getSample(instrument.sampleNumber() - 1) : null;
+            int previousSampleNumber = channel.sampleNumber;
 
             if (sample != null && instrument.period() > 0) {
                 channel.sampleNumber = instrument.sampleNumber();
@@ -246,9 +247,17 @@ public class ProtoPlayer {
 
             switch (instrument.effect()) {
 
+                case ARPEGGIO -> {
+                    //  TODO
+                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                }
+
                 case SLIDE_UP, SLIDE_DOWN -> {
                     // handled mid-row
                 }
+
+                case SET_SAMPLE_OFFSET ->
+                        effectSetSampleOffset(channel, sample, previousSampleNumber, instrument.effectArgumentX(), instrument.effectArgumentY());
 
                 case VOLUME_SLIDE ->
                         effectVolumeSlideNewRow(channel, previousEffect, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
@@ -264,14 +273,9 @@ public class ProtoPlayer {
                     }
                 }
                 case SET_SPEED -> effectSetSpeed(instrument.effectArgumentX(), instrument.effectArgumentY());
+
                 case NONE -> {
-                }
-                default -> {
-                    if (instrument.effect() == Effect.EXTENDED_EFFECT) {
-                        System.out.println("UNKNOWN EFFECT: " + instrument.extendedEffect());
-                    } else {
-                        System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-                    }
+
                 }
             }
         }
@@ -283,6 +287,7 @@ public class ProtoPlayer {
 
             switch (channel.effect) {
                 case SLIDE_UP -> effectSlideUp(channel);
+                case VOLUME_SLIDE -> effectVolumeSlide(channel);
             }
         }
     }
@@ -293,7 +298,23 @@ public class ProtoPlayer {
     }
 
     private void effectSlideDown(Channel channel) {
+        // TODO
+    }
 
+    private void effectSetSampleOffset(Channel channel, Sample sample, int previousSampleNumber, int argX, int argY) {
+        int offset = ((argX << 4) | argY) * 256;
+        int wordOffset = argX * 4096 + argY * 256;
+
+        System.out.println("SET SAMPLE OFFSET " + offset + " / " + wordOffset + " / " + sample.getDataLength());
+        // System.out.println("Sample: " + sample.ge);
+
+        if (sample == null) {
+            // if sample was not provided retrigger last sample
+            System.out.println("Retrigger last sample");
+            channel.sampleNumber = previousSampleNumber;
+        }
+
+        channel.samplePositionDouble = offset;
     }
 
     /**
@@ -358,7 +379,7 @@ public class ProtoPlayer {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
 
         System.out.println("length " + mod.getLength() + " / " + mod.getPatternSequenceCount());
 
@@ -373,6 +394,6 @@ public class ProtoPlayer {
         buffer.get(audio);
 
         AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, DEFAULT_OUTPUT_RATE, 16, 2, 4, DEFAULT_OUTPUT_RATE, false);
-        Resources.saveAudio(new File("axel.wav"), format, audio);
+        Resources.saveAudio(new File("nearly.wav"), format, audio);
     }
 }

@@ -80,6 +80,7 @@ public final class Formatters {
         return out.toString();
     }
 
+    // TODO add new column for volume and compare with MPT
     public static void formatPattern(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
         int offset = patternIndex * Mod.ROW_COUNT + rowIndex;
 

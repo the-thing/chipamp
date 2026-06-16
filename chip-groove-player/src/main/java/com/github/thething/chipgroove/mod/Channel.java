@@ -5,8 +5,8 @@ final class Channel {
     int period;
     int sampleNumber;
     int volume;
-    long samplePosition;
-    long sampleIncrement;
+//    long samplePosition;
+//    long sampleIncrement;
     Effect effect;
     ExtendedEffect extendedEffect;
     int effectArgumentX;
@@ -24,8 +24,8 @@ final class Channel {
         period = 0;
         sampleNumber = 0;
         volume = 0;
-        samplePosition = 0L;
-        sampleIncrement = 0L;
+//        samplePosition = 0L;
+//        sampleIncrement = 0L;
         effect = Effect.NONE;
         extendedEffect = ExtendedEffect.NONE;
         effectArgumentX = 0;
@@ -65,6 +65,6 @@ final class Channel {
             }
         }
 
-        return out * (volume / 64f);
+        return out * (volume / 64.0f);
     }
 }
