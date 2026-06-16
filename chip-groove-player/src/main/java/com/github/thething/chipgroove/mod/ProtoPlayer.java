@@ -245,10 +245,18 @@ public class ProtoPlayer {
             channel.effectArgumentY = instrument.effectArgumentY();
 
             switch (instrument.effect()) {
+
+                case SLIDE_UP, SLIDE_DOWN -> {
+                    // handled mid-row
+                }
+
                 case VOLUME_SLIDE ->
                         effectVolumeSlideNewRow(channel, previousEffect, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
+
                 case SET_VOLUME -> effectSetVolume(channel, instrument.effectArgumentX(), instrument.effectArgumentY());
+
                 case PATTERN_BREAK -> effectPatternBreak(instrument.effectArgumentX(), instrument.effectArgumentY());
+
                 case EXTENDED_EFFECT -> {
                     switch (instrument.extendedEffect()) {
                         case FINE_VOLUME_SLIDE_UP -> effectFineVolumeSlideUp(channel, instrument.effectArgumentY());
@@ -274,9 +282,18 @@ public class ProtoPlayer {
             Channel channel = channels[channelIndex];
 
             switch (channel.effect) {
-                case VOLUME_SLIDE -> effectVolumeSlide(channel);
+                case SLIDE_UP -> effectSlideUp(channel);
             }
         }
+    }
+
+    private void effectSlideUp(Channel channel) {
+        int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
+        channel.period = Maths.clamp(channel.period - adjustment, 57, 1712);
+    }
+
+    private void effectSlideDown(Channel channel) {
+
     }
 
     /**
