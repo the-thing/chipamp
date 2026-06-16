@@ -12,7 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class ProtoPlayer {
+public final class Player {
 
     private static final int CHANNEL_COUNT = 8;
     private static final int PAL_CLOCK_HZ = 3_546_895;
@@ -42,7 +42,7 @@ public class ProtoPlayer {
 
     private int outputRate;
 
-    public ProtoPlayer() {
+    public Player() {
         this.channels = new Channel[CHANNEL_COUNT];
 
         for (int i = 0; i < CHANNEL_COUNT; i++) {
@@ -256,27 +256,60 @@ public class ProtoPlayer {
                     // handled mid-row
                 }
 
+                case TONE_PORTAMENTO -> {
+                    // TODO
+                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                }
+
+                case VIBRATO -> {
+                    // TODO
+                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                }
+
+                case TONE_PORTAMENTO_WITH_VOLUME_SLIDE -> {
+                    // TODO
+                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                }
+
+                case VIBRATO_WITH_VOLUME_SLIDE -> {
+                    // TODO
+                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                }
+
+                case TREMOLO -> {
+                    // TODO
+                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                }
+
+                case SET_PANNING_POSITION -> {
+                    // TODO
+                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                }
+
                 case SET_SAMPLE_OFFSET ->
                         effectSetSampleOffset(channel, sample, previousSampleNumber, instrument.effectArgumentX(), instrument.effectArgumentY());
 
                 case VOLUME_SLIDE ->
                         effectVolumeSlideNewRow(channel, previousEffect, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
 
+                case POSITION_JUMP -> {
+                    // TODO
+                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                }
+
                 case SET_VOLUME -> effectSetVolume(channel, instrument.effectArgumentX(), instrument.effectArgumentY());
 
                 case PATTERN_BREAK -> effectPatternBreak(instrument.effectArgumentX(), instrument.effectArgumentY());
 
                 case EXTENDED_EFFECT -> {
+                    // TODO extract
                     switch (instrument.extendedEffect()) {
                         case FINE_VOLUME_SLIDE_UP -> effectFineVolumeSlideUp(channel, instrument.effectArgumentY());
                         case FINE_VOLUME_SLIDE_DOWN -> effectFineVolumeSlideDown(channel, instrument.effectArgumentY());
                     }
                 }
+
                 case SET_SPEED -> effectSetSpeed(instrument.effectArgumentX(), instrument.effectArgumentY());
-
-                case NONE -> {
-
-                }
             }
         }
     }
@@ -312,6 +345,7 @@ public class ProtoPlayer {
             // if sample was not provided retrigger last sample
             System.out.println("Retrigger last sample");
             channel.sampleNumber = previousSampleNumber;
+            // TOOD we probably need to set offset and increment
         }
 
         channel.samplePosition = offset;
@@ -385,7 +419,7 @@ public class ProtoPlayer {
 
         ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024 * 1024);
 
-        ProtoPlayer player = new ProtoPlayer();
+        Player player = new Player();
         player.play(mod, buffer);
 
         buffer.flip();
