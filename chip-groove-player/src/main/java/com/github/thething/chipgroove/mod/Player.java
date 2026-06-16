@@ -15,8 +15,9 @@ import java.nio.ByteBuffer;
 public final class Player {
 
     private static final int CHANNEL_COUNT = 8;
-    private static final int PAL_CLOCK_HZ = 3_546_895;
-    private static final int NTSC_CLOCK_HZ = 3_579_545;
+
+    public static final int PAL_CLOCK_HZ = 3_546_895;
+    public static final int NTSC_CLOCK_HZ = 3_579_545;
 
     private static final int DEFAULT_SPEED = 6;
     private static final int DEFAULT_TEMPO = 126;
