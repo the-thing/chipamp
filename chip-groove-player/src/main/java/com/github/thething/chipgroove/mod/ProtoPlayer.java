@@ -24,18 +24,23 @@ public class ProtoPlayer {
 
     private final Channel[] channels;
 
-    private int clock;
+    private int clockHz;
     private int speed; // ticks per row
     private int tempo; // beats per minute
     private int samplesPerTick;
-    private int samplesLeftInTick;
+    private int samplesRemainingInCurrentTick;
+    private long tickFracAccum;
+
+    private boolean jumpPending = false;
+    private int jumpOrder = 0;
+    private boolean breakPending = false;
+    private int breakRow = 0;
 
     private int patternSequenceIndex;
     private int rowIndex;
     private int tickIndex;
 
     private int outputRate;
-    private boolean stereo;
 
     public ProtoPlayer() {
         this.channels = new Channel[CHANNEL_COUNT];
@@ -46,7 +51,7 @@ public class ProtoPlayer {
 
         speed = DEFAULT_SPEED;
         tempo = DEFAULT_TEMPO;
-        clock = PAL_CLOCK_HZ;
+        clockHz = PAL_CLOCK_HZ;
         outputRate = DEFAULT_OUTPUT_RATE;
     }
 
@@ -69,12 +74,30 @@ public class ProtoPlayer {
         return (int) Math.round((double) outputRate * 2_500_000.0 / (tempo * 1_000_000.0));
     }
 
+    public int nextTickSamples(int tempo, int outputRate) {
+        // Recompute exact rational each time in case BPM changed this tick
+        long num = (long) outputRate * 5;
+        long den = (long) tempo * 2;
+        long whole = num / den;
+
+        // accumulator tracks fractional remainder * den to stay in integer arithmetic
+
+        tickFracAccum += (num % den);
+
+        if (tickFracAccum >= den) {
+            tickFracAccum -= den;
+            whole++;
+        }
+
+        return (int) whole;
+    }
+
     /**
-     * Convert an Amiga period value to a playback frequency (Hz).
+     * Convert a period value to a playback frequency (Hz).
      * <p>
-     * frequency = amigaClock / period
+     * frequency = clock / period
      * <p>
-     * Period 428 → middle C (C-3) ≈ 8287 Hz on PAL. The mixer then re-samples this to whatever output rate you have
+     * Period 428 → middle C (C-3) = 8287 Hz on PAL. The mixer then re-samples this to whatever output rate you have
      * chosen.
      */
     public static double periodToHz(int period, double clock) {
@@ -98,35 +121,25 @@ public class ProtoPlayer {
         line.start();
 
         samplesPerTick = samplesPerTick(tempo, outputRate);
-        samplesLeftInTick = samplesPerTick;
+        samplesRemainingInCurrentTick = samplesPerTick;
 
         while (patternSequenceIndex < mod.getLength()) {
 
-            if (samplesLeftInTick <= 0) {
+            if (samplesRemainingInCurrentTick <= 0) {
                 if (tickIndex == 0) {
-                    processNewRow(mod, clock, outputRate);
+                    processNewRow(mod, clockHz, outputRate);
                 } else {
-                    processTick();
+                    // TODO mid row effects
                 }
 
                 tickIndex++;
 
                 if (tickIndex >= speed) {
                     tickIndex = 0;
-                    rowIndex++;
-
-                    if (rowIndex >= 64) {
-                        rowIndex = 0;
-                        patternSequenceIndex++;
-
-                        if (patternSequenceIndex < mod.getLength()) {
-                            int patternIndex = mod.getPatternIndex(patternSequenceIndex);
-                            System.out.println("new pattern: " + patternIndex);
-                        }
-                    }
+                    advanceRow(mod.getLength());
                 }
 
-                samplesLeftInTick = samplesPerTick;
+                samplesRemainingInCurrentTick = samplesPerTick;
             }
 
             float left = 0.0f;
@@ -154,13 +167,52 @@ public class ProtoPlayer {
             buffer.put(data[2]);
             buffer.put(data[3]);
 
-            // line.write(data, 0, 4);
+            line.write(data, 0, 4);
 
-            samplesLeftInTick--;
+            samplesRemainingInCurrentTick--;
         }
 
         line.drain();
         line.close();
+    }
+
+    private void advanceRow(int modLength) {
+        if (jumpPending || breakPending) {
+            // Resolve Bxx + Dxx interaction (ProTracker rule):
+            // Bxx alone  → jump to order jumpOrder, row 0
+            // Dxx alone  → jump to orderPos+1, row breakRow
+            // Both       → jump to order jumpOrder, row breakRow
+
+            if (jumpPending && !breakPending) {
+                patternSequenceIndex = jumpOrder;
+                rowIndex = 0;
+            } else if (breakPending && !jumpPending) {
+                patternSequenceIndex = Math.min(patternSequenceIndex + 1, modLength - 1);
+                rowIndex = breakRow;
+            } else {
+                // Both: Bxx sets order, Dxx sets row
+                patternSequenceIndex = jumpOrder;
+                rowIndex = breakRow;
+            }
+
+            if (patternSequenceIndex >= modLength) {
+                patternSequenceIndex = 0;
+            }
+
+            jumpPending = false;
+            breakPending = false;
+        } else {
+            rowIndex++;
+
+            if (rowIndex >= 64) {
+                rowIndex = 0;
+                patternSequenceIndex++;
+
+                if (patternSequenceIndex >= modLength) {
+                    patternSequenceIndex = 0;
+                }
+            }
+        }
     }
 
     private void processNewRow(Mod mod, double clock, int rate) {
@@ -184,13 +236,21 @@ public class ProtoPlayer {
                 channel.volume = sample.getVolume();
             }
 
-            // TODO process some effects
             switch (instrument.effect()) {
+                case SET_VOLUME -> effectSetVolume(channel, instrument.effectArgumentX(), instrument.effectArgumentY());
                 case SET_SPEED -> effectSetSpeed(instrument.effectArgumentX(), instrument.effectArgumentY());
             }
         }
     }
 
+    private void effectSetVolume(Channel channel, int argX, int argY) {
+        int arg = (argX << 4) | argY;
+        arg = Math.min(64, arg);
+        System.out.println("SET VOLUME " + arg);
+        channel.volume = arg;
+    }
+
+    // TODO speed at zero should probably stop playing
     private void effectSetSpeed(int argX, int argY) {
         int arg = (argX << 4) | argY;
 
@@ -204,14 +264,13 @@ public class ProtoPlayer {
         }
     }
 
-    private void processTick() {
-    }
+    // TODO
+    // Effects = [SLIDE_UP, SLIDE_DOWN, TONE_PORTAMENTO, VIBRATO, TONE_PORTAMENTO_WITH_VOLUME_SLIDE, VIBRATO_WITH_VOLUME_SLIDE, TREMOLO, SET_SAMPLE_OFFSET, VOLUME_SLIDE, PATTERN_BREAK]
+    // Extended effects = [FINE_VOLUME_SLIDE_UP, FINE_VOLUME_SLIDE_DOWN]
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
-
-        System.out.println("Mod length = " + mod.getLength());
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
         ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024 * 1024);
 
@@ -224,6 +283,6 @@ public class ProtoPlayer {
         buffer.get(audio);
 
         AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, DEFAULT_OUTPUT_RATE, 16, 2, 4, DEFAULT_OUTPUT_RATE, false);
-        Resources.saveAudio(new File("nearly there.wav"), format, audio);
+        Resources.saveAudio(new File("axel.wav"), format, audio);
     }
 }

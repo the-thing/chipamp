@@ -173,10 +173,6 @@ public final class ModLoader {
             }
         }
 
-        if (effect != Effect.NONE) {
-            System.out.println("Effect = " + effect + ", extendedEffect = " + extendedEffect);
-        }
-
         return new Instrument(sampleNumber, period, effect, extendedEffect, effectArgumentX, effectArgumentY);
     }
 
