@@ -7,10 +7,13 @@ final class Channel {
     double samplePosition;
     double sampleIncrement;
     int volume;
+
     Effect effect;
     ExtendedEffect extendedEffect;
     int effectArgumentX;
     int effectArgumentY;
+
+    int maxPeriod;
 
     Channel() {
         reset();
@@ -26,6 +29,7 @@ final class Channel {
         extendedEffect = ExtendedEffect.NONE;
         effectArgumentX = 0;
         effectArgumentY = 0;
+        maxPeriod = 0;
     }
 
     float nextSample(Mod mod) {

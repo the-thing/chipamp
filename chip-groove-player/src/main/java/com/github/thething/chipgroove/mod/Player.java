@@ -223,12 +223,15 @@ public final class Player {
 
             if (sample != null && instrument.period() > 0) {
                 channel.sampleNumber = instrument.sampleNumber();
-                channel.samplePosition = 0.0;
                 channel.volume = sample.getVolume();
-                channel.period = instrument.period();
 
-                double noteHz = periodToHz(instrument.period(), clockHz);
-                channel.sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
+                // TODO write comment
+                if (instrument.effect() != Effect.TONE_PORTAMENTO) {
+                    channel.samplePosition = 0.0;
+                    channel.period = instrument.period();
+                    double noteHz = periodToHz(instrument.period(), clockHz);
+                    channel.sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
+                }
             }
 
             if (sample != null) {
@@ -260,10 +263,7 @@ public final class Player {
                 // handled mid-row
             }
 
-            case TONE_PORTAMENTO -> {
-                // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-            }
+            case TONE_PORTAMENTO -> effectTonePortamentoNewRow(channel, instrument);
 
             case VIBRATO -> {
                 // TODO
@@ -395,18 +395,39 @@ public final class Player {
 
             switch (channel.effect) {
                 case SLIDE_UP -> effectSlideUp(channel);
+                case SLIDE_DOWN -> effectSlideDown(channel);
+                case TONE_PORTAMENTO -> effectTonePortamento(channel);
                 case VOLUME_SLIDE -> effectVolumeSlide(channel);
             }
         }
     }
 
+    // TODO min / max might be configurable
     private void effectSlideUp(Channel channel) {
         int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        channel.period = Maths.clamp(channel.period - adjustment, 57, 1712);
+        channel.period = Maths.clamp(channel.period - adjustment, 113, 856);
     }
 
+    // TODO min / max might be configurable
     private void effectSlideDown(Channel channel) {
-        // TODO
+        int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
+        channel.period = Maths.clamp(channel.period + adjustment, 113, 856);
+    }
+
+    private void effectTonePortamentoNewRow(Channel channel, Instrument instrument) {
+        channel.maxPeriod = instrument.period();
+    }
+
+    private void effectTonePortamento(Channel channel) {
+        int periodIncrement = (channel.effectArgumentX << 4) | channel.effectArgumentY;
+        int newPeriod = channel.period + periodIncrement;
+        newPeriod = Maths.clamp(newPeriod, 113, channel.maxPeriod);
+        newPeriod = Maths.clamp(newPeriod, 113, 856);
+
+        channel.period = newPeriod;
+
+        double noteHz = periodToHz(newPeriod, clockHz);
+        channel.sampleIncrement = (outputSamplingRate > 0 && noteHz > 0) ? noteHz / outputSamplingRate : 0;
     }
 
     /**
