@@ -633,6 +633,5 @@ public final class Player {
         System.out.println(readCount);
 
         Resources.saveAudio(new File("axel.wav"), format, buffer, 0, readCount);
-
     }
 }
