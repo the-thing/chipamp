@@ -61,7 +61,7 @@ public final class Resources {
     public static void saveAudio(File file, AudioFormat format, byte[] audio, int offset, int length) throws IOException {
         checkFromIndexSize(offset, length, audio.length);
 
-        try (AudioInputStream in = new AudioInputStream(new ByteArrayInputStream(audio), format, audio.length)) {
+        try (AudioInputStream in = new AudioInputStream(new ByteArrayInputStream(audio, offset, length), format, length)) {
             AudioSystem.write(in, AudioFileFormat.Type.WAVE, file);
         }
     }

@@ -93,9 +93,7 @@ public final class Formatters {
         out.append(" |");
 
         out.append(' ');
-        // TODO remove later
-        // out.append(formatHexByte(rowIndex));
-         out.append(rowIndex);
+        out.append(formatHexByte(rowIndex));
         out.append(" |");
 
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {

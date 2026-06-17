@@ -2,12 +2,14 @@ package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.Formatters;
 import com.github.thething.chipgroove.common.Maths;
+import com.github.thething.chipgroove.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -136,20 +138,14 @@ public final class Player {
         changePositionToSequence(sequenceIndex);
     }
 
-    public int getTickByteCount() {
+    public int getBytesPerTick() {
         return outputStereo ? 4 : 2;
     }
 
     public void play() throws LineUnavailableException {
         byte[] buffer = new byte[4];
 
-        // TODO remove
-        System.out.println("Playing...");
-        System.out.println("Speed: " + speed);
-        System.out.println("Tempo: " + tempo);
-
-        AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, outputSamplingRate, 16,
-                outputStereo ? 2 : 1, 4, outputSamplingRate, false);
+        AudioFormat format = getCompatibleAudioFormat();
 
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
         SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
@@ -173,18 +169,18 @@ public final class Player {
     public int read(byte[] output, int offset, int length) {
         checkFromIndexSize(offset, length, output.length);
 
-        int tickByteCount = getTickByteCount();
+        int bytesPerTick = getBytesPerTick();
 
-        if (length < tickByteCount) {
-            throw new IllegalArgumentException("Buffer too small: " + length + " < " + tickByteCount);
+        if (length < bytesPerTick) {
+            throw new IllegalArgumentException("Buffer too small: " + length + " < " + bytesPerTick);
         }
 
         int readCount = 0;
 
-        while (patternSequenceIndex < mod.getLength() && length - offset >= tickByteCount) {
+        while (patternSequenceIndex < mod.getLength() && length - offset >= bytesPerTick) {
             tick(output, offset);
-            readCount += 4;
-            offset += 4;
+            readCount += bytesPerTick;
+            offset += bytesPerTick;
         }
 
         return readCount;
@@ -486,7 +482,6 @@ public final class Player {
         int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
         int newPeriod = Maths.clamp(channel.getPeriod() + adjustment, 113, 856);
         channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
-
     }
 
     private void effectTonePortamentoNewRow(Channel channel, Instrument instrument) {
@@ -607,6 +602,11 @@ public final class Player {
         channels[channelIndex].muted = muted;
     }
 
+    public AudioFormat getCompatibleAudioFormat() {
+        return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, outputSamplingRate, 16,
+                outputStereo ? 2 : 1, 4, outputSamplingRate, false);
+    }
+
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
         Mod mod = modLoader.load("DJ Metune - Axel F.mod");
@@ -614,10 +614,25 @@ public final class Player {
         Player player = new Player();
         player.setMod(mod);
         player.changePositionToPattern(8);
-        player.setMuted(0, true);
-        player.setMuted(1, true);
-        player.setMuted(2, true);
-        player.setMuted(3, false);
+//        player.setMuted(0, true);
+//        player.setMuted(1, true);
+//        player.setMuted(2, true);
+//        player.setMuted(3, false);
         player.play();
+
+        // AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, outputSamplingRate, 16,
+        //                outputStereo ? 2 : 1, 4, outputSamplingRate, false);
+
+        // ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024);
+
+        byte[] buffer = new byte[1024 * 1024 * 1024];
+
+        AudioFormat format = player.getCompatibleAudioFormat();
+        int readCount = player.read(buffer);
+
+        System.out.println(readCount);
+
+        Resources.saveAudio(new File("axel.wav"), format, buffer, 0, readCount);
+
     }
 }
