@@ -5,6 +5,7 @@ import com.github.thething.chipgroove.mod.Mod;
 import com.github.thething.chipgroove.mod.ModTables;
 import com.github.thething.chipgroove.mod.Instrument;
 
+// TODO add new column (sound) for volume and compare with MPT (not sure yet)
 public final class Formatters {
 
     private static final char[] HEX_NIBBLES = new char[]{
@@ -70,18 +71,19 @@ public final class Formatters {
 
     public static void formatPattern(Mod mod, int patternIndex, StringBuilder out) {
         for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-            formatPattern(mod, patternIndex, rowIndex, out);
+            formatRow(mod, patternIndex, rowIndex, out);
+            out.append("\r\n");
         }
     }
 
-    public static String formatPattern(Mod mod, int patternIndex, int rowIndex) {
+    public static String formatRow(Mod mod, int patternIndex, int rowIndex) {
         StringBuilder out = new StringBuilder();
-        formatPattern(mod, patternIndex, rowIndex, out);
+        formatRow(mod, patternIndex, rowIndex, out);
         return out.toString();
     }
 
-    // TODO add new column for volume and compare with MPT
-    public static void formatPattern(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
+
+    public static void formatRow(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
         int offset = patternIndex * Mod.ROW_COUNT + rowIndex;
 
         formatHexInt(offset, out);
@@ -132,8 +134,6 @@ public final class Formatters {
             out.append(effectArgument);
             out.append(" |");
         }
-
-        out.append("\r\n");
     }
 
     public static String formatHexByte(int highNibble, int lowNibble) {

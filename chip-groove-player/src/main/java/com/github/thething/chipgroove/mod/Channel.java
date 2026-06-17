@@ -14,6 +14,11 @@ final class Channel {
     int effectArgumentY;
 
     int maxPeriod;
+    int tremoloPosition;
+    int tremoloSpeed;
+    int tremoloDepth;
+    WaveformType tremoloWaveformType;
+    int volumeBeforeTremolo;
 
     Channel() {
         reset();
@@ -30,6 +35,7 @@ final class Channel {
         effectArgumentX = 0;
         effectArgumentY = 0;
         maxPeriod = 0;
+        tremoloWaveformType = WaveformType.SINE;
     }
 
     float nextSample(Mod mod) {

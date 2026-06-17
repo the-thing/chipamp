@@ -133,7 +133,7 @@ public final class Player {
                 if (tickIndex == 0) {
                     handleNewRow(mod, clockHz, outputSamplingRate);
                 } else {
-                    handleMidRow(mod);
+                    applyMidRowEffects(mod);
                 }
 
                 tickIndex++;
@@ -224,6 +224,7 @@ public final class Player {
             if (sample != null && instrument.period() > 0) {
                 channel.sampleNumber = instrument.sampleNumber();
                 channel.volume = sample.getVolume();
+                channel.tremoloPosition = 0;
 
                 // TODO write comment
                 if (instrument.effect() != Effect.TONE_PORTAMENTO) {
@@ -280,10 +281,7 @@ public final class Player {
                 System.out.println("UNKNOWN EFFECT: " + instrument.effect());
             }
 
-            case TREMOLO -> {
-                // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-            }
+            case TREMOLO -> effectTremoloNewRow(channel);
 
             case SET_PANNING_POSITION -> {
                 // TODO
@@ -389,7 +387,7 @@ public final class Player {
         }
     }
 
-    private void handleMidRow(Mod mod) {
+    private void applyMidRowEffects(Mod mod) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Channel channel = channels[channelIndex];
 
@@ -397,6 +395,7 @@ public final class Player {
                 case SLIDE_UP -> effectSlideUp(channel);
                 case SLIDE_DOWN -> effectSlideDown(channel);
                 case TONE_PORTAMENTO -> effectTonePortamento(channel);
+                case TREMOLO -> effectTremolo(channel);
                 case VOLUME_SLIDE -> effectVolumeSlide(channel);
             }
         }
@@ -430,6 +429,29 @@ public final class Player {
         channel.sampleIncrement = (outputSamplingRate > 0 && noteHz > 0) ? noteHz / outputSamplingRate : 0;
     }
 
+    private static void effectTremoloNewRow(Channel channel) {
+        // use old tremolo speed if not specified
+        if (channel.effectArgumentX != 0) {
+            channel.tremoloSpeed = channel.effectArgumentX;
+        }
+
+        // use old tremolo depth if not specified
+        if (channel.effectArgumentY != 0) {
+            channel.tremoloDepth = channel.effectArgumentY;
+        }
+
+        channel.volumeBeforeTremolo = channel.volume;
+    }
+
+    private static void effectTremolo(Channel channel) {
+        WaveformType tremoloWaveformType = channel.tremoloWaveformType;
+        int waveformValue = ModTables.getWaveformValue(tremoloWaveformType, channel.tremoloPosition);
+        int delta = (channel.tremoloDepth * waveformValue) / 64;
+
+        channel.volume = Maths.clamp(channel.volume + delta, 0, 64);
+        channel.tremoloPosition += channel.tremoloSpeed;
+    }
+
     /**
      * Set sample offset. According to some documents when effect is provided with no sample it is supposed to retrigger
      * last sample.
@@ -455,6 +477,8 @@ public final class Player {
     /**
      * If the current effect is A00 (volume slide with both arguments equal to zero) and the previous effect was a
      * volume slide than inherit arguments from previous slide.
+     *
+     * // TODO find source of this
      */
     private void effectVolumeSlideNewRow(Channel channel, Effect prevEffect, int prevArgX, int prevArgY, int argX, int argY) {
         if (argX == 0 && argY == 0 && prevEffect == Effect.VOLUME_SLIDE) {
@@ -511,8 +535,6 @@ public final class Player {
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
         Mod mod = modLoader.load("DJ Metune - Axel F.mod");
-
-        System.out.println("length " + mod.getLength() + " / " + mod.getPatternSequenceCount());
 
         ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024 * 1024);
 

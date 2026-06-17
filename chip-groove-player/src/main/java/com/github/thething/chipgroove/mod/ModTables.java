@@ -16,6 +16,19 @@ public final class ModTables {
      */
     private static final String[] NOTES = new String[1713];
 
+    /**
+     * ProTracker sine table used by both vibrato and tremolo. 32 entries covering a quarter... actually ProTracker uses
+     * a full 32-step table representing one half cycle 0..255, mirrored for the other half. This is the exact table
+     * from the original source.
+     */
+    // TODO convert to hex
+    public static final int[] SINE_TABLE = {
+            0, 24, 49, 74, 97, 120, 141, 161, 180,
+            197, 212, 224, 235, 244, 250, 253, 255,
+            253, 250, 244, 235, 224, 212, 197, 180,
+            161, 141, 120, 97, 74, 49, 24
+    };
+
     static {
         // C
         NOTES[1712] = "C-0";
@@ -96,5 +109,24 @@ public final class ModTables {
 
     public static String getNote(int period) {
         return NOTES[period];
+    }
+
+    public static int getWaveformValue(WaveformType type, int position) {
+        position = position & 63;
+        int raw = SINE_TABLE[position & 31];
+
+        switch (type) {
+            case SINE -> {
+                return (position < 32) ? raw : -raw;
+            }
+            case SAWTOOTH -> {
+                return (position < 32) ? (255 - position * 8) : -(255 - (position - 32) * 8);
+            }
+            case SQUARE -> {
+                return (position < 32) ? 255 : -255;
+            }
+        }
+
+        return 0;
     }
 }
