@@ -82,7 +82,6 @@ public final class Formatters {
         return out.toString();
     }
 
-
     public static void formatRow(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
         int offset = patternIndex * Mod.ROW_COUNT + rowIndex;
 
@@ -94,7 +93,9 @@ public final class Formatters {
         out.append(" |");
 
         out.append(' ');
-        out.append(formatHexByte(rowIndex));
+        // TODO remove later
+        // out.append(formatHexByte(rowIndex));
+         out.append(rowIndex);
         out.append(" |");
 
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
@@ -159,5 +160,27 @@ public final class Formatters {
 
     public static char getHexCharacter(int value) {
         return HEX_NIBBLES[value & 0x0F];
+    }
+
+    public static String formatEffects(Mod mod, int patternIndex, int rowIndex) {
+        StringBuilder out = new StringBuilder();
+        formatEffects(mod, patternIndex, rowIndex, out);
+        return out.toString();
+    }
+
+    public static void formatEffects(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+
+            if (channelIndex != 0) {
+                out.append(" / ");
+            }
+
+            if (instrument.effect() != Effect.EXTENDED_EFFECT) {
+                out.append(instrument.effect());
+            } else {
+                out.append(instrument.extendedEffect());
+            }
+        }
     }
 }

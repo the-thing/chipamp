@@ -2,11 +2,12 @@ package com.github.thething.chipgroove.mod;
 
 final class Channel {
 
-    int period;
+    private int period;
     int sampleNumber;
     double samplePosition;
     double sampleIncrement;
     int volume;
+    boolean muted;
 
     Effect effect;
     ExtendedEffect extendedEffect;
@@ -18,10 +19,9 @@ final class Channel {
     int tremoloSpeed;
     int tremoloDepth;
     WaveformType tremoloWaveformType;
-    int volumeBeforeTremolo;
+    int tremoloVolume;
 
     Channel() {
-        reset();
     }
 
     void reset() {
@@ -30,12 +30,20 @@ final class Channel {
         samplePosition = 0.0;
         sampleIncrement = 0.0;
         volume = 0;
+        muted = false;
+
         effect = Effect.NONE;
         extendedEffect = ExtendedEffect.NONE;
         effectArgumentX = 0;
         effectArgumentY = 0;
+
         maxPeriod = 0;
+
+        tremoloPosition = 0;
+        tremoloSpeed = 0;
+        tremoloDepth = 0;
         tremoloWaveformType = WaveformType.SINE;
+        tremoloVolume = 0;
     }
 
     float nextSample(Mod mod) {
@@ -72,5 +80,16 @@ final class Channel {
         }
 
         return out * (volume / 64.0f);
+    }
+
+    void updatePeriod(int period, int clockHz, int samplingRate) {
+        this.period = period;
+
+        double noteHz = Mods.periodToHz(period, clockHz);
+        sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
+    }
+
+    public int getPeriod() {
+        return period;
     }
 }

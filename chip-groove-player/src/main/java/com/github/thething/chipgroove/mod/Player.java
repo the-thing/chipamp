@@ -1,30 +1,45 @@
 package com.github.thething.chipgroove.mod;
 
+import com.github.thething.chipgroove.common.Formatters;
 import com.github.thething.chipgroove.common.Maths;
-import com.github.thething.chipgroove.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.PrintStream;
+
+import static com.github.thething.chipgroove.common.Requirements.requireInRange;
+import static java.util.Objects.checkFromIndexSize;
+import static java.util.Objects.requireNonNull;
 
 // TODO add volume mulitplier
 public final class Player {
 
-    private static final int CHANNEL_COUNT = 8;
-
     public static final int PAL_CLOCK_HZ = 3_546_895;
     public static final int NTSC_CLOCK_HZ = 3_579_545;
 
+    private static final int CHANNEL_COUNT = 8;
+    private static final byte[] TMP_BUFFER = new byte[4];
+
+    private static final PrintStream DEFAULT_LOG_STREAM = System.out;
+    private static final boolean DEFAULT_LOG_ROW_ENABLED = true;
     private static final int DEFAULT_SPEED = 6;
     private static final int DEFAULT_TEMPO = 126;
-    private static final int DEFAULT_OUTPUT_RATE = 44_100;
+    private static final int DEFAULT_SAMPLING_RATE = 44_100;
+    private static final boolean DEFAULT_STEREO = true;
 
     private final Channel[] channels;
+
+    private Mod mod;
+
+    private PrintStream logStream;
+    private boolean logRowEnabled;
+
+    private int outputSamplingRate;
+    private boolean outputStereo;
 
     private int clockHz;
     private int speed; // ticks per row
@@ -41,8 +56,6 @@ public final class Player {
     private int rowIndex;
     private int tickIndex;
 
-    private int outputSamplingRate;
-
     public Player() {
         this.channels = new Channel[CHANNEL_COUNT];
 
@@ -50,10 +63,21 @@ public final class Player {
             channels[i] = new Channel();
         }
 
+        logStream = DEFAULT_LOG_STREAM;
+        logRowEnabled = DEFAULT_LOG_ROW_ENABLED;
+        outputSamplingRate = DEFAULT_SAMPLING_RATE;
+        outputStereo = DEFAULT_STEREO;
+        clockHz = PAL_CLOCK_HZ;
+
+        reset();
+    }
+
+    private void reset() {
         speed = DEFAULT_SPEED;
         tempo = DEFAULT_TEMPO;
-        clockHz = PAL_CLOCK_HZ;
-        outputSamplingRate = DEFAULT_OUTPUT_RATE;
+        samplesPerTick = samplesPerTick(tempo, outputSamplingRate);
+        samplesRemainingInCurrentTick = samplesPerTick;
+        resetChannels();
     }
 
     private void resetChannels() {
@@ -75,92 +99,161 @@ public final class Player {
         return (int) Math.round((double) outputRate * 2_500_000.0 / (tempo * 1_000_000.0));
     }
 
-    /**
-     * Convert a period value to a playback frequency (Hz).
-     * <p>
-     * frequency = clock / period
-     * <p>
-     * Period 428 → middle C (C-3) = 8287 Hz on PAL. The mixer then re-samples this to whatever output rate you have
-     * chosen.
-     */
-    public static double periodToHz(int period, double clock) {
-        if (period <= 0) {
-            return 0.0;
-        }
-
-        return clock / period;
+    public void setMod(Mod mod) {
+        this.mod = mod;
+        reset();
     }
 
-    public void play(Mod mod, ByteBuffer buffer) throws LineUnavailableException {
-        resetChannels();
+    public void changePositionToSequence(int patternSequenceIndex) {
+        requireNonNull(mod);
+        requireInRange(patternSequenceIndex, 0, mod.getLength() - 1);
 
-        // PCM_SIGNED 16-bit stereo — supported on every JVM/OS without fallback
-        // 2 channels × 2 bytes = 4 bytes/frame, big-endian matches ShortBuffer easily
-        AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, outputSamplingRate, 16, 2, 4, outputSamplingRate, false);
+        reset();
+
+        while (this.patternSequenceIndex < patternSequenceIndex) {
+            int readCount = read(TMP_BUFFER);
+
+            if (readCount <= 0) {
+                throw new RuntimeException("Unexpected end of audio");
+            }
+        }
+    }
+
+    public void changePositionToPattern(int patternIndex) {
+        requireNonNull(mod);
+        requireInRange(patternIndex, 0, mod.getPatternCount());
+
+        int sequenceIndex = 0;
+
+        while (sequenceIndex < mod.getPatternSequenceCount()) {
+            if (mod.getPatternIndex(sequenceIndex) == patternIndex) {
+                break;
+            }
+
+            sequenceIndex++;
+        }
+
+        changePositionToSequence(sequenceIndex);
+    }
+
+    public int getTickByteCount() {
+        return outputStereo ? 4 : 2;
+    }
+
+    public void play() throws LineUnavailableException {
+        byte[] buffer = new byte[4];
+
+        // TODO remove
+        System.out.println("Playing...");
+        System.out.println("Speed: " + speed);
+        System.out.println("Tempo: " + tempo);
+
+        AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, outputSamplingRate, 16,
+                outputStereo ? 2 : 1, 4, outputSamplingRate, false);
 
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
         SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
         line.open(format);
         line.start();
 
-        // TODO check if we can replace sample tick
-        samplesPerTick = samplesPerTick(tempo, outputSamplingRate);
-        samplesRemainingInCurrentTick = samplesPerTick;
+        int readCount;
 
-        while (patternSequenceIndex < mod.getLength()) {
-
-            if (samplesRemainingInCurrentTick <= 0) {
-                if (tickIndex == 0) {
-                    handleNewRow(mod, clockHz, outputSamplingRate);
-                } else {
-                    applyMidRowEffects(mod);
-                }
-
-                tickIndex++;
-
-                if (tickIndex >= speed) {
-                    tickIndex = 0;
-                    advanceRow(mod.getLength());
-                }
-
-                samplesRemainingInCurrentTick = samplesPerTick;
-            }
-
-            float left = 0.0f;
-            float right = 0.0f;
-
-            left += channels[0].nextSample(mod);
-            left += channels[3].nextSample(mod);
-            right += channels[1].nextSample(mod);
-            right += channels[2].nextSample(mod);
-
-            left = Maths.clamp(left, -1.0f, 1.0f);
-            right = Maths.clamp(right, -1.0f, 1.0f);
-
-            short lefty = (short) (left * 32767.0f);
-            short righty = (short) (right * 32767.0f);
-            byte[] data = new byte[4];
-
-            data[0] = (byte) (lefty & 0xFF);
-            data[1] = (byte) ((lefty >> 8) & 0xFF);
-            data[2] = (byte) (righty & 0xFF);
-            data[3] = (byte) ((righty >> 8) & 0xFF);
-
-            buffer.put(data[0]);
-            buffer.put(data[1]);
-            buffer.put(data[2]);
-            buffer.put(data[3]);
-
-            line.write(data, 0, 4);
-
-            samplesRemainingInCurrentTick--;
+        while ((readCount = read(buffer)) > 0) {
+            line.write(buffer, 0, readCount);
         }
 
         line.drain();
         line.close();
     }
 
-    private void advanceRow(int modLength) {
+    public int read(byte[] output) {
+        return read(output, 0, output.length);
+    }
+
+    public int read(byte[] output, int offset, int length) {
+        checkFromIndexSize(offset, length, output.length);
+
+        int tickByteCount = getTickByteCount();
+
+        if (length < tickByteCount) {
+            throw new IllegalArgumentException("Buffer too small: " + length + " < " + tickByteCount);
+        }
+
+        int readCount = 0;
+
+        while (patternSequenceIndex < mod.getLength() && length - offset >= tickByteCount) {
+            tick(output, offset);
+            readCount += 4;
+            offset += 4;
+        }
+
+        return readCount;
+    }
+
+    private void tick(byte[] output, int offset) {
+        if (samplesRemainingInCurrentTick <= 0) {
+            if (tickIndex == 0) {
+                int patternIndex = mod.getPatternIndex(patternSequenceIndex);
+
+                if (logRowEnabled) {
+                    logStream.print(Formatters.formatRow(mod, patternIndex, rowIndex));
+
+                    logStream.print(' ');
+                    // logStream.print(Formatters.formatEffects(mod, patternIndex, rowIndex));
+                    logStream.print(mod.getInstrument(patternIndex, rowIndex, 3).effect());
+                    logStream.print(' ');
+                    logStream.println();
+                }
+
+                handleNewRow(mod, clockHz, outputSamplingRate);
+            } else {
+                applyMidRowEffects(mod);
+            }
+
+            tickIndex++;
+
+            if (tickIndex >= speed) {
+                tickIndex = 0;
+                advanceRow(mod);
+            }
+
+            samplesRemainingInCurrentTick = samplesPerTick;
+        }
+
+        float left = 0.0f;
+        float right = 0.0f;
+
+        if (!channels[0].muted) {
+            left += channels[0].nextSample(mod);
+        }
+
+        if (!channels[3].muted) {
+            left += channels[3].nextSample(mod);
+        }
+
+        if (!channels[1].muted) {
+            right += channels[1].nextSample(mod);
+        }
+
+        if (!channels[2].muted) {
+            right += channels[2].nextSample(mod);
+        }
+
+        left = Maths.clamp(left, -1.0f, 1.0f);
+        right = Maths.clamp(right, -1.0f, 1.0f);
+
+        short lefty = (short) (left * 32767.0f);
+        short righty = (short) (right * 32767.0f);
+
+        output[offset] = (byte) (lefty & 0xFF);
+        output[offset + 1] = (byte) ((lefty >> 8) & 0xFF);
+        output[offset + 2] = (byte) (righty & 0xFF);
+        output[offset + 3] = (byte) ((righty >> 8) & 0xFF);
+
+        samplesRemainingInCurrentTick--;
+    }
+
+    private void advanceRow(Mod mod) {
         if (jumpPending || breakPending) {
             // Resolve Bxx + Dxx interaction (ProTracker rule):
             // Bxx alone  → jump to order jumpOrder, row 0
@@ -171,7 +264,7 @@ public final class Player {
                 patternSequenceIndex = jumpOrder;
                 rowIndex = 0;
             } else if (breakPending && !jumpPending) {
-                patternSequenceIndex = Math.min(patternSequenceIndex + 1, modLength - 1);
+                patternSequenceIndex = Math.min(patternSequenceIndex + 1, mod.getLength() - 1);
                 rowIndex = breakRow;
             } else {
                 // Both: Bxx sets order, Dxx sets row
@@ -187,13 +280,15 @@ public final class Player {
             if (rowIndex >= 64) {
                 rowIndex = 0;
                 patternSequenceIndex++;
+            }
 
-                System.out.println("Pattern sequence index: " + patternSequenceIndex);
+            if (patternSequenceIndex < mod.getLength()) {
+                int patternIndex = mod.getPatternIndex(patternSequenceIndex);
             }
         }
     }
 
-    private void handleNewRow(Mod mod, double clockHz, int samplingRate) {
+    private void handleNewRow(Mod mod, int clockHz, int samplingRate) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             int patternIndex = mod.getPatternIndex(patternSequenceIndex);
             Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
@@ -209,9 +304,7 @@ public final class Player {
                 // TODO write comment
                 if (instrument.effect() != Effect.TONE_PORTAMENTO) {
                     channel.samplePosition = 0.0;
-                    channel.period = instrument.period();
-                    double noteHz = periodToHz(instrument.period(), clockHz);
-                    channel.sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
+                    channel.updatePeriod(instrument.period(), clockHz, samplingRate);
                 }
             }
 
@@ -384,13 +477,16 @@ public final class Player {
     // TODO min / max might be configurable
     private void effectSlideUp(Channel channel) {
         int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        channel.period = Maths.clamp(channel.period - adjustment, 113, 856);
+        int newPeriod = Maths.clamp(channel.getPeriod() - adjustment, 113, 856);
+        channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
     }
 
     // TODO min / max might be configurable
     private void effectSlideDown(Channel channel) {
         int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        channel.period = Maths.clamp(channel.period + adjustment, 113, 856);
+        int newPeriod = Maths.clamp(channel.getPeriod() + adjustment, 113, 856);
+        channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
+
     }
 
     private void effectTonePortamentoNewRow(Channel channel, Instrument instrument) {
@@ -399,14 +495,8 @@ public final class Player {
 
     private void effectTonePortamento(Channel channel) {
         int periodIncrement = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        int newPeriod = channel.period + periodIncrement;
-        newPeriod = Maths.clamp(newPeriod, 113, channel.maxPeriod);
-        newPeriod = Maths.clamp(newPeriod, 113, 856);
-
-        channel.period = newPeriod;
-
-        double noteHz = periodToHz(newPeriod, clockHz);
-        channel.sampleIncrement = (outputSamplingRate > 0 && noteHz > 0) ? noteHz / outputSamplingRate : 0;
+        int newPeriod = Maths.clamp(channel.getPeriod() + periodIncrement, 113, Math.min(channel.maxPeriod, 856));
+        channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
     }
 
     private static void effectTremoloNewRow(Channel channel) {
@@ -420,7 +510,7 @@ public final class Player {
             channel.tremoloDepth = channel.effectArgumentY;
         }
 
-        channel.volumeBeforeTremolo = channel.volume;
+        channel.tremoloVolume = channel.volume;
     }
 
     private static void effectTremolo(Channel channel) {
@@ -447,10 +537,7 @@ public final class Player {
         if (sample == null) {
             System.out.println("No previous sample during SET_SAMPLE_OFFSET. Retrigger last sample");
             channel.sampleNumber = previousSampleNumber;
-            channel.period = instrument.period();
-
-            double noteHz = periodToHz(instrument.period(), clockHz);
-            channel.sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
+            channel.updatePeriod(instrument.period(), clockHz, samplingRate);
         }
     }
 
@@ -458,7 +545,7 @@ public final class Player {
      * If the current effect is A00 (volume slide with both arguments equal to zero) and the previous effect was a
      * volume slide than inherit arguments from previous slide.
      * <p>
-     * // TODO find source of this
+     * // TODO find source of this comment
      */
     private void effectVolumeSlideNewRow(Channel channel, Effect prevEffect, int prevArgX, int prevArgY, int argX, int argY) {
         if (argX == 0 && argY == 0 && prevEffect == Effect.VOLUME_SLIDE) {
@@ -512,21 +599,25 @@ public final class Player {
         channel.volume = Maths.clamp(channel.volume - argY, 0, 64);
     }
 
+    public int getOutputSamplingRate() {
+        return outputSamplingRate;
+    }
+
+    public void setMuted(int channelIndex, boolean muted) {
+        channels[channelIndex].muted = muted;
+    }
+
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
         Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
-        ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024 * 1024);
-
         Player player = new Player();
-        player.play(mod, buffer);
-
-        buffer.flip();
-
-        byte[] audio = new byte[buffer.remaining()];
-        buffer.get(audio);
-
-        AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, DEFAULT_OUTPUT_RATE, 16, 2, 4, DEFAULT_OUTPUT_RATE, false);
-        Resources.saveAudio(new File("axel.wav"), format, audio);
+        player.setMod(mod);
+        player.changePositionToPattern(8);
+        player.setMuted(0, true);
+        player.setMuted(1, true);
+        player.setMuted(2, true);
+        player.setMuted(3, false);
+        player.play();
     }
 }
