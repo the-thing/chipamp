@@ -99,10 +99,12 @@ public final class Formatters {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Instrument pattern = mod.getInstrument(patternIndex, rowIndex, channelIndex);
             String note = ModTables.getNote(pattern.period());
-            note = note != null ? note : "---";
 
-            // TODO check if there are any modules where non standard note samples are used
-            // TODD if found, we probably want to search for the closest note and print it as a custom note e.g "C-X"
+            if (note == null && pattern.period() > 0) {
+                note = ModTables.getCustomNote(pattern.period());
+            } else if (note == null) {
+                note = "---";
+            }
 
             int sampleInt = pattern.sampleNumber();
             String sample;

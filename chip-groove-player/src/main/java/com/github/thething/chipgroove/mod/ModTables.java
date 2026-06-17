@@ -1,5 +1,9 @@
 package com.github.thething.chipgroove.mod;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public final class ModTables {
 
     /**
@@ -15,6 +19,12 @@ public final class ModTables {
      *  </pre>
      */
     private static final String[] NOTES = new String[1713];
+
+    private static final String[] CUSTOM_NOTES = new String[]{
+            "A-X", "B-X", "C-X", "D-X", "E-X", "F-X", "G-X"
+    };
+
+    private static final int[] PERIODS;
 
     /**
      * ProTracker sine table used by both vibrato and tremolo. 32 entries covering a quarter... actually ProTracker uses
@@ -102,6 +112,16 @@ public final class ModTables {
         NOTES[226] = "B-2";
         NOTES[113] = "B-3";
         NOTES[57] = "B-4";
+
+        List<Integer> notes = new ArrayList<>();
+
+        for (int i = 0; i < NOTES.length; i++) {
+            if (NOTES[i] != null) {
+                notes.add(i);
+            }
+        }
+
+        PERIODS = notes.stream().mapToInt(Integer::intValue).sorted().toArray();
     }
 
     private ModTables() {
@@ -111,22 +131,56 @@ public final class ModTables {
         return NOTES[period];
     }
 
+    // TODO write test
+    public static String findClosestNote(int period) {
+        int index = Arrays.binarySearch(PERIODS, period);
+
+        if (index >= 0) {
+            return NOTES[PERIODS[index]];
+        }
+
+        if (index < 0) {
+            index = -index - 1;
+        }
+
+        if (index == 0) {
+            return NOTES[PERIODS[0]];
+        }
+
+        if (index == PERIODS.length) {
+            return NOTES[PERIODS[PERIODS.length - 1]];
+        }
+
+        int diff1 = Math.abs(period - PERIODS[index - 1]);
+        int diff2 = Math.abs(period - PERIODS[index]);
+
+        if (diff1 <= diff2) {
+            return NOTES[PERIODS[index - 1]];
+        } else {
+            return NOTES[PERIODS[index]];
+        }
+    }
+
+    public static String getCustomNote(int period) {
+        String note = findClosestNote(period);
+        return CUSTOM_NOTES[note.charAt(0) - 'A'];
+    }
+
     public static int getWaveformValue(WaveformType type, int position) {
         position = position & 63;
         int raw = SINE_TABLE[position & 31];
 
         switch (type) {
-            case SINE -> {
-                return (position < 32) ? raw : -raw;
-            }
             case SAWTOOTH -> {
                 return (position < 32) ? (255 - position * 8) : -(255 - (position - 32) * 8);
             }
             case SQUARE -> {
                 return (position < 32) ? 255 : -255;
             }
-        }
 
-        return 0;
+            default -> {
+                return (position < 32) ? raw : -raw;
+            }
+        }
     }
 }
