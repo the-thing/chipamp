@@ -31,7 +31,6 @@ public final class Player {
     private int tempo; // beats per minute
     private int samplesPerTick;
     private int samplesRemainingInCurrentTick;
-    private long tickFracAccum;
 
     private boolean jumpPending = false;
     private int jumpOrder = 0;
@@ -74,25 +73,6 @@ public final class Player {
      */
     private static int samplesPerTick(int tempo, int outputRate) {
         return (int) Math.round((double) outputRate * 2_500_000.0 / (tempo * 1_000_000.0));
-    }
-
-    // TODO not sure if this is required
-    public int nextTickSamples(int tempo, int outputRate) {
-        // Recompute exact rational each time in case BPM changed this tick
-        long num = (long) outputRate * 5;
-        long den = (long) tempo * 2;
-        long whole = num / den;
-
-        // accumulator tracks fractional remainder * den to stay in integer arithmetic
-
-        tickFracAccum += (num % den);
-
-        if (tickFracAccum >= den) {
-            tickFracAccum -= den;
-            whole++;
-        }
-
-        return (int) whole;
     }
 
     /**
@@ -477,7 +457,7 @@ public final class Player {
     /**
      * If the current effect is A00 (volume slide with both arguments equal to zero) and the previous effect was a
      * volume slide than inherit arguments from previous slide.
-     *
+     * <p>
      * // TODO find source of this
      */
     private void effectVolumeSlideNewRow(Channel channel, Effect prevEffect, int prevArgX, int prevArgY, int argX, int argY) {

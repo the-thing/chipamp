@@ -42,7 +42,7 @@ class FormattersTest {
         Mod mod = modLoader.load("DJ Metune - Axel F.mod");
         String formatted = Formatters.formatRow(mod, 5, 10);
 
-        assertThat(formatted).isEqualTo("0000014A | 05 | 0A | A-3 12 --- | F-3 05 A01 | --- -- --- | --- -- EB1 |\r\n");
+        assertThat(formatted).isEqualTo("0000014A | 05 | 0A | A-3 12 --- | F-3 05 A01 | --- -- --- | --- -- EB1 |");
     }
 
     @Test
