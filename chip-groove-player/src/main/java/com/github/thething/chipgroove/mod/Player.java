@@ -192,13 +192,7 @@ public final class Player {
                 int patternIndex = mod.getPatternIndex(patternSequenceIndex);
 
                 if (logRowEnabled) {
-                    logStream.print(Formatters.formatRow(mod, patternIndex, rowIndex));
-
-                    logStream.print(' ');
-                    // logStream.print(Formatters.formatEffects(mod, patternIndex, rowIndex));
-                    logStream.print(mod.getInstrument(patternIndex, rowIndex, 3).effect());
-                    logStream.print(' ');
-                    logStream.println();
+                    logStream.println(Formatters.formatRow(mod, patternIndex, rowIndex));
                 }
 
                 handleNewRow(mod, clockHz, outputSamplingRate);
@@ -485,12 +479,12 @@ public final class Player {
     }
 
     private void effectTonePortamentoNewRow(Channel channel, Instrument instrument) {
-        channel.maxPeriod = instrument.period();
+        channel.portamentoPeriod = instrument.period();
     }
 
     private void effectTonePortamento(Channel channel) {
         int periodIncrement = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        int newPeriod = Maths.clamp(channel.period + periodIncrement, 113, Math.min(channel.maxPeriod, 856));
+        int newPeriod = Maths.clamp(channel.period + periodIncrement, 113, Math.min(channel.portamentoPeriod, 856));
         channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
     }
 
@@ -598,6 +592,14 @@ public final class Player {
         return outputSamplingRate;
     }
 
+    public void setOutputSamplingRate(int outputSamplingRate) {
+        if (outputSamplingRate <= 0) {
+            throw new IllegalArgumentException("outputSamplingRate must be greater than zero");
+        }
+
+        this.outputSamplingRate = outputSamplingRate;
+    }
+
     public void setMuted(int channelIndex, boolean muted) {
         channels[channelIndex].muted = muted;
     }
@@ -613,17 +615,13 @@ public final class Player {
 
         Player player = new Player();
         player.setMod(mod);
-        player.changePositionToPattern(8);
-//        player.setMuted(0, true);
-//        player.setMuted(1, true);
-//        player.setMuted(2, true);
-//        player.setMuted(3, false);
+        player.setOutputSamplingRate(48_000);
+        // player.changePositionToPattern(8);
+        // player.setMuted(0, true);
+        // player.setMuted(1, true);
+        // player.setMuted(2, true);
+        // player.setMuted(3, false);
         player.play();
-
-        // AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, outputSamplingRate, 16,
-        //                outputStereo ? 2 : 1, 4, outputSamplingRate, false);
-
-        // ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024);
 
         byte[] buffer = new byte[1024 * 1024 * 1024];
 

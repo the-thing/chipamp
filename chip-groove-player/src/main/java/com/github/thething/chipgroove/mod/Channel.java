@@ -14,7 +14,7 @@ final class Channel {
     int effectArgumentX;
     int effectArgumentY;
 
-    int maxPeriod;
+    int portamentoPeriod;
     int tremoloPosition;
     int tremoloSpeed;
     int tremoloDepth;
@@ -37,7 +37,7 @@ final class Channel {
         effectArgumentX = 0;
         effectArgumentY = 0;
 
-        maxPeriod = 0;
+        portamentoPeriod = 0;
 
         tremoloPosition = 0;
         tremoloSpeed = 0;

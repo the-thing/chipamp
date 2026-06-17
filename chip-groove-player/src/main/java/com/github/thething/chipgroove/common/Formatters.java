@@ -82,6 +82,8 @@ public final class Formatters {
         return out.toString();
     }
 
+    // TODO remove offset as this is not useful
+    // TODO replace pattern index and rowindex with decimal values padded to 3 and 2 characters
     public static void formatRow(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
         int offset = patternIndex * Mod.ROW_COUNT + rowIndex;
 
