@@ -2,7 +2,7 @@ package com.github.thething.chipgroove.mod;
 
 final class Channel {
 
-    private int period;
+    int period;
     int sampleNumber;
     double samplePosition;
     double sampleIncrement;
@@ -87,9 +87,5 @@ final class Channel {
 
         double noteHz = Mods.periodToHz(period, clockHz);
         sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
-    }
-
-    public int getPeriod() {
-        return period;
     }
 }

@@ -473,14 +473,14 @@ public final class Player {
     // TODO min / max might be configurable
     private void effectSlideUp(Channel channel) {
         int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        int newPeriod = Maths.clamp(channel.getPeriod() - adjustment, 113, 856);
+        int newPeriod = Maths.clamp(channel.period - adjustment, 113, 856);
         channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
     }
 
     // TODO min / max might be configurable
     private void effectSlideDown(Channel channel) {
         int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        int newPeriod = Maths.clamp(channel.getPeriod() + adjustment, 113, 856);
+        int newPeriod = Maths.clamp(channel.period + adjustment, 113, 856);
         channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
     }
 
@@ -490,7 +490,7 @@ public final class Player {
 
     private void effectTonePortamento(Channel channel) {
         int periodIncrement = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        int newPeriod = Maths.clamp(channel.getPeriod() + periodIncrement, 113, Math.min(channel.maxPeriod, 856));
+        int newPeriod = Maths.clamp(channel.period + periodIncrement, 113, Math.min(channel.maxPeriod, 856));
         channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
     }
 
