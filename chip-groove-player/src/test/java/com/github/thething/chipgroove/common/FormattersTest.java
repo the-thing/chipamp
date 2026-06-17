@@ -19,6 +19,7 @@ class FormattersTest {
         modLoader = new ModLoader();
     }
 
+    // TODO print more patterns
     @Test
     void shouldReturnFormattedPatterns() throws IOException {
         String expected = Resources.readText("axel-patterns.txt");
