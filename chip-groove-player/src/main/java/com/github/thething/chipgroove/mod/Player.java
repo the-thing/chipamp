@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+// TODO add volume mulitplier
 public final class Player {
 
     private static final int CHANNEL_COUNT = 8;
@@ -41,7 +42,7 @@ public final class Player {
     private int rowIndex;
     private int tickIndex;
 
-    private int outputRate;
+    private int outputSamplingRate;
 
     public Player() {
         this.channels = new Channel[CHANNEL_COUNT];
@@ -53,7 +54,7 @@ public final class Player {
         speed = DEFAULT_SPEED;
         tempo = DEFAULT_TEMPO;
         clockHz = PAL_CLOCK_HZ;
-        outputRate = DEFAULT_OUTPUT_RATE;
+        outputSamplingRate = DEFAULT_OUTPUT_RATE;
     }
 
     private void resetChannels() {
@@ -115,7 +116,7 @@ public final class Player {
 
         // PCM_SIGNED 16-bit stereo — supported on every JVM/OS without fallback
         // 2 channels × 2 bytes = 4 bytes/frame, big-endian matches ShortBuffer easily
-        AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, outputRate, 16, 2, 4, outputRate, false);
+        AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, outputSamplingRate, 16, 2, 4, outputSamplingRate, false);
 
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
         SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
@@ -123,14 +124,14 @@ public final class Player {
         line.start();
 
         // TODO check if we can replace sample tick
-        samplesPerTick = samplesPerTick(tempo, outputRate);
+        samplesPerTick = samplesPerTick(tempo, outputSamplingRate);
         samplesRemainingInCurrentTick = samplesPerTick;
 
         while (patternSequenceIndex < mod.getLength()) {
 
             if (samplesRemainingInCurrentTick <= 0) {
                 if (tickIndex == 0) {
-                    handleNewRow(mod, clockHz, outputRate);
+                    handleNewRow(mod, clockHz, outputSamplingRate);
                 } else {
                     handleMidRow(mod);
                 }
@@ -212,7 +213,7 @@ public final class Player {
         }
     }
 
-    private void handleNewRow(Mod mod, double clock, int rate) {
+    private void handleNewRow(Mod mod, double clockHz, int samplingRate) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             int patternIndex = mod.getPatternIndex(patternSequenceIndex);
             Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
@@ -226,91 +227,164 @@ public final class Player {
                 channel.volume = sample.getVolume();
                 channel.period = instrument.period();
 
-                double noteHz = periodToHz(instrument.period(), clock);
-                channel.sampleIncrement = (rate > 0 && noteHz > 0) ? noteHz / rate : 0;
+                double noteHz = periodToHz(instrument.period(), clockHz);
+                channel.sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
             }
 
             if (sample != null) {
                 channel.volume = sample.getVolume();
             }
 
-            // TODO refactor to handle effects in separate methods
+            applyNewRowEffects(channel, instrument, sample, previousSampleNumber);
+        }
+    }
 
-            Effect previousEffect = channel.effect;
-            ExtendedEffect previousExtendedEffect = channel.extendedEffect;
-            int prevEffectArgumentX = channel.effectArgumentX;
-            int prevEffectArgumentY = channel.effectArgumentY;
+    private void applyNewRowEffects(Channel channel, Instrument instrument, Sample sample, int previousSampleNumber) {
+        Effect previousEffect = channel.effect;
+        int prevEffectArgumentX = channel.effectArgumentX;
+        int prevEffectArgumentY = channel.effectArgumentY;
 
-            channel.effect = instrument.effect();
-            channel.extendedEffect = instrument.extendedEffect();
-            channel.effectArgumentX = instrument.effectArgumentX();
-            channel.effectArgumentY = instrument.effectArgumentY();
+        channel.effect = instrument.effect();
+        channel.extendedEffect = instrument.extendedEffect();
+        channel.effectArgumentX = instrument.effectArgumentX();
+        channel.effectArgumentY = instrument.effectArgumentY();
 
-            switch (instrument.effect()) {
+        switch (instrument.effect()) {
 
-                case ARPEGGIO -> {
-                    //  TODO
-                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-                }
+            case ARPEGGIO -> {
+                //  TODO
+                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+            }
 
-                case SLIDE_UP, SLIDE_DOWN -> {
-                    // handled mid-row
-                }
+            case SLIDE_UP, SLIDE_DOWN -> {
+                // handled mid-row
+            }
 
-                case TONE_PORTAMENTO -> {
-                    // TODO
-                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-                }
+            case TONE_PORTAMENTO -> {
+                // TODO
+                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+            }
 
-                case VIBRATO -> {
-                    // TODO
-                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-                }
+            case VIBRATO -> {
+                // TODO
+                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+            }
 
-                case TONE_PORTAMENTO_WITH_VOLUME_SLIDE -> {
-                    // TODO
-                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-                }
+            case TONE_PORTAMENTO_WITH_VOLUME_SLIDE -> {
+                // TODO
+                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+            }
 
-                case VIBRATO_WITH_VOLUME_SLIDE -> {
-                    // TODO
-                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-                }
+            case VIBRATO_WITH_VOLUME_SLIDE -> {
+                // TODO
+                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+            }
 
-                case TREMOLO -> {
-                    // TODO
-                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-                }
+            case TREMOLO -> {
+                // TODO
+                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+            }
 
-                case SET_PANNING_POSITION -> {
-                    // TODO
-                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-                }
+            case SET_PANNING_POSITION -> {
+                // TODO
+                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+            }
 
-                case SET_SAMPLE_OFFSET ->
-                        effectSetSampleOffset(channel, sample, previousSampleNumber, instrument.effectArgumentX(), instrument.effectArgumentY());
+            case SET_SAMPLE_OFFSET -> effectSetSampleOffset(channel, sample, instrument, previousSampleNumber,
+                    clockHz, outputSamplingRate, instrument.effectArgumentX(), instrument.effectArgumentY());
 
-                case VOLUME_SLIDE ->
-                        effectVolumeSlideNewRow(channel, previousEffect, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
+            case VOLUME_SLIDE ->
+                    effectVolumeSlideNewRow(channel, previousEffect, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
 
-                case POSITION_JUMP -> {
-                    // TODO
-                    System.out.println("UNKNOWN EFFECT: " + instrument.effect());
-                }
+            case POSITION_JUMP -> {
+                // TODO
+                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+            }
 
-                case SET_VOLUME -> effectSetVolume(channel, instrument.effectArgumentX(), instrument.effectArgumentY());
+            case SET_VOLUME -> effectSetVolume(channel, instrument.effectArgumentX(), instrument.effectArgumentY());
 
-                case PATTERN_BREAK -> effectPatternBreak(instrument.effectArgumentX(), instrument.effectArgumentY());
+            case PATTERN_BREAK -> effectPatternBreak(instrument.effectArgumentX(), instrument.effectArgumentY());
 
-                case EXTENDED_EFFECT -> {
-                    // TODO extract
-                    switch (instrument.extendedEffect()) {
-                        case FINE_VOLUME_SLIDE_UP -> effectFineVolumeSlideUp(channel, instrument.effectArgumentY());
-                        case FINE_VOLUME_SLIDE_DOWN -> effectFineVolumeSlideDown(channel, instrument.effectArgumentY());
-                    }
-                }
+            case EXTENDED_EFFECT -> applyExtendedEffects(channel, instrument);
 
-                case SET_SPEED -> effectSetSpeed(instrument.effectArgumentX(), instrument.effectArgumentY());
+            case SET_SPEED -> effectSetSpeed(instrument.effectArgumentX(), instrument.effectArgumentY());
+        }
+    }
+
+    private void applyExtendedEffects(Channel channel, Instrument instrument) {
+        switch (instrument.extendedEffect()) {
+
+            case SET_FILTER -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case FINE_SLIDE_UP -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case FINE_SLIDE_DOWN -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case SET_GLISSANDO -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case SET_VIBRATO_WAVEFORM -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case SET_FINE_TUNE_VALUE -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case LOOP_PATTERN -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case SET_TREMOLO_WAVEFORM -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case ROUGH_PANNING -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case RETRIGGER_SAMPLE -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case FINE_VOLUME_SLIDE_UP -> effectFineVolumeSlideUp(channel, instrument.effectArgumentY());
+            case FINE_VOLUME_SLIDE_DOWN -> effectFineVolumeSlideDown(channel, instrument.effectArgumentY());
+
+            case CUT_SAMPLE -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case DELAY_SAMPLE -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case DELAY_PATTERN -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+            }
+
+            case INVERT_LOOP -> {
+                //TODO
+                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
             }
         }
     }
@@ -335,21 +409,26 @@ public final class Player {
         // TODO
     }
 
-    private void effectSetSampleOffset(Channel channel, Sample sample, int previousSampleNumber, int argX, int argY) {
+    /**
+     * Set sample offset. According to some documents when effect is provided with no sample it is supposed to retrigger
+     * last sample.
+     */
+    private void effectSetSampleOffset(
+            Channel channel, Sample sample, Instrument instrument, int previousSampleNumber,
+            int clockHz, int samplingRate, int argX, int argY) {
         int offset = ((argX << 4) | argY) * 256;
-        int wordOffset = argX * 4096 + argY * 256;
 
-        System.out.println("SET SAMPLE OFFSET " + offset + " / " + wordOffset + " / " + sample.getDataLength());
-        // System.out.println("Sample: " + sample.ge);
+        // System.out.println("SET SAMPLE OFFSET " + offset + " / " + sample.getDataLength());
+        channel.samplePosition = offset;
 
         if (sample == null) {
-            // if sample was not provided retrigger last sample
-            System.out.println("Retrigger last sample");
+            System.out.println("No previous sample during SET_SAMPLE_OFFSET. Retrigger last sample");
             channel.sampleNumber = previousSampleNumber;
-            // TOOD we probably need to set offset and increment
-        }
+            channel.period = instrument.period();
 
-        channel.samplePosition = offset;
+            double noteHz = periodToHz(instrument.period(), clockHz);
+            channel.sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
+        }
     }
 
     /**
@@ -400,7 +479,7 @@ public final class Player {
         } else {
             // System.out.println("EFFECT SET TEMPO: " + arg);
             tempo = arg;
-            samplesPerTick = samplesPerTick(tempo, outputRate);
+            samplesPerTick = samplesPerTick(tempo, outputSamplingRate);
         }
     }
 
@@ -414,7 +493,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
         System.out.println("length " + mod.getLength() + " / " + mod.getPatternSequenceCount());
 
@@ -429,6 +508,6 @@ public final class Player {
         buffer.get(audio);
 
         AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, DEFAULT_OUTPUT_RATE, 16, 2, 4, DEFAULT_OUTPUT_RATE, false);
-        Resources.saveAudio(new File("nearly.wav"), format, audio);
+        Resources.saveAudio(new File("axel.wav"), format, audio);
     }
 }
