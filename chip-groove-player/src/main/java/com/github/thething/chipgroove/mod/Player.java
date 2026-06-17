@@ -478,14 +478,12 @@ public final class Player {
     private void effectSetVolume(Channel channel, int argX, int argY) {
         int arg = (argX << 4) | argY;
         arg = Math.min(64, arg);
-        // System.out.println("SET VOLUME " + arg);
         channel.volume = arg;
     }
 
     private void effectPatternBreak(int argX, int argY) {
         int arg = argX * 10 + argY;
         Math.min(arg, 63);
-        // System.out.println("PATTERN BREAK " + arg);
         breakPending = true;
         breakRow = arg;
     }
@@ -495,10 +493,8 @@ public final class Player {
         int arg = (argX << 4) | argY;
 
         if (arg < 0x20) {
-            // System.out.println("EFFECT SET SPEED: " + arg);
             speed = arg;
         } else {
-            // System.out.println("EFFECT SET TEMPO: " + arg);
             tempo = arg;
             samplesPerTick = samplesPerTick(tempo, outputSamplingRate);
         }
