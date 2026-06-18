@@ -1,9 +1,9 @@
 package com.github.thething.chipgroove.common;
 
-import com.github.thething.chipgroove.mod.EffectType;
 import com.github.thething.chipgroove.mod.Mod;
 import com.github.thething.chipgroove.mod.ModTables;
 import com.github.thething.chipgroove.mod.Instrument;
+import com.github.thething.chipgroove.mod.EffectType;
 
 // TODO add new column (sound) for volume and compare with MPT (not sure yet)
 public final class Formatters {
@@ -82,20 +82,13 @@ public final class Formatters {
         return out.toString();
     }
 
-    // TODO remove offset as this is not useful
-    // TODO replace pattern index and rowindex with decimal values padded to 3 and 2 characters
     public static void formatRow(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
-        int offset = patternIndex * Mod.ROW_COUNT + rowIndex;
-
-        formatHexInt(offset, out);
+        out.append(' ');
+        out.append(Strings.padLeft(String.valueOf(patternIndex), 3, '0'));
         out.append(" |");
 
         out.append(' ');
-        out.append(formatHexByte(patternIndex));
-        out.append(" |");
-
-        out.append(' ');
-        out.append(formatHexByte(rowIndex));
+        out.append(Strings.padLeft(String.valueOf(rowIndex), 2, '0'));
         out.append(" |");
 
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {

@@ -6,7 +6,7 @@ final class Config {
 
     private static final PrintStream DEFAULT_LOG_STREAM = System.out;
     private static final boolean DEFAULT_LOG_ROW_ENABLED = true;
-    private static final int DEFAULT_SAMPLING_RATE = 44_100;
+    private static final int DEFAULT_SAMPLING_RATE = 48_000;
     private static final boolean DEFAULT_STEREO = true;
 
     int clockHz;
@@ -18,6 +18,10 @@ final class Config {
     boolean logRowEnabled;
 
     Config() {
+        reset();
+    }
+
+    void reset() {
         this.clockHz = Player.PAL_CLOCK_HZ;
         this.samplingRate = DEFAULT_SAMPLING_RATE;
         this.minPeriod = 113;

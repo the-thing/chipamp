@@ -26,8 +26,8 @@ public final class Player {
     private static final byte[] TMP_BUFFER = new byte[4];
 
     private final Channel[] channels;
-    private final Context context;
     private final Config config;
+    private final Context context;
 
     private Mod mod;
 
@@ -38,14 +38,15 @@ public final class Player {
 
     public Player() {
         this.channels = new Channel[CHANNEL_COUNT];
-        this.context = new Context();
-        this.config = new Config();
 
         for (int i = 0; i < CHANNEL_COUNT; i++) {
             channels[i] = new Channel();
         }
 
-        reset();
+        this.config = new Config();
+        this.context = new Context(config.samplingRate);
+
+        samplesRemainingInCurrentTick = context.samplesPerTick;
     }
 
     private void reset() {
@@ -55,19 +56,6 @@ public final class Player {
         for (int i = 0; i < CHANNEL_COUNT; i++) {
             channels[i].reset();
         }
-    }
-
-    /**
-     * Compute the length of one CIA tick in output samples.
-     * <p>
-     * ProTracker CIA formula: tickDuration (µs) = 2_500_000 / BPM
-     * <p>
-     * Converted to output samples: samplesPerTick = outputRate * tickDuration_µs / 1_000_000 = outputRate * 2_500_000 /
-     * (BPM * 1_000_000) = outputRate * 2.5 / BPM
-     * <p>
-     */
-    private static int samplesPerTick(int tempo, int outputRate) {
-        return (int) Math.round((double) outputRate * 2_500_000.0 / (tempo * 1_000_000.0));
     }
 
     public void setMod(Mod mod) {
@@ -166,7 +154,7 @@ public final class Player {
 
                 handleNewRow(mod, config.clockHz, config.samplingRate);
             } else {
-                applyMidRowEffects(mod);
+                applyMidRowEffects();
             }
 
             tickIndex++;
@@ -252,309 +240,53 @@ public final class Player {
             int patternIndex = mod.getPatternIndex(patternSequenceIndex);
             Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
             Channel channel = channels[channelIndex];
+
+            // copy data to previous fields before applying new changes
+            channel.previousPeriod = channel.period;
+            channel.previousSamplePosition = channel.samplePosition;
+            channel.previousEffectType = channel.effectType;
+            channel.previousExtendedEffectType = channel.extendedEffectType;
+            channel.previousEffectArgumentX = channel.effectArgumentX;
+            channel.previousEffectArgumentY = channel.effectArgumentY;
+
             Sample sample = instrument.sampleNumber() > 0 ? mod.getSample(instrument.sampleNumber() - 1) : null;
-            int previousSampleNumber = channel.sampleNumber;
 
             // TODO this needs to be split per sample and instrument
             if (sample != null && instrument.period() > 0) {
+                channel.updatePeriod(instrument.period(), clockHz, samplingRate);
                 channel.sampleNumber = instrument.sampleNumber();
+                channel.samplePosition = 0.0;
                 channel.volume = sample.getVolume();
                 channel.tremoloPosition = 0;
-
-                // TODO write comment
-                if (instrument.effectType() != EffectType.TONE_PORTAMENTO) {
-                    channel.samplePosition = 0.0;
-                    channel.updatePeriod(instrument.period(), clockHz, samplingRate);
-                }
             }
 
             if (sample != null) {
                 channel.volume = sample.getVolume();
             }
 
-            applyNewRowEffects(channel, instrument, sample, previousSampleNumber);
+            channel.effectType = instrument.effectType();
+            channel.extendedEffectType = instrument.extendedEffectType();
+            channel.effectArgumentX = instrument.effectArgumentX();
+            channel.effectArgumentY = instrument.effectArgumentY();
         }
+
+        applyNewRowEffects();
     }
 
-    private void applyNewRowEffects(Channel channel, Instrument instrument, Sample sample, int previousSampleNumber) {
-        EffectType previousEffectType = channel.effectType;
-        int prevEffectArgumentX = channel.effectArgumentX;
-        int prevEffectArgumentY = channel.effectArgumentY;
+    private void applyNewRowEffects() {
+        // TODO effects that affect global channels should be taken from highest channel
 
-        channel.effectType = instrument.effectType();
-        channel.extendedEffectType = instrument.extendedEffectType();
-        channel.effectArgumentX = instrument.effectArgumentX();
-        channel.effectArgumentY = instrument.effectArgumentY();
-
-        switch (instrument.effectType()) {
-
-            case ARPEGGIO -> {
-                //  TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
-            }
-
-            case SLIDE_UP, SLIDE_DOWN -> {
-                // handled mid-row
-            }
-
-            case TONE_PORTAMENTO -> effectTonePortamentoNewRow(channel, instrument);
-
-            case VIBRATO -> {
-                // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
-            }
-
-            case TONE_PORTAMENTO_WITH_VOLUME_SLIDE -> {
-                // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
-            }
-
-            case VIBRATO_WITH_VOLUME_SLIDE -> {
-                // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
-            }
-
-            case TREMOLO -> effectTremoloNewRow(channel);
-
-            case SET_PANNING_POSITION -> {
-                // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
-            }
-
-            case SET_SAMPLE_OFFSET -> effectSetSampleOffset(channel, sample, instrument, previousSampleNumber,
-                    config.clockHz, config.samplingRate, instrument.effectArgumentX(), instrument.effectArgumentY());
-
-            case VOLUME_SLIDE ->
-                    effectVolumeSlideNewRow(channel, previousEffectType, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
-
-            case POSITION_JUMP -> {
-                // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
-            }
-
-            case SET_VOLUME -> effectSetVolume(channel, instrument.effectArgumentX(), instrument.effectArgumentY());
-
-            case PATTERN_BREAK -> effectPatternBreak(instrument.effectArgumentX(), instrument.effectArgumentY());
-
-            case EXTENDED_EFFECT -> applyExtendedEffects(channel, instrument);
-
-            case SET_SPEED -> effectSetSpeed(instrument.effectArgumentX(), instrument.effectArgumentY());
-        }
-    }
-
-    private void applyExtendedEffects(Channel channel, Instrument instrument) {
-        switch (instrument.extendedEffectType()) {
-
-            case SET_FILTER -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case FINE_SLIDE_UP -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case FINE_SLIDE_DOWN -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case SET_GLISSANDO -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case SET_VIBRATO_WAVEFORM -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case SET_FINE_TUNE_VALUE -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case LOOP_PATTERN -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case SET_TREMOLO_WAVEFORM -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case ROUGH_PANNING -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case RETRIGGER_SAMPLE -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case FINE_VOLUME_SLIDE_UP -> effectFineVolumeSlideUp(channel, instrument.effectArgumentY());
-            case FINE_VOLUME_SLIDE_DOWN -> effectFineVolumeSlideDown(channel, instrument.effectArgumentY());
-
-            case CUT_SAMPLE -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case DELAY_SAMPLE -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case DELAY_PATTERN -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-
-            case INVERT_LOOP -> {
-                //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
-            }
-        }
-    }
-
-    private void applyMidRowEffects(Mod mod) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Channel channel = channels[channelIndex];
-
-            switch (channel.effectType) {
-                case SLIDE_UP -> effectSlideUp(channel);
-                case SLIDE_DOWN -> effectSlideDown(channel);
-                case TONE_PORTAMENTO -> effectTonePortamento(channel);
-                case TREMOLO -> effectTremolo(channel);
-                case VOLUME_SLIDE -> effectVolumeSlide(channel);
-            }
+            channel.effectType.onNewRow(channel, context, config);
         }
     }
 
-    // TODO min / max might be configurable
-    private void effectSlideUp(Channel channel) {
-        int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        int newPeriod = Maths.clamp(channel.period - adjustment, 113, 856);
-        channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
-    }
-
-    // TODO min / max might be configurable
-    private void effectSlideDown(Channel channel) {
-        int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        int newPeriod = Maths.clamp(channel.period + adjustment, 113, 856);
-        channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
-    }
-
-    private void effectTonePortamentoNewRow(Channel channel, Instrument instrument) {
-        channel.portamentoPeriod = instrument.period();
-    }
-
-    private void effectTonePortamento(Channel channel) {
-        int periodIncrement = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        int newPeriod = Maths.clamp(channel.period + periodIncrement, 113, Math.min(channel.portamentoPeriod, 856));
-        channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
-    }
-
-    private static void effectTremoloNewRow(Channel channel) {
-        // use old tremolo speed if not specified
-        if (channel.effectArgumentX != 0) {
-            channel.tremoloSpeed = channel.effectArgumentX;
+    private void applyMidRowEffects() {
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            Channel channel = channels[channelIndex];
+            channel.effectType.onMidRow(channel, context, config);
         }
-
-        // use old tremolo depth if not specified
-        if (channel.effectArgumentY != 0) {
-            channel.tremoloDepth = channel.effectArgumentY;
-        }
-
-        channel.tremoloVolume = channel.volume;
-    }
-
-    private static void effectTremolo(Channel channel) {
-        WaveformType tremoloWaveformType = channel.tremoloWaveformType;
-        int waveformValue = ModTables.getWaveformValue(tremoloWaveformType, channel.tremoloPosition);
-        int delta = (channel.tremoloDepth * waveformValue) / 64;
-
-        channel.volume = Maths.clamp(channel.volume + delta, 0, 64);
-        channel.tremoloPosition += channel.tremoloSpeed;
-    }
-
-    /**
-     * Set sample offset. According to some documents when effect is provided with no sample it is supposed to retrigger
-     * last sample.
-     */
-    private void effectSetSampleOffset(
-            Channel channel, Sample sample, Instrument instrument, int previousSampleNumber,
-            int clockHz, int samplingRate, int argX, int argY) {
-        int offset = ((argX << 4) | argY) * 256;
-
-        // System.out.println("SET SAMPLE OFFSET " + offset + " / " + sample.getDataLength());
-        channel.samplePosition = offset;
-
-        if (sample == null) {
-            System.out.println("No previous sample during SET_SAMPLE_OFFSET. Retrigger last sample");
-            channel.sampleNumber = previousSampleNumber;
-            channel.updatePeriod(instrument.period(), clockHz, samplingRate);
-        }
-    }
-
-    /**
-     * If the current effect is A00 (volume slide with both arguments equal to zero) and the previous effect was a
-     * volume slide than inherit arguments from previous slide.
-     * <p>
-     * // TODO find source of this comment
-     */
-    private void effectVolumeSlideNewRow(Channel channel, EffectType prevEffectType, int prevArgX, int prevArgY, int argX, int argY) {
-        if (argX == 0 && argY == 0 && prevEffectType == EffectType.VOLUME_SLIDE) {
-            channel.effectArgumentX = prevArgX;
-            channel.effectArgumentY = prevArgY;
-        }
-    }
-
-    private void effectVolumeSlide(Channel channel) {
-        int delta;
-
-        if (channel.effectArgumentX != 0) {
-            delta = channel.effectArgumentX;
-        } else {
-            delta = -channel.effectArgumentY;
-        }
-
-        channel.volume = Maths.clamp(channel.volume + delta, 0, 64);
-    }
-
-    private void effectSetVolume(Channel channel, int argX, int argY) {
-        int arg = (argX << 4) | argY;
-        arg = Math.min(64, arg);
-        channel.volume = arg;
-    }
-
-    private void effectPatternBreak(int argX, int argY) {
-        int arg = argX * 10 + argY;
-        Math.min(arg, 63);
-        context.breakPending = true;
-        context.breakRow = arg;
-    }
-
-    // TODO speed at zero should probably stop playing
-    private void effectSetSpeed(int argX, int argY) {
-        int arg = (argX << 4) | argY;
-
-        if (arg < 0x20) {
-            context.speed = arg;
-        } else {
-            context.updateTempo(arg, config.samplingRate);
-        }
-    }
-
-    private void effectFineVolumeSlideUp(Channel channel, int argY) {
-        channel.volume = Maths.clamp(channel.volume + argY, 0, 64);
-    }
-
-    private void effectFineVolumeSlideDown(Channel channel, int argY) {
-        channel.volume = Maths.clamp(channel.volume - argY, 0, 64);
     }
 
     public int getSamplingRate() {
@@ -584,12 +316,11 @@ public final class Player {
 
         Player player = new Player();
         player.setMod(mod);
-        player.setSamplingRate(48_000);
-        // player.changePositionToPattern(2);
-        // player.setMuted(0, true);
-        // player.setMuted(1, true);
-        // player.setMuted(2, true);
-        // player.setMuted(3, false);
+        player.changePositionToPattern(13);
+//        player.setMuted(0, true);
+//        player.setMuted(1, false);
+//        player.setMuted(2, true);
+//        player.setMuted(3, true);
         player.play();
 
         byte[] buffer = new byte[1024 * 1024 * 1024];

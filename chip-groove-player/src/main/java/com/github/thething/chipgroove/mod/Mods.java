@@ -46,7 +46,6 @@ public final class Mods {
         return extendedEffectTypes;
     }
 
-
     /**
      * Convert a period value to a playback frequency (Hz).
      * <p>

@@ -155,8 +155,6 @@ public final class ModLoader {
         int effectArgumentX = b3 >> 4;
         int effectArgumentY = b3 & 0x0F;
 
-        // TODO possibly the effect arguments should be collapsed into a single [0, 255] argument
-
         EffectType effectType;
         ExtendedEffectType extendedEffectType;
 

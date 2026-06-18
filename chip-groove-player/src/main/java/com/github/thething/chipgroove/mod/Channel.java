@@ -11,11 +11,6 @@ final class Channel {
     int volume;
     boolean muted;
 
-    ProtoEffectType protoEffectType;
-    ProtoEffectType previousProtoEffectType;
-    ProtoExtendedEffectType protoExtendedEffectType;
-    ProtoExtendedEffectType previousProtoExtendedEffectType;
-
     EffectType effectType;
     EffectType previousEffectType;
     ExtendedEffectType extendedEffectType;
@@ -33,23 +28,27 @@ final class Channel {
     int tremoloVolume;
 
     Channel() {
+        reset();
     }
 
     void reset() {
         period = 0;
+        previousPeriod = 0;
         sampleNumber = 0;
         samplePosition = 0.0;
+        previousSamplePosition = 0.0;
         sampleIncrement = 0.0;
         volume = 0;
         muted = false;
 
         effectType = EffectType.NONE;
+        previousEffectType = EffectType.NONE;
         extendedEffectType = ExtendedEffectType.NONE;
+        previousExtendedEffectType = ExtendedEffectType.NONE;
         effectArgumentX = 0;
         effectArgumentY = 0;
 
         portamentoPeriod = 0;
-
         tremoloPosition = 0;
         tremoloSpeed = 0;
         tremoloDepth = 0;
