@@ -11,6 +11,11 @@ final class Channel {
     int volume;
     boolean muted;
 
+    ProtoEffectType protoEffectType;
+    ProtoEffectType previousProtoEffectType;
+    ProtoExtendedEffectType protoExtendedEffectType;
+    ProtoExtendedEffectType previousProtoExtendedEffectType;
+
     EffectType effectType;
     EffectType previousEffectType;
     ExtendedEffectType extendedEffectType;

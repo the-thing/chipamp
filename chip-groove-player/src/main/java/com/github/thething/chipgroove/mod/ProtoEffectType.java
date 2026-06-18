@@ -229,12 +229,12 @@ public enum ProtoEffectType implements Effect {
     EXTENDED_EFFECT(0x0E) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
+            channel.protoExtendedEffectType.onNewRow(channel, context, config);
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
+            channel.protoExtendedEffectType.onMidRow(channel, context, config);
         }
     },
 
