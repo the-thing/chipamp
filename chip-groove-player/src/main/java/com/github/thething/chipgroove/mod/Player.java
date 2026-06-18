@@ -316,7 +316,7 @@ public final class Player {
 
         Player player = new Player();
         player.setMod(mod);
-        player.changePositionToPattern(13);
+         player.changePositionToPattern(0);
 //        player.setMuted(0, true);
 //        player.setMuted(1, false);
 //        player.setMuted(2, true);
