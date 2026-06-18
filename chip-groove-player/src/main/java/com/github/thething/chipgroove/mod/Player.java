@@ -11,7 +11,6 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
@@ -25,13 +24,6 @@ public final class Player {
 
     private static final int CHANNEL_COUNT = 8;
     private static final byte[] TMP_BUFFER = new byte[4];
-
-    private static final PrintStream DEFAULT_LOG_STREAM = System.out;
-    private static final boolean DEFAULT_LOG_ROW_ENABLED = true;
-    private static final int DEFAULT_SPEED = 6;
-    private static final int DEFAULT_TEMPO = 126;
-    private static final int DEFAULT_SAMPLING_RATE = 44_100;
-    private static final boolean DEFAULT_STEREO = true;
 
     private final Channel[] channels;
     private final Context context;
@@ -588,12 +580,12 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Hoffman - Eon.mod");
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
         Player player = new Player();
         player.setMod(mod);
         player.setSamplingRate(48_000);
-        player.changePositionToPattern(2);
+        // player.changePositionToPattern(2);
         // player.setMuted(0, true);
         // player.setMuted(1, true);
         // player.setMuted(2, true);
