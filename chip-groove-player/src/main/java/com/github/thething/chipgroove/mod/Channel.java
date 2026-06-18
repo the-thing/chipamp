@@ -3,16 +3,22 @@ package com.github.thething.chipgroove.mod;
 final class Channel {
 
     int period;
+    int previousPeriod;
     int sampleNumber;
     double samplePosition;
+    double previousSamplePosition;
     double sampleIncrement;
     int volume;
     boolean muted;
 
     EffectType effectType;
+    EffectType previousEffectType;
     ExtendedEffectType extendedEffectType;
+    ExtendedEffectType previousExtendedEffectType;
     int effectArgumentX;
     int effectArgumentY;
+    int previousEffectArgumentX;
+    int previousEffectArgumentY;
 
     int portamentoPeriod;
     int tremoloPosition;

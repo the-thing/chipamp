@@ -34,55 +34,32 @@ public final class Player {
     private static final boolean DEFAULT_STEREO = true;
 
     private final Channel[] channels;
+    private final Context context;
+    private final Config config;
 
     private Mod mod;
-
-    private PrintStream logStream;
-    private boolean logRowEnabled;
-
-    private int outputSamplingRate;
-    private boolean outputStereo;
-
-    private int clockHz;
-    private int speed; // ticks per row
-    private int tempo; // beats per minute
-    private int samplesPerTick;
-    private int samplesRemainingInCurrentTick;
-
-    private boolean jumpPending = false;
-    private int jumpOrder = 0;
-    private boolean breakPending = false;
-    private int breakRow = 0;
 
     private int patternSequenceIndex;
     private int rowIndex;
     private int tickIndex;
+    private int samplesRemainingInCurrentTick;
 
     public Player() {
         this.channels = new Channel[CHANNEL_COUNT];
+        this.context = new Context();
+        this.config = new Config();
 
         for (int i = 0; i < CHANNEL_COUNT; i++) {
             channels[i] = new Channel();
         }
 
-        logStream = DEFAULT_LOG_STREAM;
-        logRowEnabled = DEFAULT_LOG_ROW_ENABLED;
-        outputSamplingRate = DEFAULT_SAMPLING_RATE;
-        outputStereo = DEFAULT_STEREO;
-        clockHz = PAL_CLOCK_HZ;
-
         reset();
     }
 
     private void reset() {
-        speed = DEFAULT_SPEED;
-        tempo = DEFAULT_TEMPO;
-        samplesPerTick = samplesPerTick(tempo, outputSamplingRate);
-        samplesRemainingInCurrentTick = samplesPerTick;
-        resetChannels();
-    }
+        context.reset(config.samplingRate);
+        samplesRemainingInCurrentTick = context.samplesPerTick;
 
-    private void resetChannels() {
         for (int i = 0; i < CHANNEL_COUNT; i++) {
             channels[i].reset();
         }
@@ -139,7 +116,7 @@ public final class Player {
     }
 
     public int getBytesPerTick() {
-        return outputStereo ? 4 : 2;
+        return config.stereo ? 4 : 2;
     }
 
     public void play() throws LineUnavailableException {
@@ -191,23 +168,23 @@ public final class Player {
             if (tickIndex == 0) {
                 int patternIndex = mod.getPatternIndex(patternSequenceIndex);
 
-                if (logRowEnabled) {
-                    logStream.println(Formatters.formatRow(mod, patternIndex, rowIndex));
+                if (config.logRowEnabled) {
+                    config.logger.println(Formatters.formatRow(mod, patternIndex, rowIndex));
                 }
 
-                handleNewRow(mod, clockHz, outputSamplingRate);
+                handleNewRow(mod, config.clockHz, config.samplingRate);
             } else {
                 applyMidRowEffects(mod);
             }
 
             tickIndex++;
 
-            if (tickIndex >= speed) {
+            if (tickIndex >= context.speed) {
                 tickIndex = 0;
                 advanceRow(mod);
             }
 
-            samplesRemainingInCurrentTick = samplesPerTick;
+            samplesRemainingInCurrentTick = context.samplesPerTick;
         }
 
         float left = 0.0f;
@@ -244,26 +221,26 @@ public final class Player {
     }
 
     private void advanceRow(Mod mod) {
-        if (jumpPending || breakPending) {
+        if (context.jumpPending || context.breakPending) {
             // Resolve Bxx + Dxx interaction (ProTracker rule):
             // Bxx alone  → jump to order jumpOrder, row 0
             // Dxx alone  → jump to orderPos+1, row breakRow
             // Both       → jump to order jumpOrder, row breakRow
 
-            if (jumpPending && !breakPending) {
-                patternSequenceIndex = jumpOrder;
+            if (context.jumpPending && !context.breakPending) {
+                patternSequenceIndex = context.jumpOrder;
                 rowIndex = 0;
-            } else if (breakPending && !jumpPending) {
+            } else if (context.breakPending && !context.jumpPending) {
                 patternSequenceIndex = Math.min(patternSequenceIndex + 1, mod.getLength() - 1);
-                rowIndex = breakRow;
+                rowIndex = context.breakRow;
             } else {
                 // Both: Bxx sets order, Dxx sets row
-                patternSequenceIndex = jumpOrder;
-                rowIndex = breakRow;
+                patternSequenceIndex = context.jumpOrder;
+                rowIndex = context.breakRow;
             }
 
-            jumpPending = false;
-            breakPending = false;
+            context.jumpPending = false;
+            context.breakPending = false;
         } else {
             rowIndex++;
 
@@ -286,6 +263,7 @@ public final class Player {
             Sample sample = instrument.sampleNumber() > 0 ? mod.getSample(instrument.sampleNumber() - 1) : null;
             int previousSampleNumber = channel.sampleNumber;
 
+            // TODO this needs to be split per sample and instrument
             if (sample != null && instrument.period() > 0) {
                 channel.sampleNumber = instrument.sampleNumber();
                 channel.volume = sample.getVolume();
@@ -352,7 +330,7 @@ public final class Player {
             }
 
             case SET_SAMPLE_OFFSET -> effectSetSampleOffset(channel, sample, instrument, previousSampleNumber,
-                    clockHz, outputSamplingRate, instrument.effectArgumentX(), instrument.effectArgumentY());
+                    config.clockHz, config.samplingRate, instrument.effectArgumentX(), instrument.effectArgumentY());
 
             case VOLUME_SLIDE ->
                     effectVolumeSlideNewRow(channel, previousEffectType, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
@@ -468,14 +446,14 @@ public final class Player {
     private void effectSlideUp(Channel channel) {
         int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
         int newPeriod = Maths.clamp(channel.period - adjustment, 113, 856);
-        channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
+        channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
     }
 
     // TODO min / max might be configurable
     private void effectSlideDown(Channel channel) {
         int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
         int newPeriod = Maths.clamp(channel.period + adjustment, 113, 856);
-        channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
+        channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
     }
 
     private void effectTonePortamentoNewRow(Channel channel, Instrument instrument) {
@@ -485,7 +463,7 @@ public final class Player {
     private void effectTonePortamento(Channel channel) {
         int periodIncrement = (channel.effectArgumentX << 4) | channel.effectArgumentY;
         int newPeriod = Maths.clamp(channel.period + periodIncrement, 113, Math.min(channel.portamentoPeriod, 856));
-        channel.updatePeriod(newPeriod, clockHz, outputSamplingRate);
+        channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
     }
 
     private static void effectTremoloNewRow(Channel channel) {
@@ -564,8 +542,8 @@ public final class Player {
     private void effectPatternBreak(int argX, int argY) {
         int arg = argX * 10 + argY;
         Math.min(arg, 63);
-        breakPending = true;
-        breakRow = arg;
+        context.breakPending = true;
+        context.breakRow = arg;
     }
 
     // TODO speed at zero should probably stop playing
@@ -573,10 +551,9 @@ public final class Player {
         int arg = (argX << 4) | argY;
 
         if (arg < 0x20) {
-            speed = arg;
+            context.speed = arg;
         } else {
-            tempo = arg;
-            samplesPerTick = samplesPerTick(tempo, outputSamplingRate);
+            context.updateTempo(arg, config.samplingRate);
         }
     }
 
@@ -588,16 +565,16 @@ public final class Player {
         channel.volume = Maths.clamp(channel.volume - argY, 0, 64);
     }
 
-    public int getOutputSamplingRate() {
-        return outputSamplingRate;
+    public int getSamplingRate() {
+        return config.samplingRate;
     }
 
-    public void setOutputSamplingRate(int outputSamplingRate) {
-        if (outputSamplingRate <= 0) {
-            throw new IllegalArgumentException("outputSamplingRate must be greater than zero");
+    public void setSamplingRate(int samplingRate) {
+        if (samplingRate <= 0) {
+            throw new IllegalArgumentException("samplingRate must be greater than zero");
         }
 
-        this.outputSamplingRate = outputSamplingRate;
+        config.samplingRate = samplingRate;
     }
 
     public void setMuted(int channelIndex, boolean muted) {
@@ -605,18 +582,18 @@ public final class Player {
     }
 
     public AudioFormat getCompatibleAudioFormat() {
-        return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, outputSamplingRate, 16,
-                outputStereo ? 2 : 1, 4, outputSamplingRate, false);
+        return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, config.samplingRate, 16,
+                config.stereo ? 2 : 1, 4, config.samplingRate, false);
     }
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("Hoffman - Eon.mod");
 
         Player player = new Player();
         player.setMod(mod);
-        player.setOutputSamplingRate(48_000);
-        // player.changePositionToPattern(8);
+        player.setSamplingRate(48_000);
+        player.changePositionToPattern(2);
         // player.setMuted(0, true);
         // player.setMuted(1, true);
         // player.setMuted(2, true);
