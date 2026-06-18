@@ -70,6 +70,7 @@ public final class Player {
         reset();
 
         while (this.patternSequenceIndex < patternSequenceIndex) {
+            // TODO disable logging regardless of setting when advancing patterns
             int readCount = read(TMP_BUFFER);
 
             if (readCount <= 0) {
@@ -312,11 +313,11 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("Hoffman - Eon.mod");
 
         Player player = new Player();
         player.setMod(mod);
-         player.changePositionToPattern(0);
+          player.changePositionToPattern(4);
 //        player.setMuted(0, true);
 //        player.setMuted(1, false);
 //        player.setMuted(2, true);
