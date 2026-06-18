@@ -40,7 +40,7 @@ N.B. All 2 byte lengths are stored with the Hi-byte first, as is usual
           throughout the song). Legal values are 1..128.
 1         Historically set to 127, but can be safely ignored.
           Noisetracker uses this byte to indicate restart position -
-          this has been made redundant by the 'Position Jump' effect.
+          this has been made redundant by the 'Position Jump' effectType.
 128       Pattern table: patterns to play in each song position (0..127)
           Each byte has a legal value of 0..63 (note the Protracker
           exception below). The highest value in this table is the
@@ -98,7 +98,7 @@ on the right. In the case of more channels: channels 5 and 8 are on the
 left, and channels 6 and 7 are on the right, etc. Each channel's data in
 the division has an identical format which consists of 2 words (4
 bytes). Divisions are numbered 0..63. Each division may be divided into
-a number of ticks (see 'set speed' effect below).
+a number of ticks (see 'set speed' effectType below).
 
 Channel Data:
                   (the four bytes of channel data in a pattern division)
@@ -106,12 +106,12 @@ Channel Data:
 wwww xxxxxxxxxxxxxx yyyy zzzzzzzzzzzzzz
 
     wwwwyyyy (8 bits) is the sample for this channel/division
-xxxxxxxxxxxx (12 bits) is the sample's period (or effect parameter)
-zzzzzzzzzzzz (12 bits) is the effect for this channel/division
+xxxxxxxxxxxx (12 bits) is the sample's period (or effectType parameter)
+zzzzzzzzzzzz (12 bits) is the effectType for this channel/division
 
 If there is to be no new sample to be played at this division on this
 channel, then the old sample on this channel will continue, or at least
-be "remembered" for any effects. If the sample is 0, then the previous
+be "remembered" for any effectTypes. If the sample is 0, then the previous
 sample on that channel is used. Only one sample may play on a channel at
 a time, so playing a new sample will cancel an old one - even if there
 has been no data supplied for the new sample. Though, if you are using a
@@ -124,8 +124,8 @@ is 0, then the previous period on that channel is used. Unfortunately,
 some modules do not use these exact values. It is best to do a binary-
 search (unless you use the period as the offset of an array of notes..
 expensive), especially if you plan to use periods outside the "standard"
-range. Periods are the internal representation of the pitch, so effects
-that alter pitch (eg. sliding) alter the period value (see "effects"
+range. Periods are the internal representation of the pitch, so effectTypes
+that alter pitch (eg. sliding) alter the period value (see "effectTypes"
 below).
 
           C    C#   D    D#   E    F    F#   G    G#   A    A#   B
@@ -142,7 +142,7 @@ nice that if you can code it, to allow them to be read.
 
 Effects:
 Effects are written as groups of 4 bits, eg. 1871 = 7 * 256 + 4 * 16 +
-15 = [7][4][15]. The high nibble (4 bits) usually determines the effect,
+15 = [7][4][15]. The high nibble (4 bits) usually determines the effectType,
 but if it is [14], then the second nibble is used as well.
 
 [0]: Arpeggio
@@ -156,7 +156,7 @@ but if it is [14], then the second nibble is used as well.
 [1]: Slide up
      Where [1][x][y] means "smoothly decrease the period of current
      sample by x*16+y after each tick in the division". The
-     ticks/division are set with the 'set speed' effect (see below). If
+     ticks/division are set with the 'set speed' effectType (see below). If
      the period of the note being played is z, then the final period
      will be z - (x*16 + y)*(ticks - 1). As the slide rate depends on
      the speed, changing the speed will change the slide. You cannot
@@ -173,7 +173,7 @@ but if it is [14], then the second nibble is used as well.
      by x*16+y after each tick in the division, never sliding beyond
      current period". Any note in this channel's division is not played,
      but changes the "remembered" note - it can be thought of as a
-     parameter to this effect. Sliding to a note is similar to effects
+     parameter to this effectType. Sliding to a note is similar to effectTypes
      [1] and [2], but the slide will not go beyond the given period, and
      the direction is implied by that period. If x and y are both 0,
      then the old slide will continue.
@@ -182,8 +182,8 @@ but if it is [14], then the second nibble is used as well.
      Where [4][x][y] means "oscillate the sample pitch using a
      particular waveform with amplitude y/16 semitones, such that (x *
      ticks)/64 cycles occur in the division". The waveform is set using
-     effect [14][4]. By placing vibrato effects on consecutive
-     divisions, the vibrato effect can be maintained. If either x or y
+     effectType [14][4]. By placing vibrato effectTypes on consecutive
+     divisions, the vibrato effectType can be maintained. If either x or y
      are 0, then the old vibrato values will be used.
 
 [5]: Continue 'Slide to note', but also do Volume slide
@@ -192,7 +192,7 @@ but if it is [14], then the second nibble is used as well.
      the last 'Slide to note'". It is illegal for both x and y to be
      non-zero. You cannot slide outside the volume range 0..64. The
      period-length in this channel's division is a parameter to this
-     effect, and hence is not played.
+     effectType, and hence is not played.
 
 [6]: Continue 'Vibrato', but also do Volume slide
      Where [6][x][y] means "either slide the volume up x*(ticks - 1) or
@@ -205,13 +205,13 @@ but if it is [14], then the second nibble is used as well.
      particular waveform with amplitude y*(ticks - 1), such that (x *
      ticks)/64 cycles occur in the division". If either x or y are 0,
      then the old tremolo values will be used. The waveform is set using
-     effect [14][7]. Similar to [4].
+     effectType [14][7]. Similar to [4].
 
 [8]: (Set panning position)
      This command is unused by the vast majority of trackers, but one
      tracker for the PC (called DMP) uses this for setting the panning
      state of the channel. As this is very useful, I am documenting it
-     here. The effect [8][x][y] means "set channel to panning position
+     here. The effectType [8][x][y] means "set channel to panning position
      x*16 + y". Position 0 is left, 64 is centre, 128 is right.
      Interestingly, position 164 is defined as "surround".
 
@@ -251,7 +251,7 @@ but if it is [14], then the second nibble is used as well.
      Where [14][1][x] means "decrement the period of the current sample
      by x". The incrementing takes place at the beginning of the
      division, and hence there is no actual sliding. This type of
-     sliding cannot be continued with effect [5]. You cannot slide
+     sliding cannot be continued with effectType [5]. You cannot slide
      beyond the note B3 (period 113).
 
 [14][2]: Fineslide down
@@ -267,7 +267,7 @@ but if it is [14], then the second nibble is used as well.
 
 [14][4]: Set vibrato waveform
      Where [14][4][x] means "set the waveform of succeeding 'vibrato'
-     effects to wave #x". [4] is the 'vibrato' effect.  Possible values
+     effectTypes to wave #x". [4] is the 'vibrato' effectType.  Possible values
      for x are:
           0 - sine (default)      /\    /\     (2 cycles shown)
           4  (without retrigger)     \/    \/
@@ -300,15 +300,15 @@ but if it is [14], then the second nibble is used as well.
 
 [14][7]: Set tremolo waveform
      Where [14][7][x] means "set the waveform of succeeding 'tremolo'
-     effects to wave #x". Similar to [14][4], but alters effect [7] -
-     the 'tremolo' effect.
+     effectTypes to wave #x". Similar to [14][4], but alters effectType [7] -
+     the 'tremolo' effectType.
 
 [14][8]: -- Unused --
 
 [14][9]: Retrigger sample
      Where [14][9][x] means "trigger current sample every x ticks in
      this division". If x is 0, then no retriggering is done (acts as if
-     no effect was chosen), otherwise the retriggering begins on the
+     no effectType was chosen), otherwise the retriggering begins on the
      first tick and then x ticks after that, etc.
 
 [14][10]: Fine volume slide up
@@ -328,20 +328,20 @@ but if it is [14], then the second nibble is used as well.
      implies that if x is 0, then you will not hear any of the sample.
      If you wish to insert "silence" in a pattern, it is better to use a
      "silence"-sample (see above) due to the lack of proper support for
-     this effect.
+     this effectType.
 
 [14][13]: Delay sample
      Where [14][13][x] means "do not start this division's sample for
      the first x ticks in this division, play the sample after this".
      This implies that if x is 0, then you will hear no delay, but
-     actually there will be a VERY small delay. Note that this effect
+     actually there will be a VERY small delay. Note that this effectType
      only influences a sample if it was started in this division.
 
 [14][14]: Delay pattern
      Where [14][14][x] means "after this division there will be a delay
      equivalent to the time taken to play x divisions after which the
      pattern will be resumed". The delay only relates to the
-     interpreting of new divisions, and all effects and previous notes
+     interpreting of new divisions, and all effectTypes and previous notes
      continue during delay.
 
 [14][15]: Invert loop
@@ -371,14 +371,14 @@ but if it is [14], then the second nibble is used as well.
                               ticks/division
      Hence divisions/minute range from 24.75 to 6120, eg. to get a value
      of 2000 divisions/minute use 3 ticks/division and 250 beats/minute.
-     If multiple "set speed" effects are performed in a single division,
+     If multiple "set speed" effectTypes are performed in a single division,
      the ones on higher-numbered channels take precedence over the ones
-     on lower-numbered channels. This effect has a large number of
+     on lower-numbered channels. This effectType has a large number of
      different implementations, but the one described here has the
      widest usage.
 
 N.B. This document should be fairly accurate now, but as the module
-format is more of an observation than a standard, a couple of effects
+format is more of an observation than a standard, a couple of effectTypes
 cannot be relied upon to act exactly the same from tracker to tracker
 (especially if the tracker is not for the Amiga). It is probably better
 to use this document as a guide rather than as a hard-and-fast

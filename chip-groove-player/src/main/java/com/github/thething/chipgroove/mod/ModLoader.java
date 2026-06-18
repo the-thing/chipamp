@@ -157,23 +157,23 @@ public final class ModLoader {
 
         // TODO possibly the effect arguments should be collapsed into a single [0, 255] argument
 
-        Effect effect;
-        ExtendedEffect extendedEffect;
+        EffectType effectType;
+        ExtendedEffectType extendedEffectType;
 
         if (effectCode == 0 && effectArgumentX == 0 && effectArgumentY == 0) {
-            effect = Effect.NONE;
-            extendedEffect = ExtendedEffect.NONE;
+            effectType = EffectType.NONE;
+            extendedEffectType = ExtendedEffectType.NONE;
         } else {
-            effect = Effect.valueOf(effectCode);
+            effectType = EffectType.valueOf(effectCode);
 
-            if (effect == Effect.EXTENDED_EFFECT) {
-                extendedEffect = ExtendedEffect.valueOf(effectArgumentX);
+            if (effectType == EffectType.EXTENDED_EFFECT) {
+                extendedEffectType = ExtendedEffectType.valueOf(effectArgumentX);
             } else {
-                extendedEffect = ExtendedEffect.NONE;
+                extendedEffectType = ExtendedEffectType.NONE;
             }
         }
 
-        return new Instrument(sampleNumber, period, effect, extendedEffect, effectArgumentX, effectArgumentY);
+        return new Instrument(sampleNumber, period, effectType, extendedEffectType, effectArgumentX, effectArgumentY);
     }
 
     private record SampleHeader(String name, int length, int fineTune, int volume, int loopStart, int loopLength) {

@@ -1,6 +1,6 @@
 package com.github.thething.chipgroove.common;
 
-import com.github.thething.chipgroove.mod.Effect;
+import com.github.thething.chipgroove.mod.EffectType;
 import com.github.thething.chipgroove.mod.Mod;
 import com.github.thething.chipgroove.mod.ModTables;
 import com.github.thething.chipgroove.mod.Instrument;
@@ -120,11 +120,11 @@ public final class Formatters {
             char effect;
             String effectArgument;
 
-            if (pattern.effect() == Effect.NONE) {
+            if (pattern.effectType() == EffectType.NONE) {
                 effect = '-';
                 effectArgument = "--";
             } else {
-                effect = getHexCharacter(pattern.effect().getCode());
+                effect = getHexCharacter(pattern.effectType().getCode());
                 effectArgument = formatHexByte(pattern.effectArgumentX(), pattern.effectArgumentY());
             }
 
@@ -178,10 +178,10 @@ public final class Formatters {
                 out.append(" / ");
             }
 
-            if (instrument.effect() != Effect.EXTENDED_EFFECT) {
-                out.append(instrument.effect());
+            if (instrument.effectType() != EffectType.EXTENDED_EFFECT) {
+                out.append(instrument.effectType());
             } else {
-                out.append(instrument.extendedEffect());
+                out.append(instrument.extendedEffectType());
             }
         }
     }

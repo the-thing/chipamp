@@ -292,7 +292,7 @@ public final class Player {
                 channel.tremoloPosition = 0;
 
                 // TODO write comment
-                if (instrument.effect() != Effect.TONE_PORTAMENTO) {
+                if (instrument.effectType() != EffectType.TONE_PORTAMENTO) {
                     channel.samplePosition = 0.0;
                     channel.updatePeriod(instrument.period(), clockHz, samplingRate);
                 }
@@ -307,20 +307,20 @@ public final class Player {
     }
 
     private void applyNewRowEffects(Channel channel, Instrument instrument, Sample sample, int previousSampleNumber) {
-        Effect previousEffect = channel.effect;
+        EffectType previousEffectType = channel.effectType;
         int prevEffectArgumentX = channel.effectArgumentX;
         int prevEffectArgumentY = channel.effectArgumentY;
 
-        channel.effect = instrument.effect();
-        channel.extendedEffect = instrument.extendedEffect();
+        channel.effectType = instrument.effectType();
+        channel.extendedEffectType = instrument.extendedEffectType();
         channel.effectArgumentX = instrument.effectArgumentX();
         channel.effectArgumentY = instrument.effectArgumentY();
 
-        switch (instrument.effect()) {
+        switch (instrument.effectType()) {
 
             case ARPEGGIO -> {
                 //  TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
             }
 
             case SLIDE_UP, SLIDE_DOWN -> {
@@ -331,35 +331,35 @@ public final class Player {
 
             case VIBRATO -> {
                 // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
             }
 
             case TONE_PORTAMENTO_WITH_VOLUME_SLIDE -> {
                 // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
             }
 
             case VIBRATO_WITH_VOLUME_SLIDE -> {
                 // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
             }
 
             case TREMOLO -> effectTremoloNewRow(channel);
 
             case SET_PANNING_POSITION -> {
                 // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
             }
 
             case SET_SAMPLE_OFFSET -> effectSetSampleOffset(channel, sample, instrument, previousSampleNumber,
                     clockHz, outputSamplingRate, instrument.effectArgumentX(), instrument.effectArgumentY());
 
             case VOLUME_SLIDE ->
-                    effectVolumeSlideNewRow(channel, previousEffect, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
+                    effectVolumeSlideNewRow(channel, previousEffectType, prevEffectArgumentX, prevEffectArgumentY, instrument.effectArgumentX(), instrument.effectArgumentY());
 
             case POSITION_JUMP -> {
                 // TODO
-                System.out.println("UNKNOWN EFFECT: " + instrument.effect());
+                System.out.println("UNKNOWN EFFECT: " + instrument.effectType());
             }
 
             case SET_VOLUME -> effectSetVolume(channel, instrument.effectArgumentX(), instrument.effectArgumentY());
@@ -373,56 +373,56 @@ public final class Player {
     }
 
     private void applyExtendedEffects(Channel channel, Instrument instrument) {
-        switch (instrument.extendedEffect()) {
+        switch (instrument.extendedEffectType()) {
 
             case SET_FILTER -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case FINE_SLIDE_UP -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case FINE_SLIDE_DOWN -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case SET_GLISSANDO -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case SET_VIBRATO_WAVEFORM -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case SET_FINE_TUNE_VALUE -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case LOOP_PATTERN -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case SET_TREMOLO_WAVEFORM -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case ROUGH_PANNING -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case RETRIGGER_SAMPLE -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case FINE_VOLUME_SLIDE_UP -> effectFineVolumeSlideUp(channel, instrument.effectArgumentY());
@@ -430,22 +430,22 @@ public final class Player {
 
             case CUT_SAMPLE -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case DELAY_SAMPLE -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case DELAY_PATTERN -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
 
             case INVERT_LOOP -> {
                 //TODO
-                System.out.println("Unknown extended effect: " + instrument.extendedEffect());
+                System.out.println("Unknown extended effect: " + instrument.extendedEffectType());
             }
         }
     }
@@ -454,7 +454,7 @@ public final class Player {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Channel channel = channels[channelIndex];
 
-            switch (channel.effect) {
+            switch (channel.effectType) {
                 case SLIDE_UP -> effectSlideUp(channel);
                 case SLIDE_DOWN -> effectSlideDown(channel);
                 case TONE_PORTAMENTO -> effectTonePortamento(channel);
@@ -536,8 +536,8 @@ public final class Player {
      * <p>
      * // TODO find source of this comment
      */
-    private void effectVolumeSlideNewRow(Channel channel, Effect prevEffect, int prevArgX, int prevArgY, int argX, int argY) {
-        if (argX == 0 && argY == 0 && prevEffect == Effect.VOLUME_SLIDE) {
+    private void effectVolumeSlideNewRow(Channel channel, EffectType prevEffectType, int prevArgX, int prevArgY, int argX, int argY) {
+        if (argX == 0 && argY == 0 && prevEffectType == EffectType.VOLUME_SLIDE) {
             channel.effectArgumentX = prevArgX;
             channel.effectArgumentY = prevArgY;
         }

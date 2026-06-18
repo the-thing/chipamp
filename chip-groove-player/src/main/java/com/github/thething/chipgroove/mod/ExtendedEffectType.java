@@ -2,7 +2,7 @@ package com.github.thething.chipgroove.mod;
 
 import java.util.Arrays;
 
-public enum ExtendedEffect {
+public enum ExtendedEffectType {
 
     SET_FILTER(0x00),
     FINE_SLIDE_UP(0x01),
@@ -22,17 +22,17 @@ public enum ExtendedEffect {
     INVERT_LOOP(0x0F),
     NONE(0xFF);
 
-    private static final ExtendedEffect[] EFFECT_BY_CODE;
+    private static final ExtendedEffectType[] EFFECT_BY_CODE;
 
     static {
-        EFFECT_BY_CODE = new ExtendedEffect[256];
+        EFFECT_BY_CODE = new ExtendedEffectType[256];
         Arrays.fill(EFFECT_BY_CODE, 16, EFFECT_BY_CODE.length, NONE);
         System.arraycopy(values(), 0, EFFECT_BY_CODE, 0, values().length);
     }
 
     private final int code;
 
-    ExtendedEffect(int code) {
+    ExtendedEffectType(int code) {
         this.code = code;
     }
 
@@ -40,7 +40,7 @@ public enum ExtendedEffect {
         return code;
     }
 
-    public static ExtendedEffect valueOf(int code) {
+    public static ExtendedEffectType valueOf(int code) {
         return EFFECT_BY_CODE[code];
     }
 }

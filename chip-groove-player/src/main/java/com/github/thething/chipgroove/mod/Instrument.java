@@ -4,15 +4,15 @@ import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.requireNonNull;
 
 public record Instrument(int sampleNumber, int period,
-                         Effect effect, ExtendedEffect extendedEffect, int effectArgumentX, int effectArgumentY) {
+                         EffectType effectType, ExtendedEffectType extendedEffectType, int effectArgumentX, int effectArgumentY) {
 
     public Instrument(
             int sampleNumber, int period,
-            Effect effect, ExtendedEffect extendedEffect, int effectArgumentX, int effectArgumentY) {
+            EffectType effectType, ExtendedEffectType extendedEffectType, int effectArgumentX, int effectArgumentY) {
         this.sampleNumber = requireInRange(sampleNumber, 0, 255);
         this.period = requireInRange(period, 0, Short.MAX_VALUE);
-        this.effect = requireNonNull(effect);
-        this.extendedEffect = requireNonNull(extendedEffect);
+        this.effectType = requireNonNull(effectType);
+        this.extendedEffectType = requireNonNull(extendedEffectType);
         this.effectArgumentX = requireInRange(effectArgumentX, 0, 15);
         this.effectArgumentY = requireInRange(effectArgumentY, 0, 15);
     }

@@ -8,42 +8,42 @@ public final class Mods {
     private Mods() {
     }
 
-    public static Set<Effect> getUniqueEffects(Mod mod) {
-        EnumSet<Effect> effects = EnumSet.noneOf(Effect.class);
+    public static Set<EffectType> getUniqueEffects(Mod mod) {
+        EnumSet<EffectType> effectTypes = EnumSet.noneOf(EffectType.class);
 
         for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
             for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
                 for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
                     Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
-                    Effect effect = instrument.effect();
+                    EffectType effectType = instrument.effectType();
 
-                    if (effect != Effect.NONE && effect != Effect.EXTENDED_EFFECT) {
-                        effects.add(effect);
+                    if (effectType != EffectType.NONE && effectType != EffectType.EXTENDED_EFFECT) {
+                        effectTypes.add(effectType);
                     }
                 }
             }
         }
 
-        return effects;
+        return effectTypes;
     }
 
-    public static Set<ExtendedEffect> getUniqueExtendedEffects(Mod mod) {
-        EnumSet<ExtendedEffect> extendedEffects = EnumSet.noneOf(ExtendedEffect.class);
+    public static Set<ExtendedEffectType> getUniqueExtendedEffects(Mod mod) {
+        EnumSet<ExtendedEffectType> extendedEffectTypes = EnumSet.noneOf(ExtendedEffectType.class);
 
         for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
             for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
                 for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
                     Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
-                    ExtendedEffect extendedEffect = instrument.extendedEffect();
+                    ExtendedEffectType extendedEffectType = instrument.extendedEffectType();
 
-                    if (extendedEffect != ExtendedEffect.NONE) {
-                        extendedEffects.add(extendedEffect);
+                    if (extendedEffectType != ExtendedEffectType.NONE) {
+                        extendedEffectTypes.add(extendedEffectType);
                     }
                 }
             }
         }
 
-        return extendedEffects;
+        return extendedEffectTypes;
     }
 
 

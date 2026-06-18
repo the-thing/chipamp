@@ -9,8 +9,8 @@ final class Channel {
     int volume;
     boolean muted;
 
-    Effect effect;
-    ExtendedEffect extendedEffect;
+    EffectType effectType;
+    ExtendedEffectType extendedEffectType;
     int effectArgumentX;
     int effectArgumentY;
 
@@ -32,8 +32,8 @@ final class Channel {
         volume = 0;
         muted = false;
 
-        effect = Effect.NONE;
-        extendedEffect = ExtendedEffect.NONE;
+        effectType = EffectType.NONE;
+        extendedEffectType = ExtendedEffectType.NONE;
         effectArgumentX = 0;
         effectArgumentY = 0;
 

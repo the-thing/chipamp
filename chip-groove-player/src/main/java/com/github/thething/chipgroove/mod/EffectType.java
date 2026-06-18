@@ -2,7 +2,7 @@ package com.github.thething.chipgroove.mod;
 
 import java.util.Arrays;
 
-public enum Effect {
+public enum EffectType {
 
     ARPEGGIO(0x00),
     SLIDE_UP(0x01),
@@ -22,17 +22,17 @@ public enum Effect {
     SET_SPEED(0x0F),
     NONE(0xFF);
 
-    private static final Effect[] EFFECT_BY_CODE;
+    private static final EffectType[] EFFECT_TYPE_BY_CODE;
 
     static {
-        EFFECT_BY_CODE = new Effect[256];
-        Arrays.fill(EFFECT_BY_CODE, 16, EFFECT_BY_CODE.length, NONE);
-        System.arraycopy(values(), 0, EFFECT_BY_CODE, 0, values().length);
+        EFFECT_TYPE_BY_CODE = new EffectType[256];
+        Arrays.fill(EFFECT_TYPE_BY_CODE, 16, EFFECT_TYPE_BY_CODE.length, NONE);
+        System.arraycopy(values(), 0, EFFECT_TYPE_BY_CODE, 0, values().length);
     }
 
     private final int code;
 
-    Effect(int code) {
+    EffectType(int code) {
         this.code = code;
     }
 
@@ -40,7 +40,7 @@ public enum Effect {
         return code;
     }
 
-    public static Effect valueOf(int code) {
-        return EFFECT_BY_CODE[code];
+    public static EffectType valueOf(int code) {
+        return EFFECT_TYPE_BY_CODE[code];
     }
 }
