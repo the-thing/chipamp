@@ -35,7 +35,7 @@ public final class Player {
     private int patternSequenceIndex;
     private int rowIndex;
     private int tickIndex;
-    private int samplesRemainingInCurrentTick;
+    private int samplesRemainingInCurrentTick; // TODO this culd be sample index
 
     public Player() {
         this.channels = new Channel[CHANNEL_COUNT];
@@ -338,13 +338,13 @@ public final class Player {
         // player.setMuted(1, true);
         // player.setMuted(2, true);
         // player.setMuted(3, true);
-        // player.play();
+        player.play();
 
         byte[] buffer = new byte[1024 * 1024 * 1024];
 
         AudioFormat format = player.getCompatibleAudioFormat();
         int readCount = player.read(buffer);
 
-        Resources.saveAudio(new File("space debris double.wav"), format, buffer, 0, readCount);
+        Resources.saveAudio(new File("space debris.wav"), format, buffer, 0, readCount);
     }
 }
