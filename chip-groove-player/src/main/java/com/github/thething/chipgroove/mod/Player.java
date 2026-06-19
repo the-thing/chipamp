@@ -2,14 +2,12 @@ package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.Formatters;
 import com.github.thething.chipgroove.common.Maths;
-import com.github.thething.chipgroove.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.io.File;
 import java.io.IOException;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
@@ -189,7 +187,7 @@ public final class Player {
 
             if (tickIndex >= context.speed) {
                 tickIndex = 0;
-                advanceRow(mod);
+                advanceRow();
             }
 
             samplesRemainingInCurrentTick = context.samplesPerTick;
@@ -231,7 +229,7 @@ public final class Player {
         samplesRemainingInCurrentTick--;
     }
 
-    private void advanceRow(Mod mod) {
+    private void advanceRow() {
         if (context.jumpPending || context.breakPending) {
             // Resolve Bxx + Dxx interaction (ProTracker rule):
             // Bxx alone  → jump to order jumpOrder, row 0
