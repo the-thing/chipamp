@@ -1,6 +1,5 @@
 package com.github.thething.chipgroove.mod;
 
-// TODO extract previous values to some other object such as existing Context or new object
 final class Channel {
 
     int period;
@@ -76,7 +75,7 @@ final class Channel {
 
     // TODO there is a special flag in extra effect to decide if vibrato and tremolo need to retrigger
     // TODO currently we always retrigger
-    void resetOnNewSampleWithPeriod() {
+    void resetOnNewSample() {
         vibratoPosition = 0;
         tremoloPosition = 0;
     }
