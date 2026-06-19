@@ -112,6 +112,8 @@ public final class Player {
         return config.stereo ? 4 : 2;
     }
 
+    // TODO play spacific range of patterns
+
     public void play() throws LineUnavailableException {
         byte[] buffer = new byte[4];
 
@@ -131,6 +133,8 @@ public final class Player {
         line.drain();
         line.close();
     }
+
+    // TODO read spacific range of patterns
 
     public int read(byte[] output) {
         return read(output, 0, output.length);
