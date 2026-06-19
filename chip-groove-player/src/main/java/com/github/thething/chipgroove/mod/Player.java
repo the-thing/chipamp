@@ -244,10 +244,6 @@ public final class Player {
                 rowIndex = 0;
                 patternSequenceIndex++;
             }
-
-            if (patternSequenceIndex < mod.getLength()) {
-                int patternIndex = mod.getPatternIndex(patternSequenceIndex);
-            }
         }
     }
 
@@ -333,7 +329,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("_1995.mod");
+        Mod mod = modLoader.load("Captain - Space Debris.mod");
 
         Player player = new Player();
         player.setMod(mod);
@@ -342,13 +338,13 @@ public final class Player {
         // player.setMuted(1, true);
         // player.setMuted(2, true);
         // player.setMuted(3, true);
-        player.play();
+        // player.play();
 
         byte[] buffer = new byte[1024 * 1024 * 1024];
 
         AudioFormat format = player.getCompatibleAudioFormat();
         int readCount = player.read(buffer);
 
-        Resources.saveAudio(new File("axel.wav"), format, buffer, 0, readCount);
+        Resources.saveAudio(new File("space debris double.wav"), format, buffer, 0, readCount);
     }
 }
