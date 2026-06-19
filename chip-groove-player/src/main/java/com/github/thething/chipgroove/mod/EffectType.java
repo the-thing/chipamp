@@ -59,11 +59,7 @@ public enum EffectType implements Effect {
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            int periodIncrement = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-            int maxPeriod = Math.min(channel.portamentoPeriod, config.maxPeriod);
-
-            int newPeriod = Maths.clamp(channel.period + periodIncrement, config.minPeriod, maxPeriod);
-            channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
+            EffectType.applyTonePortamento(channel, config);
         }
     },
 
@@ -86,38 +82,47 @@ public enum EffectType implements Effect {
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            WaveformType vibratoWaveformType = channel.vibratoWaveformType;
-            int waveformValue = ModTables.getWaveformValue(vibratoWaveformType, channel.vibratoPosition);
-            int delta = (channel.vibratoAmplitude * waveformValue) / 64;
-
-            channel.period = Maths.clamp(channel.vibratoPeriod + delta, config.minPeriod, config.maxPeriod);
-            channel.vibratoPosition += channel.vibratoSpeed;
+            EffectType.applyToneVibrato(channel, config);
         }
     },
 
     TONE_PORTAMENTO_WITH_VOLUME_SLIDE(0x05) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("TONE_PORTAMENTO_WITH_VOLUME_SLIDE not supported");
+            if (channel.effectArgumentX != 0 && channel.effectArgumentY != 0) {
+                // TODO create config flag to decide if we should prioritize X over delta (x + y)
+                channel.volumeSlide = channel.effectArgumentX;
+            } else if (channel.effectArgumentX != 0) {
+                channel.volumeSlide = channel.effectArgumentX;
+            } else if (channel.effectArgumentY != 0) {
+                channel.volumeSlide = -channel.effectArgumentY;
+            }
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
+            EffectType.applyTonePortamento(channel, config);
+            EffectType.applyVolumeSlide(channel);
         }
     },
 
     VIBRATO_WITH_VOLUME_SLIDE(0x06) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("VIBRATO_WITH_VOLUME_SLIDE not supported");
+            if (channel.effectArgumentX != 0 && channel.effectArgumentY != 0) {
+                // TODO create config flag to decide if we should prioritize X over delta (x + y)
+                channel.volumeSlide = channel.effectArgumentX;
+            } else if (channel.effectArgumentX != 0) {
+                channel.volumeSlide = channel.effectArgumentX;
+            } else if (channel.effectArgumentY != 0) {
+                channel.volumeSlide = -channel.effectArgumentY;
+            }
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
+            EffectType.applyToneVibrato(channel, config);
+            EffectType.applyVolumeSlide(channel);
         }
     },
 
@@ -178,30 +183,19 @@ public enum EffectType implements Effect {
     VOLUME_SLIDE(0x0A) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // if the current effect is A00 (volume slide with both arguments equal to zero) and the previous effect
-            // was also a volume side then inherit arguments from previous slide.
-            if (channel.effectArgumentX == 0 && channel.effectArgumentY == 0 && channel.previousEffectType == EffectType.VOLUME_SLIDE) {
-                channel.effectArgumentX = channel.previousEffectArgumentX;
-                channel.effectArgumentY = channel.previousEffectArgumentY;
+            if (channel.effectArgumentX != 0 && channel.effectArgumentY != 0) {
+                // TODO create config flag to decide if we should prioritize X over delta (x + y)
+                channel.volumeSlide = channel.effectArgumentX;
+            } else if (channel.effectArgumentX != 0) {
+                channel.volumeSlide = channel.effectArgumentX;
+            } else if (channel.effectArgumentY != 0) {
+                channel.volumeSlide = -channel.effectArgumentY;
             }
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            int delta;
-
-            // TODO if both set, some trackers prioritize X argument, some compute delta
-            if (channel.effectArgumentX != 0 && channel.effectArgumentY != 0) {
-                // config.logger.println("VOLUME_SLIDE with both arguments not equal to zero: " + channel.effectArgumentX + ", " + channel.effectArgumentY);
-            }
-
-            if (channel.effectArgumentX != 0) {
-                delta = channel.effectArgumentX;
-            } else {
-                delta = -channel.effectArgumentY;
-            }
-
-            channel.volume = Maths.clamp(channel.volume + delta, 0, 64);
+            EffectType.applyVolumeSlide(channel);
         }
     },
 
@@ -307,5 +301,26 @@ public enum EffectType implements Effect {
 
     public static EffectType valueOf(int code) {
         return EFFECT_TYPE_BY_CODE[code];
+    }
+
+    private static void applyTonePortamento(Channel channel, Config config) {
+        int periodIncrement = (channel.effectArgumentX << 4) | channel.effectArgumentY;
+        int maxPeriod = Math.min(channel.portamentoPeriod, config.maxPeriod);
+
+        int newPeriod = Maths.clamp(channel.period + periodIncrement, config.minPeriod, maxPeriod);
+        channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
+    }
+
+    private static void applyToneVibrato(Channel channel, Config config) {
+        WaveformType vibratoWaveformType = channel.vibratoWaveformType;
+        int waveformValue = ModTables.getWaveformValue(vibratoWaveformType, channel.vibratoPosition);
+        int delta = (channel.vibratoAmplitude * waveformValue) / 64;
+
+        channel.period = Maths.clamp(channel.vibratoPeriod + delta, config.minPeriod, config.maxPeriod);
+        channel.vibratoPosition += channel.vibratoSpeed;
+    }
+
+    private static void applyVolumeSlide(Channel channel) {
+        channel.volume = Maths.clamp(channel.volume + channel.volumeSlide, 0, 64);
     }
 }

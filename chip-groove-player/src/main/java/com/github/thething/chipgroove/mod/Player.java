@@ -280,9 +280,7 @@ public final class Player {
                 channel.samplePosition = 0.0;
                 channel.volume = sample.getVolume();
 
-                // TODO do we need to clear that?
-                channel.vibratoPosition = 0;
-                channel.tremoloPosition = 0;
+                channel.resetOnNewSampleWithPeriod();
             }
 
             if (sample != null) {
@@ -341,12 +339,12 @@ public final class Player {
 
         Player player = new Player();
         player.setMod(mod);
-         player.changePositionToPattern(13);
+        // player.changePositionToPattern(13);
         // player.setMuted(0, true);
         // player.setMuted(1, true);
         // player.setMuted(2, true);
         // player.setMuted(3, true);
-        player.play();
+        // player.play();
 
         byte[] buffer = new byte[1024 * 1024 * 1024];
 

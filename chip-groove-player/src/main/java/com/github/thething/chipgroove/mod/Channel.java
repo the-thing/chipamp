@@ -22,20 +22,24 @@ final class Channel {
     int previousEffectArgumentX;
     int previousEffectArgumentY;
 
-    int portamentoPeriod;
+    /**
+     * List of effect that are related to specific effects, but they also persist and should carry over even if there
+     * are effects in between.
+     */
 
-    // TODO there is a specialflag to decide when vibrato and tremolo need to kick in, we have to support that
+    int portamentoPeriod;
+    int volumeSlide; // volume recorded when hitting first row with volume slide or vibrato / tremolo with volume side
 
     int vibratoPosition;
     int vibratoSpeed;
     int vibratoAmplitude;
-    int vibratoPeriod; // period recorded when the row with vibrato kicks in
+    int vibratoPeriod; // period recorded when hitting first row in vibrato
     WaveformType vibratoWaveformType;
 
     int tremoloPosition;
     int tremoloSpeed;
     int tremoloAmplitude;
-    int tremoloVolume; // volume recorded when the row with tremolo kicks in
+    int tremoloVolume; // volume recorded when hitting first row with tremolo
     WaveformType tremoloWaveformType;
 
     Channel(boolean left) {
@@ -71,6 +75,13 @@ final class Channel {
         tremoloAmplitude = 0;
         tremoloVolume = 0;
         tremoloWaveformType = WaveformType.SINE;
+    }
+
+    // TODO there is a special flag in extra effect to decide if vibrato and tremolo need to retrigger
+    // TODO currently we always retrigger
+    void resetOnNewSampleWithPeriod() {
+        vibratoPosition = 0;
+        tremoloPosition = 0;
     }
 
     float nextSample(Mod mod) {
