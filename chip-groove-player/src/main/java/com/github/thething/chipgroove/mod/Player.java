@@ -38,10 +38,14 @@ public final class Player {
 
     public Player() {
         this.channels = new Channel[CHANNEL_COUNT];
-
-        for (int i = 0; i < CHANNEL_COUNT; i++) {
-            channels[i] = new Channel();
-        }
+        this.channels[0] = new Channel(true);
+        this.channels[1] = new Channel(false);
+        this.channels[2] = new Channel(false);
+        this.channels[3] = new Channel(true);
+        this.channels[4] = new Channel(true);
+        this.channels[5] = new Channel(false);
+        this.channels[6] = new Channel(false);
+        this.channels[7] = new Channel(true);
 
         this.config = new Config();
         this.context = new Context(config.samplingRate);
@@ -171,24 +175,27 @@ public final class Player {
         float left = 0.0f;
         float right = 0.0f;
 
-        if (!channels[0].muted) {
-            left += channels[0].nextSample(mod);
-        }
+        for (int i = 0; i < mod.getChannelCount(); i++) {
+            // we increment the sample even if the channel is muted (need to push the sample position)
+            float sample = channels[i].nextSample(mod);
 
-        if (!channels[3].muted) {
-            left += channels[3].nextSample(mod);
-        }
+            if (channels[i].muted) {
+                continue;
+            }
 
-        if (!channels[1].muted) {
-            right += channels[1].nextSample(mod);
-        }
-
-        if (!channels[2].muted) {
-            right += channels[2].nextSample(mod);
+            if (channels[i].left) {
+                left += sample;
+            } else {
+                right += sample;
+            }
         }
 
         left = Maths.clamp(left, -1.0f, 1.0f);
         right = Maths.clamp(right, -1.0f, 1.0f);
+
+        // TODO stereo fold down vs hard panning
+        left = (left + right) * 0.5f;
+        right = left;
 
         short lefty = (short) (left * 32767.0f);
         short righty = (short) (right * 32767.0f);
@@ -258,6 +265,7 @@ public final class Player {
                 channel.sampleNumber = instrument.sampleNumber();
                 channel.samplePosition = 0.0;
                 channel.volume = sample.getVolume();
+                // TODO do we need to clear that?
                 channel.tremoloPosition = 0;
             }
 
@@ -313,13 +321,13 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Hoffman - Eon.mod");
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
         Player player = new Player();
         player.setMod(mod);
-          player.changePositionToPattern(4);
-//        player.setMuted(0, true);
-//        player.setMuted(1, false);
+        // player.changePositionToPattern(13);
+        // player.setMuted(0, true);
+        // player.setMuted(1, true);
 //        player.setMuted(2, true);
 //        player.setMuted(3, true);
         player.play();

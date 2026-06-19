@@ -10,6 +10,7 @@ final class Channel {
     double sampleIncrement;
     int volume;
     boolean muted;
+    boolean left;
 
     EffectType effectType;
     EffectType previousEffectType;
@@ -27,7 +28,8 @@ final class Channel {
     WaveformType tremoloWaveformType;
     int tremoloVolume;
 
-    Channel() {
+    Channel(boolean left) {
+        this.left = left;
         reset();
     }
 
