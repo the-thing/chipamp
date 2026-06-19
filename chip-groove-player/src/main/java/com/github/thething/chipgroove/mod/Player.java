@@ -14,6 +14,7 @@ import java.io.IOException;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
+import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.requireNonNull;
 
 // TODO add a global volume multiplier
@@ -112,11 +113,14 @@ public final class Player {
         return config.stereo ? 4 : 2;
     }
 
-    // TODO play spacific range of patterns
-
     public void play() throws LineUnavailableException {
-        byte[] buffer = new byte[4];
+        play(0, mod.getLength());
+    }
 
+    public void play(int startSequenceIndex, int endSequenceIndex) throws LineUnavailableException {
+        checkFromToIndex(startSequenceIndex, endSequenceIndex, mod.getLength());
+
+        byte[] buffer = new byte[4];
         AudioFormat format = getCompatibleAudioFormat();
 
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -124,9 +128,13 @@ public final class Player {
         line.open(format);
         line.start();
 
-        int readCount;
+        while (patternSequenceIndex >= startSequenceIndex && patternSequenceIndex < endSequenceIndex) {
+            int readCount = read(buffer);
 
-        while ((readCount = read(buffer)) > 0) {
+            if (readCount <= 0) {
+                throw new RuntimeException("Unexpected end of audio");
+            }
+
             line.write(buffer, 0, readCount);
         }
 
@@ -134,14 +142,17 @@ public final class Player {
         line.close();
     }
 
-    // TODO read spacific range of patterns
-
     public int read(byte[] output) {
         return read(output, 0, output.length);
     }
 
     public int read(byte[] output, int offset, int length) {
+        return read(output, offset, length, 0, mod.getLength());
+    }
+
+    public int read(byte[] output, int offset, int length, int startSequenceIndex, int endSequenceIndex) {
         checkFromIndexSize(offset, length, output.length);
+        checkFromToIndex(startSequenceIndex, endSequenceIndex, mod.getLength());
 
         int bytesPerTick = getBytesPerTick();
 
@@ -151,7 +162,7 @@ public final class Player {
 
         int readCount = 0;
 
-        while (patternSequenceIndex < mod.getLength() && length - offset >= bytesPerTick) {
+        while (patternSequenceIndex >= startSequenceIndex && patternSequenceIndex < endSequenceIndex && length - offset >= bytesPerTick) {
             tick(output, offset);
             readCount += bytesPerTick;
             offset += bytesPerTick;
@@ -329,22 +340,21 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Hoffman - Eon.mod");
+        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
 
         Player player = new Player();
         player.setMod(mod);
-        player.changePositionToPattern(11);
+        // player.changePositionToPattern(14);
         // player.setMuted(0, true);
-        player.setMuted(1, true);
-        player.setMuted(2, true);
-        player.setMuted(3, true);
-        player.play();
+        // player.setMuted(1, true);
+        // player.setMuted(2, true);
+        // player.setMuted(3, true);
+        // player.play();
+        player.play(0, 1);
 
-        byte[] buffer = new byte[1024 * 1024 * 1024];
-
-        AudioFormat format = player.getCompatibleAudioFormat();
-        int readCount = player.read(buffer);
-
-        Resources.saveAudio(new File("space debris.wav"), format, buffer, 0, readCount);
+        // byte[] buffer = new byte[1024 * 1024 * 1024];
+        // AudioFormat format = player.getCompatibleAudioFormat();
+        // int readCount = player.read(buffer);
+        // Resources.saveAudio(new File("nearly.wav"), format, buffer, 0, readCount);
     }
 }

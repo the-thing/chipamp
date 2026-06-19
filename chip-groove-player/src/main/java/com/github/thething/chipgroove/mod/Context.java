@@ -5,6 +5,8 @@ final class Context {
     private static final int DEFAULT_SPEED = 6;
     private static final int DEFAULT_TEMPO = 125;
 
+    // TODO check which of these effects modify global state
+
     int speed; // ticks per row
     int tempo; // beats per minute
     int samplesPerTick;
