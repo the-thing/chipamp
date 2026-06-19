@@ -22,26 +22,26 @@ public enum ExtendedEffectType implements Effect {
     FINE_SLIDE_UP(0x01) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("FINE_SLIDE_UP not supported");
+            int adjustment = channel.effectArgumentY;
+            channel.period = Maths.clamp(channel.period - adjustment, config.minPeriod, config.maxPeriod);
+            channel.updatePeriod(channel.period, config.clockHz, config.samplingRate);
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 
     FINE_SLIDE_DOWN(0x02) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("FINE_SLIDE_DOWN not supported");
+            int adjustment = channel.effectArgumentY;
+            channel.period = Maths.clamp(channel.period + adjustment, config.minPeriod, config.maxPeriod);
+            channel.updatePeriod(channel.period, config.clockHz, config.samplingRate);
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 
