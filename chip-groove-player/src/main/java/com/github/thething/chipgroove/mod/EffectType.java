@@ -70,13 +70,28 @@ public enum EffectType implements Effect {
     VIBRATO(0x04) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("VIBRATO not supported");
+            // continue with previous vibrato speed if not provided
+            if (channel.effectArgumentX != 0) {
+                channel.vibratoSpeed = channel.effectArgumentX;
+            }
+
+            // continue with previous vibrato amplitude if not provided
+            if (channel.effectArgumentY != 0) {
+                channel.vibratoAmplitude = channel.effectArgumentY;
+            }
+
+            channel.vibratoPeriod = channel.period;
+            // supposedly waveforms are not reset on effect start
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
+            WaveformType vibratoWaveformType = channel.vibratoWaveformType;
+            int waveformValue = ModTables.getWaveformValue(vibratoWaveformType, channel.vibratoPosition);
+            int delta = (channel.vibratoAmplitude * waveformValue) / 64;
+
+            channel.period = Maths.clamp(channel.vibratoPeriod + delta, config.minPeriod, config.maxPeriod);
+            channel.vibratoPosition += channel.vibratoSpeed;
         }
     },
 
@@ -96,11 +111,13 @@ public enum EffectType implements Effect {
     VIBRATO_WITH_VOLUME_SLIDE(0x06) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-
+            // TODO
+            System.out.println("VIBRATO_WITH_VOLUME_SLIDE not supported");
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
+            // TODO
         }
     },
 
@@ -109,24 +126,25 @@ public enum EffectType implements Effect {
         public void onNewRow(Channel channel, Context context, Config config) {
             // use old tremolo speed if not specified
             if (channel.effectArgumentX != 0) {
-                channel.tremoloSpeed = channel.effectArgumentX;
+                channel.tremoloSpeed = channel.previousEffectArgumentX;
             }
 
             // use old tremolo depth if not specified
             if (channel.effectArgumentY != 0) {
-                channel.tremoloDepth = channel.effectArgumentY;
+                channel.tremoloAmplitude = channel.previousEffectArgumentY;
             }
 
             channel.tremoloVolume = channel.volume;
+            // supposedly waveforms are not reset on effect start
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
             WaveformType tremoloWaveformType = channel.tremoloWaveformType;
             int waveformValue = ModTables.getWaveformValue(tremoloWaveformType, channel.tremoloPosition);
-            int delta = (channel.tremoloDepth * waveformValue) / 64;
+            int delta = (channel.tremoloAmplitude * waveformValue) / 64;
 
-            channel.volume = Maths.clamp(channel.volume + delta, 0, 64);
+            channel.volume = Maths.clamp(channel.tremoloVolume + delta, 0, 64);
             channel.tremoloPosition += channel.tremoloSpeed;
         }
     },

@@ -279,7 +279,9 @@ public final class Player {
                 channel.sampleNumber = instrument.sampleNumber();
                 channel.samplePosition = 0.0;
                 channel.volume = sample.getVolume();
+
                 // TODO do we need to clear that?
+                channel.vibratoPosition = 0;
                 channel.tremoloPosition = 0;
             }
 
@@ -339,7 +341,7 @@ public final class Player {
 
         Player player = new Player();
         player.setMod(mod);
-        // player.changePositionToPattern(1);
+         player.changePositionToPattern(13);
         // player.setMuted(0, true);
         // player.setMuted(1, true);
         // player.setMuted(2, true);

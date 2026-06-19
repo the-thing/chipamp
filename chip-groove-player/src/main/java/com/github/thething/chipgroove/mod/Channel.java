@@ -1,5 +1,6 @@
 package com.github.thething.chipgroove.mod;
 
+// TODO extract previous values to a new history data object
 final class Channel {
 
     int period;
@@ -22,11 +23,20 @@ final class Channel {
     int previousEffectArgumentY;
 
     int portamentoPeriod;
+
+    // TODO there is a specialflag to decide when vibrato and tremolo need to kick in, we have to support that
+
+    int vibratoPosition;
+    int vibratoSpeed;
+    int vibratoAmplitude;
+    int vibratoPeriod; // period recorded when the row with vibrato kicks in
+    WaveformType vibratoWaveformType;
+
     int tremoloPosition;
     int tremoloSpeed;
-    int tremoloDepth;
+    int tremoloAmplitude;
+    int tremoloVolume; // volume recorded when the row with tremolo kicks in
     WaveformType tremoloWaveformType;
-    int tremoloVolume;
 
     Channel(boolean left) {
         this.left = left;
@@ -51,11 +61,16 @@ final class Channel {
         effectArgumentY = 0;
 
         portamentoPeriod = 0;
+        vibratoPosition = 0;
+        vibratoSpeed = 0;
+        vibratoAmplitude = 0;
+        vibratoPeriod = 0;
+        vibratoWaveformType = WaveformType.SINE;
         tremoloPosition = 0;
         tremoloSpeed = 0;
-        tremoloDepth = 0;
-        tremoloWaveformType = WaveformType.SINE;
+        tremoloAmplitude = 0;
         tremoloVolume = 0;
+        tremoloWaveformType = WaveformType.SINE;
     }
 
     float nextSample(Mod mod) {
