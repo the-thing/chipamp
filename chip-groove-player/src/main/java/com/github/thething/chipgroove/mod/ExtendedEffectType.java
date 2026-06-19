@@ -114,6 +114,9 @@ public enum ExtendedEffectType implements Effect {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
             // original amiga doesn't support this effect
+            if (config.logErrorEnabled) {
+                config.logger.println("ROUGH_PANNING is not supported");
+            }
         }
 
         @Override

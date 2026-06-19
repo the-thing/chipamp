@@ -144,6 +144,9 @@ public enum EffectType implements Effect {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
             // original amiga doesn't support this effect
+            if (config.logErrorEnabled) {
+                config.logger.println("SET_PANNING_POSITION is not supported");
+            }
         }
 
         @Override
