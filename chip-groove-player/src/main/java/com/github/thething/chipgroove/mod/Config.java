@@ -10,6 +10,8 @@ final class Config {
     private static final int DEFAULT_SAMPLING_RATE = 48_000;
     private static final boolean DEFAULT_STEREO = true;
     private static final boolean DEFAULT_VOLUME_SLIDE_DELTA = false;
+    private static final int DEFAULT_MIN_PERIOD = 108; // minimum standard octave with fine tune +7
+    private static final int DEFAULT_MAX_PERIOD = 907; // maximum standard octave with fine tune -8
 
     int clockHz;
     int samplingRate;
@@ -18,8 +20,8 @@ final class Config {
     boolean stereo;
     boolean volumeSlideDelta;
     PrintStream logger;
-    boolean logEnabled;
-    boolean logRowEnabled;
+    boolean logInfoEnabled;
+    boolean logErrorEnabled;
 
     Config() {
         reset();
@@ -28,13 +30,12 @@ final class Config {
     void reset() {
         this.clockHz = Player.PAL_CLOCK_HZ;
         this.samplingRate = DEFAULT_SAMPLING_RATE;
-        // TODO
-        this.minPeriod = 113;
-        this.maxPeriod = 856;
+        this.minPeriod = DEFAULT_MIN_PERIOD;
+        this.maxPeriod = DEFAULT_MAX_PERIOD;
         this.stereo = DEFAULT_STEREO;
         this.volumeSlideDelta = DEFAULT_VOLUME_SLIDE_DELTA;
         this.logger = DEFAULT_LOG_STREAM;
-        this.logEnabled = DEFAULT_LOG_ENABLED;
-        this.logRowEnabled = DEFAULT_LOG_ROW_ENABLED;
+        this.logInfoEnabled = DEFAULT_LOG_ENABLED;
+        this.logErrorEnabled = DEFAULT_LOG_ROW_ENABLED;
     }
 }
