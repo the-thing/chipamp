@@ -230,27 +230,20 @@ public final class Player {
     }
 
     private void advanceRow() {
-        if (context.jumpPending || context.breakPending) {
-            // Resolve Bxx + Dxx interaction (ProTracker rule):
-            // Bxx alone  → jump to order jumpOrder, row 0
-            // Dxx alone  → jump to orderPos+1, row breakRow
-            // Both       → jump to order jumpOrder, row breakRow
-
-            if (context.jumpPending && !context.breakPending) {
-                patternSequenceIndex = context.jumpOrder;
-                rowIndex = 0;
-            } else if (context.breakPending && !context.jumpPending) {
-                patternSequenceIndex = Math.min(patternSequenceIndex + 1, mod.getLength() - 1);
-                rowIndex = context.breakRow;
-            } else {
-                // Both: Bxx sets order, Dxx sets row
-                patternSequenceIndex = context.jumpOrder;
-                rowIndex = context.breakRow;
-            }
-
-            context.jumpPending = false;
-            context.breakPending = false;
+        if (context.jumpPending && context.breakPending) {
+            // both position jump and pattern break effects are pending
+            patternSequenceIndex = context.jumpSequenceIndex;
+            rowIndex = context.breakRowIndex;
+        } else if (context.jumpPending) {
+            // jump to row 0 of specific pattern
+            patternSequenceIndex = context.jumpSequenceIndex;
+            rowIndex = 0;
+        } else if (context.breakPending) {
+            // jump to next pattern's specific row
+            patternSequenceIndex = patternSequenceIndex + 1;
+            rowIndex = context.breakRowIndex;
         } else {
+            // advance single row
             rowIndex++;
 
             if (rowIndex >= 64) {
@@ -258,6 +251,11 @@ public final class Player {
                 patternSequenceIndex++;
             }
         }
+
+        context.jumpPending = false;
+        context.jumpSequenceIndex = 0;
+        context.breakPending = false;
+        context.breakRowIndex = 0;
     }
 
     private void handleNewRow(Mod mod, int clockHz, int samplingRate) {

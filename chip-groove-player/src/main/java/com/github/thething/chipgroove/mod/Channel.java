@@ -1,13 +1,13 @@
 package com.github.thething.chipgroove.mod;
 
-// TODO extract previous values to a new history data object
+// TODO extract previous values to some other object such as existing Context or new object
 final class Channel {
 
     int period;
     int previousPeriod;
     int sampleNumber;
     double samplePosition;
-    double previousSamplePosition; // TODO extract
+    double previousSamplePosition;
     double sampleIncrement;
     int volume;
     boolean muted; //
@@ -123,6 +123,4 @@ final class Channel {
         double noteHz = Mods.periodToHz(period, clockHz);
         sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
     }
-
-    // TODO channel state formatting
 }

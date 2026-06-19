@@ -11,9 +11,9 @@ final class Context {
     int tempo; // beats per minute
     int samplesPerTick;
     boolean jumpPending;
-    int jumpOrder;
+    int jumpSequenceIndex;
     boolean breakPending;
-    int breakRow;
+    int breakRowIndex;
 
     Context(int samplingRate) {
         reset(samplingRate);
@@ -23,9 +23,9 @@ final class Context {
         speed = DEFAULT_SPEED;
         updateTempo(DEFAULT_TEMPO, samplingRate);
         jumpPending = false;
-        jumpOrder = 0;
+        jumpSequenceIndex = 0;
         breakPending = false;
-        breakRow = 0;
+        breakRowIndex = 0;
     }
 
     void updateTempo(int tempo, int samplingRate) {

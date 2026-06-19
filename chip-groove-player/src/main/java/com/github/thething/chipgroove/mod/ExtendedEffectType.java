@@ -113,13 +113,11 @@ public enum ExtendedEffectType implements Effect {
     ROUGH_PANNING(0x08) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("ROUGH_PANNING not supported");
+            // original amiga doesn't support this effect
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 

@@ -143,21 +143,18 @@ public enum EffectType implements Effect {
     SET_PANNING_POSITION(0x08) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("SET_PANNING_POSITION not supported");
+            // original amiga doesn't support this effect
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 
     SET_SAMPLE_OFFSET(0x09) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            int offset = ((channel.effectArgumentX << 4) | channel.effectArgumentY) * 256;
-            channel.samplePosition = offset;
+            channel.samplePosition = ((channel.effectArgumentX << 4) | channel.effectArgumentY) * 256;
         }
 
         @Override
@@ -181,13 +178,13 @@ public enum EffectType implements Effect {
     POSITION_JUMP(0x0B) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("POSITION_JUMP not supported");
+            int jumpSequenceIndex = (channel.effectArgumentX << 4) | channel.effectArgumentY;
+            context.jumpPending = true;
+            context.jumpSequenceIndex = jumpSequenceIndex;
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 
@@ -209,7 +206,7 @@ public enum EffectType implements Effect {
         public void onNewRow(Channel channel, Context context, Config config) {
             int row = channel.effectArgumentX * 10 + channel.effectArgumentY;
             context.breakPending = true;
-            context.breakRow = Maths.clamp(row, 0, 63);
+            context.breakRowIndex = Maths.clamp(row, 0, 63);
         }
 
         @Override
