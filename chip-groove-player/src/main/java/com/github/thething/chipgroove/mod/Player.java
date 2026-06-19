@@ -17,6 +17,7 @@ import static java.util.Objects.checkFromIndexSize;
 import static java.util.Objects.requireNonNull;
 
 // TODO add volume mulitplier
+
 public final class Player {
 
     public static final int PAL_CLOCK_HZ = 3_546_895;
@@ -73,13 +74,20 @@ public final class Player {
 
         reset();
 
-        while (this.patternSequenceIndex < patternSequenceIndex) {
-            // TODO disable logging regardless of setting when advancing patterns
-            int readCount = read(TMP_BUFFER);
+        // disable logging regardless of config setting, we don't want to log skipped patterns
+        boolean logEnabled = config.logEnabled;
+        config.logEnabled = false;
 
-            if (readCount <= 0) {
-                throw new RuntimeException("Unexpected end of audio");
+        try {
+            while (this.patternSequenceIndex < patternSequenceIndex) {
+                int readCount = read(TMP_BUFFER);
+
+                if (readCount <= 0) {
+                    throw new RuntimeException("Unexpected end of audio");
+                }
             }
+        } finally {
+            config.logEnabled = logEnabled;
         }
     }
 
@@ -153,7 +161,7 @@ public final class Player {
             if (tickIndex == 0) {
                 int patternIndex = mod.getPatternIndex(patternSequenceIndex);
 
-                if (config.logRowEnabled) {
+                if (config.logEnabled && config.logRowEnabled) {
                     config.logger.println(Formatters.formatRow(mod, patternIndex, rowIndex));
                 }
 
@@ -327,14 +335,14 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
         Player player = new Player();
         player.setMod(mod);
-        player.changePositionToPattern(1);
-        player.setMuted(0, true);
-        player.setMuted(1, true);
-        player.setMuted(2, true);
+        // player.changePositionToPattern(1);
+        // player.setMuted(0, true);
+        // player.setMuted(1, true);
+        // player.setMuted(2, true);
         // player.setMuted(3, true);
         player.play();
 
@@ -342,8 +350,6 @@ public final class Player {
 
         AudioFormat format = player.getCompatibleAudioFormat();
         int readCount = player.read(buffer);
-
-        System.out.println(readCount);
 
         Resources.saveAudio(new File("axel.wav"), format, buffer, 0, readCount);
     }

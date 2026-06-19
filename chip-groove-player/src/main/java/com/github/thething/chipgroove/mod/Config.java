@@ -5,6 +5,7 @@ import java.io.PrintStream;
 final class Config {
 
     private static final PrintStream DEFAULT_LOG_STREAM = System.out;
+    private static final boolean DEFAULT_LOG_ENABLED = true;
     private static final boolean DEFAULT_LOG_ROW_ENABLED = true;
     private static final int DEFAULT_SAMPLING_RATE = 48_000;
     private static final boolean DEFAULT_STEREO = true;
@@ -15,6 +16,7 @@ final class Config {
     int maxPeriod;
     boolean stereo;
     PrintStream logger;
+    boolean logEnabled;
     boolean logRowEnabled;
 
     Config() {
@@ -28,6 +30,7 @@ final class Config {
         this.maxPeriod = 856;
         this.stereo = DEFAULT_STEREO;
         this.logger = DEFAULT_LOG_STREAM;
+        this.logEnabled = DEFAULT_LOG_ENABLED;
         this.logRowEnabled = DEFAULT_LOG_ROW_ENABLED;
     }
 }
