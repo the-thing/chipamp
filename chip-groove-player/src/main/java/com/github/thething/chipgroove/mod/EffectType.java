@@ -89,14 +89,7 @@ public enum EffectType implements Effect {
     TONE_PORTAMENTO_WITH_VOLUME_SLIDE(0x05) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            if (channel.effectArgumentX != 0 && channel.effectArgumentY != 0) {
-                // TODO create config flag to decide if we should prioritize X over delta (x + y)
-                channel.volumeSlide = channel.effectArgumentX;
-            } else if (channel.effectArgumentX != 0) {
-                channel.volumeSlide = channel.effectArgumentX;
-            } else if (channel.effectArgumentY != 0) {
-                channel.volumeSlide = -channel.effectArgumentY;
-            }
+            EffectType.storeVolumeSlide(channel, config.volumeSlideDelta);
         }
 
         @Override
@@ -109,14 +102,7 @@ public enum EffectType implements Effect {
     VIBRATO_WITH_VOLUME_SLIDE(0x06) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            if (channel.effectArgumentX != 0 && channel.effectArgumentY != 0) {
-                // TODO create config flag to decide if we should prioritize X over delta (x + y)
-                channel.volumeSlide = channel.effectArgumentX;
-            } else if (channel.effectArgumentX != 0) {
-                channel.volumeSlide = channel.effectArgumentX;
-            } else if (channel.effectArgumentY != 0) {
-                channel.volumeSlide = -channel.effectArgumentY;
-            }
+            EffectType.storeVolumeSlide(channel, config.volumeSlideDelta);
         }
 
         @Override
@@ -183,14 +169,7 @@ public enum EffectType implements Effect {
     VOLUME_SLIDE(0x0A) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            if (channel.effectArgumentX != 0 && channel.effectArgumentY != 0) {
-                // TODO create config flag to decide if we should prioritize X over delta (x + y)
-                channel.volumeSlide = channel.effectArgumentX;
-            } else if (channel.effectArgumentX != 0) {
-                channel.volumeSlide = channel.effectArgumentX;
-            } else if (channel.effectArgumentY != 0) {
-                channel.volumeSlide = -channel.effectArgumentY;
-            }
+            EffectType.storeVolumeSlide(channel, config.volumeSlideDelta);
         }
 
         @Override
@@ -318,6 +297,28 @@ public enum EffectType implements Effect {
 
         channel.period = Maths.clamp(channel.vibratoPeriod + delta, config.minPeriod, config.maxPeriod);
         channel.vibratoPosition += channel.vibratoSpeed;
+    }
+
+    /**
+     * Decide which parameter to use for the volume slide based on configuration.
+     */
+    private static void storeVolumeSlide(Channel channel, boolean volumeSlideDelta) {
+        if (channel.effectArgumentX != 0 && channel.effectArgumentY != 0) {
+            // it is possible that both arguments are not zero
+            if (volumeSlideDelta) {
+                // compute delta
+                channel.volumeSlide = channel.effectArgumentX - channel.effectArgumentY;
+            } else {
+                // prioritize x over delta (x + y)
+                channel.volumeSlide = channel.effectArgumentX;
+            }
+        } else if (channel.effectArgumentX != 0) {
+            channel.volumeSlide = channel.effectArgumentX;
+        } else if (channel.effectArgumentY != 0) {
+            channel.volumeSlide = -channel.effectArgumentY;
+        }
+
+        // when both arguments are zero, we retain old volume slide
     }
 
     private static void applyVolumeSlide(Channel channel) {

@@ -7,16 +7,14 @@ final class Channel {
     int previousPeriod;
     int sampleNumber;
     double samplePosition;
-    double previousSamplePosition;
+    double previousSamplePosition; // TODO extract
     double sampleIncrement;
     int volume;
-    boolean muted;
-    boolean left;
+    boolean muted; //
+    boolean left; // hardware panning, left == true -> 100% goes to left channel, otherwise 100% goes to right channel
 
     EffectType effectType;
-    EffectType previousEffectType;
     ExtendedEffectType extendedEffectType;
-    ExtendedEffectType previousExtendedEffectType;
     int effectArgumentX;
     int effectArgumentY;
     int previousEffectArgumentX;
@@ -58,9 +56,7 @@ final class Channel {
         muted = false;
 
         effectType = EffectType.NONE;
-        previousEffectType = EffectType.NONE;
         extendedEffectType = ExtendedEffectType.NONE;
-        previousExtendedEffectType = ExtendedEffectType.NONE;
         effectArgumentX = 0;
         effectArgumentY = 0;
 

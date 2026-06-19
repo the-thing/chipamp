@@ -16,7 +16,7 @@ import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
 import static java.util.Objects.requireNonNull;
 
-// TODO add volume mulitplier
+// TODO add a global volume multiplier
 
 public final class Player {
 
@@ -260,8 +260,6 @@ public final class Player {
             // copy data to previous fields before applying new changes
             channel.previousPeriod = channel.period;
             channel.previousSamplePosition = channel.samplePosition;
-            channel.previousEffectType = channel.effectType;
-            channel.previousExtendedEffectType = channel.extendedEffectType;
             channel.previousEffectArgumentX = channel.effectArgumentX;
             channel.previousEffectArgumentY = channel.effectArgumentY;
 
@@ -335,7 +333,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("_1995.mod");
 
         Player player = new Player();
         player.setMod(mod);
@@ -344,7 +342,7 @@ public final class Player {
         // player.setMuted(1, true);
         // player.setMuted(2, true);
         // player.setMuted(3, true);
-        // player.play();
+        player.play();
 
         byte[] buffer = new byte[1024 * 1024 * 1024];
 
