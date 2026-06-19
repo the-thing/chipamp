@@ -3,7 +3,7 @@ package com.github.thething.chipgroove.mod;
 final class Context {
 
     private static final int DEFAULT_SPEED = 6;
-    private static final int DEFAULT_TEMPO = 126;
+    private static final int DEFAULT_TEMPO = 125;
 
     int speed; // ticks per row
     int tempo; // beats per minute

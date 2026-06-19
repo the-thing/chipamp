@@ -342,7 +342,7 @@ public final class Player {
         // player.setMuted(1, true);
         // player.setMuted(2, true);
         // player.setMuted(3, true);
-        player.play();
+        // player.play();
 
         byte[] buffer = new byte[1024 * 1024 * 1024];
 
