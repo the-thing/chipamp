@@ -260,15 +260,12 @@ public final class Player {
             // copy data to previous fields before applying new changes
             channel.previousPeriod = channel.period;
             channel.previousSamplePosition = channel.samplePosition;
-            channel.previousEffectArgumentX = channel.effectArgumentX;
-            channel.previousEffectArgumentY = channel.effectArgumentY;
 
             Sample sample = instrument.sampleNumber() > 0 ? mod.getSample(instrument.sampleNumber() - 1) : null;
             int period = instrument.period();
 
             // TODO this needs to be split per sample and instrument
             if (sample != null && period > 0) {
-
                 if (sample.getFineTune() != 0) {
                     period = ModTables.getFineTunePeriod(period, sample.getFineTune());
                 }
@@ -276,7 +273,6 @@ public final class Player {
                 channel.updatePeriod(period, clockHz, samplingRate);
                 channel.sampleNumber = instrument.sampleNumber();
                 channel.samplePosition = 0.0;
-                channel.volume = sample.getVolume();
 
                 channel.resetOnNewSampleWithPeriod();
             }
@@ -333,16 +329,16 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Captain - Space Debris.mod");
+        Mod mod = modLoader.load("Hoffman - Eon.mod");
 
         Player player = new Player();
         player.setMod(mod);
-        // player.changePositionToPattern(13);
+        player.changePositionToPattern(11);
         // player.setMuted(0, true);
-        // player.setMuted(1, true);
-        // player.setMuted(2, true);
-        // player.setMuted(3, true);
-        // player.play();
+        player.setMuted(1, true);
+        player.setMuted(2, true);
+        player.setMuted(3, true);
+        player.play();
 
         byte[] buffer = new byte[1024 * 1024 * 1024];
 

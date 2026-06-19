@@ -17,8 +17,6 @@ final class Channel {
     ExtendedEffectType extendedEffectType;
     int effectArgumentX;
     int effectArgumentY;
-    int previousEffectArgumentX;
-    int previousEffectArgumentY;
 
     /**
      * List of effect that are related to specific effects, but they also persist and should carry over even if there
@@ -61,11 +59,14 @@ final class Channel {
         effectArgumentY = 0;
 
         portamentoPeriod = 0;
+        volumeSlide = 0;
+
         vibratoPosition = 0;
         vibratoSpeed = 0;
         vibratoAmplitude = 0;
         vibratoPeriod = 0;
         vibratoWaveformType = WaveformType.SINE;
+
         tremoloPosition = 0;
         tremoloSpeed = 0;
         tremoloAmplitude = 0;

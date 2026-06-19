@@ -117,12 +117,12 @@ public enum EffectType implements Effect {
         public void onNewRow(Channel channel, Context context, Config config) {
             // use old tremolo speed if not specified
             if (channel.effectArgumentX != 0) {
-                channel.tremoloSpeed = channel.previousEffectArgumentX;
+                channel.tremoloSpeed = channel.effectArgumentX;
             }
 
             // use old tremolo depth if not specified
             if (channel.effectArgumentY != 0) {
-                channel.tremoloAmplitude = channel.previousEffectArgumentY;
+                channel.tremoloAmplitude = channel.effectArgumentY;
             }
 
             channel.tremoloVolume = channel.volume;
