@@ -123,4 +123,6 @@ final class Channel {
         double noteHz = Mods.periodToHz(period, clockHz);
         sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
     }
+
+    // TODO channel state formatting
 }
