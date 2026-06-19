@@ -26,11 +26,6 @@ public final class ModTables {
 
     private static final int[] PERIODS;
 
-    /**
-     * ProTracker sine table used by both vibrato and tremolo. 32 entries covering a quarter... actually ProTracker uses
-     * a full 32-step table representing one half cycle 0..255, mirrored for the other half. This is the exact table
-     * from the original source.
-     */
     public static final int[] SINE_TABLE = {
             0, 24, 49, 74, 97, 120, 141, 161, 180,
             197, 212, 224, 235, 244, 250, 253, 255,
