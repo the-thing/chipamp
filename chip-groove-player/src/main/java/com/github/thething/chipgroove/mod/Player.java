@@ -2,12 +2,14 @@ package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.Formatters;
 import com.github.thething.chipgroove.common.Maths;
+import com.github.thething.chipgroove.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.io.File;
 import java.io.IOException;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
@@ -67,18 +69,18 @@ public final class Player {
         reset();
     }
 
-    public void changePositionToSequence(int patternSequenceIndex) {
+    public void changePositionSequence(int sequenceIndex) {
         requireNonNull(mod);
-        requireInRange(patternSequenceIndex, 0, mod.getLength() - 1);
+        requireInRange(sequenceIndex, 0, mod.getLength() - 1);
 
         reset();
 
         // disable logging regardless of config setting, we don't want to log skipped patterns
-        boolean logEnabled = config.logEnabled;
-        config.logEnabled = false;
+        boolean logEnabled = config.logInfoEnabled;
+        config.logInfoEnabled = false;
 
         try {
-            while (this.patternSequenceIndex < patternSequenceIndex) {
+            while (this.patternSequenceIndex < sequenceIndex) {
                 int readCount = read(TMP_BUFFER);
 
                 if (readCount <= 0) {
@@ -86,11 +88,11 @@ public final class Player {
                 }
             }
         } finally {
-            config.logEnabled = logEnabled;
+            config.logInfoEnabled = logEnabled;
         }
     }
 
-    public void changePositionToPattern(int patternIndex) {
+    public void changePositionPattern(int patternIndex) {
         requireNonNull(mod);
         requireInRange(patternIndex, 0, mod.getPatternCount());
 
@@ -104,7 +106,7 @@ public final class Player {
             sequenceIndex++;
         }
 
-        changePositionToSequence(sequenceIndex);
+        changePositionSequence(sequenceIndex);
     }
 
     public int getBytesPerTick() {
@@ -174,7 +176,7 @@ public final class Player {
             if (tickIndex == 0) {
                 int patternIndex = mod.getPatternIndex(patternSequenceIndex);
 
-                if (config.logEnabled && config.logRowEnabled) {
+                if (config.logInfoEnabled && config.logErrorEnabled) {
                     config.logger.println(Formatters.formatRow(mod, patternIndex, rowIndex));
                 }
 
@@ -271,7 +273,29 @@ public final class Player {
             Sample sample = instrument.sampleNumber() > 0 ? mod.getSample(instrument.sampleNumber() - 1) : null;
             int period = instrument.period();
 
-            // TODO this needs to be split per sample and instrument
+//            if (sample != null) {
+//                channel.resetOnNewSample();
+//
+//                channel.sampleNumber = instrument.sampleNumber();
+//                channel.samplePosition = 0.0;
+//                channel.volume = sample.getVolume();
+//            }
+
+//            if (period > 0) {
+//                // TODO decide what to do with the period
+//                //  do we just set the period or adjust it from finetune from a previous sample on that channel?
+//                channel.updatePeriod(period, clockHz, samplingRate);
+//            }
+
+//            if (sample != null && period > 0) {
+//                if (sample.getFineTune() != 0) {
+//                    period = ModTables.getFineTunePeriod(period, sample.getFineTune());
+//                }
+//
+//                channel.updatePeriod(period, clockHz, samplingRate);
+//            }
+
+//            // TODO this needs to be split per sample and instrument
             if (sample != null && period > 0) {
                 if (sample.getFineTune() != 0) {
                     period = ModTables.getFineTunePeriod(period, sample.getFineTune());
@@ -281,7 +305,7 @@ public final class Player {
                 channel.sampleNumber = instrument.sampleNumber();
                 channel.samplePosition = 0.0;
 
-                channel.resetOnNewSampleWithPeriod();
+                channel.resetOnNewSample();
             }
 
             if (sample != null) {
@@ -329,6 +353,14 @@ public final class Player {
         channels[channelIndex].muted = muted;
     }
 
+    public void setLogInfoEnabled(boolean enabled) {
+        this.config.logInfoEnabled = enabled;
+    }
+
+    public void setLogErrorEnabled(boolean enabled) {
+        this.config.logErrorEnabled = enabled;
+    }
+
     public AudioFormat getCompatibleAudioFormat() {
         return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, config.samplingRate, 16,
                 config.stereo ? 2 : 1, 4, config.samplingRate, false);
@@ -336,21 +368,24 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
+        Mod mod = modLoader.load("Hoffman - Eon.mod");
 
         Player player = new Player();
+        player.setLogInfoEnabled(true);
+        player.setLogErrorEnabled(true);
         player.setMod(mod);
-        // player.changePositionToPattern(14);
         // player.setMuted(0, true);
         // player.setMuted(1, true);
         // player.setMuted(2, true);
         // player.setMuted(3, true);
-        // player.play();
-        player.play(0, 1);
+         player.play();
 
-        // byte[] buffer = new byte[1024 * 1024 * 1024];
-        // AudioFormat format = player.getCompatibleAudioFormat();
-        // int readCount = player.read(buffer);
-        // Resources.saveAudio(new File("nearly.wav"), format, buffer, 0, readCount);
+//        player.changePositionSequence(8);
+//        player.play(8, 9);
+
+        byte[] buffer = new byte[1024 * 1024 * 1024];
+        AudioFormat format = player.getCompatibleAudioFormat();
+        int readCount = player.read(buffer);
+        Resources.saveAudio(new File("space debris.wav"), format, buffer, 0, readCount);
     }
 }
