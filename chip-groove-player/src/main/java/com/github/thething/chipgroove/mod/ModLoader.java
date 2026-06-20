@@ -110,6 +110,10 @@ public final class ModLoader {
         int fineTune = in.readByte();
         int volume = in.readUnsignedByte();
 
+        // FIXME
+        // some mods store it as unsigned, so we have to convert back to signed (eye of the tiger)
+        // fineTune = (fineTune << 28) >> 28;
+
         int loopStart = in.readUnsignedShort() << 1; // in words - multiply by 2
         int loopLength = in.readUnsignedShort() << 1; // in words - multiply by 2
 
