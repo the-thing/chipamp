@@ -5,8 +5,8 @@ import java.io.PrintStream;
 final class Config {
 
     private static final PrintStream DEFAULT_LOG_STREAM = System.out;
-    private static final boolean DEFAULT_LOG_ENABLED = true;
-    private static final boolean DEFAULT_LOG_ROW_ENABLED = true;
+    private static final boolean DEFAULT_LOG_ENABLED = false;
+    private static final boolean DEFAULT_LOG_ROW_ENABLED = false;
     private static final int DEFAULT_SAMPLING_RATE = 48_000;
     private static final boolean DEFAULT_STEREO = true;
     private static final boolean DEFAULT_VOLUME_SLIDE_DELTA = false;
