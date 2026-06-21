@@ -9,6 +9,10 @@ final class Channel {
     int volume;
     boolean left; // hardware panning, left == true -> 100% goes to left channel, otherwise 100% goes to right channel
 
+    /**
+     * Effect data for the current row.
+     */
+
     EffectType effectType;
     ExtendedEffectType extendedEffectType;
     int effectArgumentX;
