@@ -22,9 +22,9 @@ public final class Sample {
     private final String name;
 
     /**
-     * Lowest four bits represent a signed nibble (-8..7) which is the fine tune value for the sample. Each fine tune
-     * step changes the note 1/8th of a semitone. Implemented by switching to a different table of period-values for
-     * each fine tune value.
+     * The lowest four bits represent a signed nibble (-8..7) which is the fine tune value for the sample. Each fine
+     * tune step changes the note 1/8th of a semitone. Implemented by switching to a different table of period-values
+     * for each fine-tune value.
      */
     private final int fineTune;
 
@@ -83,8 +83,8 @@ public final class Sample {
     }
 
     /**
-     * Loop enabled flag. The first word of the sample is overwritten by the tracker, so a length of 2 still means an
-     * empty sample.
+     * Loop enabled flag. The tracker overwrites the first word of the sample, so a length of 2 still means an empty
+     * sample.
      *
      * @return sample length in bytes
      */
@@ -100,18 +100,9 @@ public final class Sample {
         return Arrays.copyOf(data, data.length);
     }
 
-    public int readData(byte[] dst, int offset, int length) {
-        checkFromIndexSize(offset, length, dst.length);
-
-        int copyLength = Math.min(length, data.length);
-        System.arraycopy(data, 0, dst, offset, copyLength);
-
-        return copyLength;
-    }
-
     /**
-     * Sample length in bytes. The first word of the sample is overwritten by the tracker, so a length of 2 still means
-     * an empty sample.
+     * Sample length in bytes. The tracker overwrites the first word of the sample, so a length of 2 still means an
+     * empty sample.
      *
      * @return sample length in bytes
      */

@@ -49,6 +49,7 @@ public enum EffectType implements Effect {
     TONE_PORTAMENTO(0x03) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
+            // FIXME this doesn't seem to work properly
             // store new period as portamento period
             channel.portamentoPeriod = channel.period;
 

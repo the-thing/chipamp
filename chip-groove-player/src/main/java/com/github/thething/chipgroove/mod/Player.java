@@ -9,7 +9,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.io.File;
 import java.io.IOException;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
@@ -273,29 +272,6 @@ public final class Player {
             Sample sample = instrument.sampleNumber() > 0 ? mod.getSample(instrument.sampleNumber() - 1) : null;
             int period = instrument.period();
 
-//            if (sample != null) {
-//                channel.resetOnNewSample();
-//
-//                channel.sampleNumber = instrument.sampleNumber();
-//                channel.samplePosition = 0.0;
-//                channel.volume = sample.getVolume();
-//            }
-
-//            if (period > 0) {
-//                // TODO decide what to do with the period
-//                //  do we just set the period or adjust it from finetune from a previous sample on that channel?
-//                channel.updatePeriod(period, clockHz, samplingRate);
-//            }
-
-//            if (sample != null && period > 0) {
-//                if (sample.getFineTune() != 0) {
-//                    period = ModTables.getFineTunePeriod(period, sample.getFineTune());
-//                }
-//
-//                channel.updatePeriod(period, clockHz, samplingRate);
-//            }
-
-//            // TODO this needs to be split per sample and instrument
             if (sample != null && period > 0) {
                 if (sample.getFineTune() != 0) {
                     period = ModTables.getFineTunePeriod(period, sample.getFineTune());
@@ -378,11 +354,11 @@ public final class Player {
         player.setMuted(1, true);
         // player.setMuted(2, true);
         player.setMuted(3, true);
-        // player.play();
 
         player.changePositionSequence(0);
         player.play(1);
 
+        // TODO add suport for dynamic array
 //        byte[] buffer = new byte[1024 * 1024 * 1024];
 //        AudioFormat format = player.getCompatibleAudioFormat();
 //        int readCount = player.read(buffer);

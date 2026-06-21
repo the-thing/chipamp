@@ -72,8 +72,6 @@ final class Channel {
         tremoloWaveformType = WaveformType.SINE;
     }
 
-    // TODO there is a special flag in extra effect to decide if vibrato and tremolo need to retrigger
-    // TODO currently we always retrigger
     void resetOnNewSample() {
         vibratoPosition = 0;
         tremoloPosition = 0;
