@@ -264,27 +264,32 @@ public final class Player {
             Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
             Channel channel = channels[channelIndex];
 
-            // copy data to previous fields before applying new changes
-            channel.previousPeriod = channel.period;
-            channel.previousSamplePosition = channel.samplePosition;
-
             Sample sample = instrument.sampleNumber() > 0 ? mod.getSample(instrument.sampleNumber() - 1) : null;
             int period = instrument.period();
 
-            if (sample != null && period > 0) {
-                if (sample.getFineTune() != 0) {
-                    period = ModTables.getFineTunePeriod(period, sample.getFineTune());
-                }
-
-                channel.updatePeriod(period, clockHz, samplingRate);
+            if (sample != null) {
                 channel.sampleNumber = instrument.sampleNumber();
-                channel.samplePosition = 0.0;
-
-                channel.resetOnNewSample();
+                channel.volume = sample.getVolume();
             }
 
-            if (sample != null) {
-                channel.volume = sample.getVolume();
+            if (period > 0) {
+                Sample activeSample = channel.sampleNumber > 0 ? mod.getSample(channel.sampleNumber - 1) : null;
+
+                if (activeSample != null && activeSample.getFineTune() != 0) {
+                    period = ModTables.getFineTunePeriod(period, activeSample.getFineTune());
+                }
+
+                boolean portamento = instrument.effectType() == EffectType.TONE_PORTAMENTO ||
+                        instrument.effectType() == EffectType.TONE_PORTAMENTO_WITH_VOLUME_SLIDE;
+
+                if (portamento) {
+                    // for portamento, we only set target
+                    channel.portamentoTargetPeriod = period;
+                } else if (activeSample != null) {
+                    channel.updatePeriod(period, clockHz, samplingRate);
+                    channel.samplePosition = 0.0;
+                    channel.resetOnNewSampleWithPeriod();
+                }
             }
 
             channel.effectType = instrument.effectType();
@@ -314,7 +319,6 @@ public final class Player {
 
     public void setClockHz(int clockHz) {
         this.config.clockHz = clockHz;
-
         // TODO this needs to trigger updates
     }
 
@@ -324,6 +328,7 @@ public final class Player {
         }
 
         config.samplingRate = samplingRate;
+        // TODO this needs to trigger updates for current states
     }
 
     public void setStereoEnabled(boolean stereoEnabled) {
@@ -332,6 +337,10 @@ public final class Player {
 
     public void setStereoFoldDownEnabled(boolean stereoFoldDownEnabled) {
         this.config.stereoFoldDownEnabled = stereoFoldDownEnabled;
+    }
+
+    public void setVolumeSlideDeltaEnabled(boolean volumeSlideDeltaEnabled) {
+        this.config.volumeSlideDeltaEnabled = volumeSlideDeltaEnabled;
     }
 
     public void setMuted(int channelIndex, boolean muted) {
@@ -356,6 +365,7 @@ public final class Player {
         Mod mod = modLoader.load("Captain - Space Debris.mod");
 
         Player player = new Player();
+        player.setStereoFoldDownEnabled(true);
         player.setLogInfoEnabled(true);
         player.setLogErrorEnabled(true);
         player.setMod(mod);
@@ -366,6 +376,7 @@ public final class Player {
 
         player.changePositionSequence(0);
         player.play(1);
+        // player.play();
 
         // TODO add suport for dynamic array
 //        byte[] buffer = new byte[1024 * 1024 * 1024];

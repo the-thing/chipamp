@@ -49,13 +49,11 @@ public enum EffectType implements Effect {
     TONE_PORTAMENTO(0x03) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // FIXME this doesn't seem to work properly
-            // store new period as portamento period
-            channel.portamentoPeriod = channel.period;
+            int portamentoSpeed = (channel.effectArgumentX << 4) | channel.effectArgumentY;
 
-            // restore period and sample position from previous row
-            channel.updatePeriod(channel.previousPeriod, config.clockHz, config.samplingRate);
-            channel.samplePosition = channel.previousSamplePosition;
+            if (portamentoSpeed != 0) {
+                channel.portamentoSpeed = portamentoSpeed;
+            }
         }
 
         @Override
@@ -90,9 +88,9 @@ public enum EffectType implements Effect {
     TONE_PORTAMENTO_WITH_VOLUME_SLIDE(0x05) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            System.out.println("TONE_PORTAMENTO_WITH_VOLUME_SLIDE");
-            // FIXME this needs to portamento implemenation
-            EffectType.storeVolumeSlide(channel, config.volumeSlideDelta);
+            // tone portamento with volume slide doesn't store portamento arguments
+            // it just continues the old portamento if present
+            EffectType.storeVolumeSlide(channel, config.volumeSlideDeltaEnabled);
         }
 
         @Override
@@ -105,7 +103,7 @@ public enum EffectType implements Effect {
     VIBRATO_WITH_VOLUME_SLIDE(0x06) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            EffectType.storeVolumeSlide(channel, config.volumeSlideDelta);
+            EffectType.storeVolumeSlide(channel, config.volumeSlideDeltaEnabled);
         }
 
         @Override
@@ -147,9 +145,7 @@ public enum EffectType implements Effect {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
             // original amiga doesn't support this effect
-            if (config.logErrorEnabled) {
-                config.logger.println("SET_PANNING_POSITION is not supported");
-            }
+            // TODO
         }
 
         @Override
@@ -172,7 +168,7 @@ public enum EffectType implements Effect {
     VOLUME_SLIDE(0x0A) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            EffectType.storeVolumeSlide(channel, config.volumeSlideDelta);
+            EffectType.storeVolumeSlide(channel, config.volumeSlideDeltaEnabled);
         }
 
         @Override
@@ -286,10 +282,19 @@ public enum EffectType implements Effect {
     }
 
     private static void applyTonePortamento(Channel channel, Config config) {
-        int periodIncrement = (channel.effectArgumentX << 4) | channel.effectArgumentY;
-        int maxPeriod = Math.min(channel.portamentoPeriod, config.maxPeriod);
+        if (channel.portamentoTargetPeriod == 0 || channel.period == channel.portamentoTargetPeriod) {
+            return;
+        }
 
-        int newPeriod = Maths.clamp(channel.period + periodIncrement, config.minPeriod, maxPeriod);
+        int newPeriod;
+
+        if (channel.period > channel.portamentoTargetPeriod) {
+            newPeriod = Math.max(channel.portamentoTargetPeriod, channel.period - channel.portamentoSpeed);
+        } else {
+            newPeriod = Math.min(channel.portamentoTargetPeriod, channel.period + channel.portamentoSpeed);
+        }
+
+        newPeriod = Maths.clamp(newPeriod, config.minPeriod, config.maxPeriod);
         channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
     }
 
@@ -312,7 +317,7 @@ public enum EffectType implements Effect {
                 // compute delta
                 channel.volumeSlide = channel.effectArgumentX - channel.effectArgumentY;
             } else {
-                // prioritize x over delta (x + y)
+                // prioritize x over delta (x - y)
                 channel.volumeSlide = channel.effectArgumentX;
             }
         } else if (channel.effectArgumentX != 0) {

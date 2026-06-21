@@ -3,13 +3,10 @@ package com.github.thething.chipgroove.mod;
 final class Channel {
 
     int period;
-    int previousPeriod;
     int sampleNumber;
     double samplePosition;
-    double previousSamplePosition;
     double sampleIncrement;
     int volume;
-    // TODO maybe this should be a part of config?
     boolean left; // hardware panning, left == true -> 100% goes to left channel, otherwise 100% goes to right channel
 
     EffectType effectType;
@@ -19,10 +16,12 @@ final class Channel {
 
     /**
      * List of effect that are related to specific effects, but they also persist and should carry over even if there
-     * are effects in between.
+     * are different effects in between.
      */
 
-    int portamentoPeriod;
+    int portamentoTargetPeriod;
+    int portamentoSpeed;
+
     int volumeSlide; // volume recorded when hitting first row with volume slide or vibrato / tremolo with volume side
 
     int vibratoPosition;
@@ -44,10 +43,8 @@ final class Channel {
 
     void reset() {
         period = 0;
-        previousPeriod = 0;
         sampleNumber = 0;
         samplePosition = 0.0;
-        previousSamplePosition = 0.0;
         sampleIncrement = 0.0;
         volume = 0;
 
@@ -56,7 +53,7 @@ final class Channel {
         effectArgumentX = 0;
         effectArgumentY = 0;
 
-        portamentoPeriod = 0;
+        portamentoTargetPeriod = 0;
         volumeSlide = 0;
 
         vibratoPosition = 0;
@@ -72,7 +69,7 @@ final class Channel {
         tremoloWaveformType = WaveformType.SINE;
     }
 
-    void resetOnNewSample() {
+    void resetOnNewSampleWithPeriod() {
         vibratoPosition = 0;
         tremoloPosition = 0;
     }
