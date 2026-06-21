@@ -9,7 +9,7 @@ final class Channel {
     double previousSamplePosition;
     double sampleIncrement;
     int volume;
-    boolean muted; //
+    // TODO maybe this should be a part of config?
     boolean left; // hardware panning, left == true -> 100% goes to left channel, otherwise 100% goes to right channel
 
     EffectType effectType;
@@ -50,7 +50,6 @@ final class Channel {
         previousSamplePosition = 0.0;
         sampleIncrement = 0.0;
         volume = 0;
-        muted = false;
 
         effectType = EffectType.NONE;
         extendedEffectType = ExtendedEffectType.NONE;

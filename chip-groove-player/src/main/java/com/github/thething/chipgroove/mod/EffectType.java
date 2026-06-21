@@ -89,6 +89,8 @@ public enum EffectType implements Effect {
     TONE_PORTAMENTO_WITH_VOLUME_SLIDE(0x05) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
+            System.out.println("TONE_PORTAMENTO_WITH_VOLUME_SLIDE");
+            // FIXME this needs to portamento implemenation
             EffectType.storeVolumeSlide(channel, config.volumeSlideDelta);
         }
 

@@ -49,7 +49,7 @@ public final class Player {
         this.channels[6] = new Channel(false);
         this.channels[7] = new Channel(true);
 
-        this.config = new Config();
+        this.config = new Config(CHANNEL_COUNT);
         this.context = new Context(config.samplingRate);
 
         samplesRemainingInCurrentTick = context.samplesPerTick;
@@ -114,11 +114,11 @@ public final class Player {
     }
 
     public void play() throws LineUnavailableException {
-        play(0, mod.getLength());
+        play(mod.getLength());
     }
 
-    public void play(int startSequenceIndex, int endSequenceIndex) throws LineUnavailableException {
-        checkFromToIndex(startSequenceIndex, endSequenceIndex, mod.getLength());
+    public void play(int endSequenceIndex) throws LineUnavailableException {
+        checkFromToIndex(0, endSequenceIndex, mod.getLength());
 
         byte[] buffer = new byte[4];
         AudioFormat format = getCompatibleAudioFormat();
@@ -128,7 +128,7 @@ public final class Player {
         line.open(format);
         line.start();
 
-        while (patternSequenceIndex >= startSequenceIndex && patternSequenceIndex < endSequenceIndex) {
+        while (patternSequenceIndex < endSequenceIndex) {
             int readCount = read(buffer);
 
             if (readCount <= 0) {
@@ -202,7 +202,7 @@ public final class Player {
             // we increment the sample even if the channel is muted (need to push the sample position)
             float sample = channels[i].nextSample(mod);
 
-            if (channels[i].muted) {
+            if (config.muted[i]) {
                 continue;
             }
 
@@ -350,7 +350,7 @@ public final class Player {
     }
 
     public void setMuted(int channelIndex, boolean muted) {
-        channels[channelIndex].muted = muted;
+        config.muted[channelIndex] = muted;
     }
 
     public void setLogInfoEnabled(boolean enabled) {
@@ -368,24 +368,24 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Hoffman - Eon.mod");
+        Mod mod = modLoader.load("Captain - Space Debris.mod");
 
         Player player = new Player();
         player.setLogInfoEnabled(true);
         player.setLogErrorEnabled(true);
         player.setMod(mod);
-        // player.setMuted(0, true);
-        // player.setMuted(1, true);
+        player.setMuted(0, true);
+        player.setMuted(1, true);
         // player.setMuted(2, true);
-        // player.setMuted(3, true);
-         player.play();
+        player.setMuted(3, true);
+        // player.play();
 
-//        player.changePositionSequence(8);
-//        player.play(8, 9);
+        player.changePositionSequence(0);
+        player.play(1);
 
-        byte[] buffer = new byte[1024 * 1024 * 1024];
-        AudioFormat format = player.getCompatibleAudioFormat();
-        int readCount = player.read(buffer);
-        Resources.saveAudio(new File("space debris.wav"), format, buffer, 0, readCount);
+//        byte[] buffer = new byte[1024 * 1024 * 1024];
+//        AudioFormat format = player.getCompatibleAudioFormat();
+//        int readCount = player.read(buffer);
+//        Resources.saveAudio(new File("space debris.wav"), format, buffer, 0, readCount);
     }
 }

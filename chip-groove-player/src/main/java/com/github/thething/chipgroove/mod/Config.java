@@ -13,6 +13,7 @@ final class Config {
     private static final int DEFAULT_MIN_PERIOD = 108; // minimum standard octave with fine tune +7
     private static final int DEFAULT_MAX_PERIOD = 907; // maximum standard octave with fine tune -8
 
+    final boolean[] muted;
     int clockHz;
     int samplingRate;
     int minPeriod;
@@ -23,7 +24,8 @@ final class Config {
     boolean logInfoEnabled;
     boolean logErrorEnabled;
 
-    Config() {
+    Config(int channelCount) {
+        this.muted = new boolean[channelCount];
         reset();
     }
 
