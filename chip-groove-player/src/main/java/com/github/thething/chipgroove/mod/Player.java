@@ -269,14 +269,14 @@ public final class Player {
 
             if (sample != null) {
                 channel.sampleNumber = instrument.sampleNumber();
-                channel.volume = sample.getVolume();
+                channel.volume = sample.volume();
             }
 
             if (period > 0) {
                 Sample activeSample = channel.sampleNumber > 0 ? mod.getSample(channel.sampleNumber - 1) : null;
 
-                if (activeSample != null && activeSample.getFineTune() != 0) {
-                    period = ModTables.getFineTunePeriod(period, activeSample.getFineTune());
+                if (activeSample != null && activeSample.fineTune() != 0) {
+                    period = ModTables.getFineTunePeriod(period, activeSample.fineTune());
                 }
 
                 boolean portamento = instrument.effectType() == EffectType.TONE_PORTAMENTO ||
