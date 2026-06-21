@@ -2,7 +2,6 @@ package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.Formatters;
 import com.github.thething.chipgroove.common.Maths;
-import com.github.thething.chipgroove.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -17,7 +16,6 @@ import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.requireNonNull;
 
 // TODO add a global volume multiplier
-
 public final class Player {
 
     public static final int PAL_CLOCK_HZ = 3_546_895;
@@ -35,7 +33,7 @@ public final class Player {
     private int patternSequenceIndex;
     private int rowIndex;
     private int tickIndex;
-    private int samplesRemainingInCurrentTick; // TODO this culd be sample index
+    private int samplesRemainingInCurrentTick; // TODO this culd be sample index (we have to test speed change)
 
     public Player() {
         this.channels = new Channel[CHANNEL_COUNT];
@@ -109,7 +107,7 @@ public final class Player {
     }
 
     public int getBytesPerTick() {
-        return config.stereo ? 4 : 2;
+        return config.stereoEnabled ? 4 : 2;
     }
 
     public void play() throws LineUnavailableException {
@@ -215,9 +213,10 @@ public final class Player {
         left = Maths.clamp(left, -1.0f, 1.0f);
         right = Maths.clamp(right, -1.0f, 1.0f);
 
-        // TODO stereo fold down vs hard panning
-        left = (left + right) * 0.5f;
-        right = left;
+        if (config.stereoFoldDownEnabled) {
+            left = (left + right) * 0.5f;
+            right = left;
+        }
 
         short lefty = (short) (left * 32767.0f);
         short righty = (short) (right * 32767.0f);
@@ -298,7 +297,7 @@ public final class Player {
     }
 
     private void applyNewRowEffects() {
-        // TODO effects that affect global channels should be taken from highest channel
+        // TODO decided what to do with effects that modify global state
 
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Channel channel = channels[channelIndex];
@@ -313,8 +312,10 @@ public final class Player {
         }
     }
 
-    public int getSamplingRate() {
-        return config.samplingRate;
+    public void setClockHz(int clockHz) {
+        this.config.clockHz = clockHz;
+
+        // TODO this needs to trigger updates
     }
 
     public void setSamplingRate(int samplingRate) {
@@ -323,6 +324,14 @@ public final class Player {
         }
 
         config.samplingRate = samplingRate;
+    }
+
+    public void setStereoEnabled(boolean stereoEnabled) {
+        this.config.stereoEnabled = stereoEnabled;
+    }
+
+    public void setStereoFoldDownEnabled(boolean stereoFoldDownEnabled) {
+        this.config.stereoFoldDownEnabled = stereoFoldDownEnabled;
     }
 
     public void setMuted(int channelIndex, boolean muted) {
@@ -339,7 +348,7 @@ public final class Player {
 
     public AudioFormat getCompatibleAudioFormat() {
         return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, config.samplingRate, 16,
-                config.stereo ? 2 : 1, 4, config.samplingRate, false);
+                config.stereoEnabled ? 2 : 1, 4, config.samplingRate, false);
     }
 
     public static void main(String[] args) throws IOException, LineUnavailableException {

@@ -8,7 +8,8 @@ final class Config {
     private static final boolean DEFAULT_LOG_ENABLED = false;
     private static final boolean DEFAULT_LOG_ROW_ENABLED = false;
     private static final int DEFAULT_SAMPLING_RATE = 48_000;
-    private static final boolean DEFAULT_STEREO = true;
+    private static final boolean DEFAULT_STEREO_ENABLED = true;
+    private static final boolean DEFAULT_STEREO_FOLD_DOWN_ENABLED = true;
     private static final boolean DEFAULT_VOLUME_SLIDE_DELTA = false;
     private static final int DEFAULT_MIN_PERIOD = 108; // minimum standard octave with fine tune +7
     private static final int DEFAULT_MAX_PERIOD = 907; // maximum standard octave with fine tune -8
@@ -18,7 +19,8 @@ final class Config {
     int samplingRate;
     int minPeriod;
     int maxPeriod;
-    boolean stereo;
+    boolean stereoEnabled;
+    boolean stereoFoldDownEnabled;
     boolean volumeSlideDelta;
     PrintStream logger;
     boolean logInfoEnabled;
@@ -34,7 +36,8 @@ final class Config {
         this.samplingRate = DEFAULT_SAMPLING_RATE;
         this.minPeriod = DEFAULT_MIN_PERIOD;
         this.maxPeriod = DEFAULT_MAX_PERIOD;
-        this.stereo = DEFAULT_STEREO;
+        this.stereoEnabled = DEFAULT_STEREO_ENABLED;
+        this.stereoFoldDownEnabled = DEFAULT_STEREO_FOLD_DOWN_ENABLED;
         this.volumeSlideDelta = DEFAULT_VOLUME_SLIDE_DELTA;
         this.logger = DEFAULT_LOG_STREAM;
         this.logInfoEnabled = DEFAULT_LOG_ENABLED;
