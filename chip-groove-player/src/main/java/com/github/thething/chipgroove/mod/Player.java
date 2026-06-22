@@ -296,9 +296,6 @@ public final class Player {
                     // for portamento, we only set target period
                     channel.portamentoTargetPeriod = period;
                 } else if (activeSample != null) {
-                    if (channelIndex == 2) {
-                        System.out.println("updatePeriodAndIncrement: " + period);
-                    }
                     channel.updatePeriodAndIncrement(period, clockHz, samplingRate);
                     channel.samplePosition = 0.0f;
                     channel.resetOnNewSampleWithPeriod();
@@ -413,19 +410,19 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Angelwings - 1995.mod");
+        Mod mod = modLoader.load("Allister Brimble - Superfrog World 1.mod");
 
         Player player = new Player();
         player.setStereoFoldDownEnabled(true);
         player.setLogInfoEnabled(true);
         player.setLogErrorEnabled(true);
         player.setMod(mod);
-        player.setMuted(0, true);
-        player.setMuted(1, true);
+        // player.setMuted(0, true);
+        // player.setMuted(1, true);
         // player.setMuted(2, true);
-        player.setMuted(3, true);
+        // player.setMuted(3, true);
 
-        player.play(1);
+        player.play();
 
         // TODO add suport for dynamic array
 //         byte[] buffer = new byte[1024 * 1024 * 1024];

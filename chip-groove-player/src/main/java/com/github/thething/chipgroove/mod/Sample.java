@@ -37,7 +37,7 @@ public record Sample(String name, int fineTune, int volume, int loopStart, int l
         this.fineTune = requireInRange(fineTune, MIN_FINE_TUNE, MAX_FINE_TUNE);
         this.volume = requireInRange(volume, MIN_VOLUME, MAX_VOLUME);
         this.loopStart = requireInRange(loopStart, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
-        checkFromIndexSize(loopStart, loopLength - 2, data.length);
+        checkFromIndexSize(loopStart, Math.max(0, loopLength - 2), data.length);
         this.loopLength = loopLength;
         requireInRange(data.length, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
         this.data = data;
