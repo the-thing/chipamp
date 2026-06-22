@@ -445,12 +445,12 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-        // player.play();
+        player.play();
 
-        // TODO add suport for dynamic array
-        byte[] buffer = new byte[1024 * 1024 * 100];
-        AudioFormat format = player.getCompatibleAudioFormat();
-        int readCount = player.read(buffer);
-        Resources.saveAudio(new File("Allister Brimble - Superfrog World 1.wav"), format, buffer, 0, readCount);
+        // TODO add support for dynamic array
+//        byte[] buffer = new byte[1024 * 1024 * 100];
+//        AudioFormat format = player.getCompatibleAudioFormat();
+//        int readCount = player.read(buffer);
+//        Resources.saveAudio(new File("Allister Brimble - Superfrog World 1.wav"), format, buffer, 0, readCount);
     }
 }

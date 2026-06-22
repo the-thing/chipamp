@@ -124,13 +124,18 @@ public enum ExtendedEffectType implements Effect {
     RETRIGGER_SAMPLE(0x09) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("RETRIGGER_SAMPLE not supported");
+            channel.retriggerPosition = 0;
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
+            channel.retriggerPosition++;
+
+            int interval = channel.effectArgumentY;
+
+            if (interval > 0 && channel.retriggerPosition % interval == 0) {
+                channel.samplePosition = 0.0f;
+            }
         }
     },
 

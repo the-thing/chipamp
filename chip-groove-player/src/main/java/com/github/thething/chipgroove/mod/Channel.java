@@ -34,6 +34,8 @@ final class Channel {
     int portamentoTargetPeriod;
     int portamentoSpeed;
 
+    int retriggerPosition;
+
     int volumeSlide; // volume recorded when hitting first row with volume slide or vibrato / tremolo with volume side
 
     int vibratoPosition;
@@ -72,6 +74,8 @@ final class Channel {
 
         portamentoTargetPeriod = 0;
         portamentoSpeed = 0;
+
+        retriggerPosition = 0;
 
         volumeSlide = 0;
 
