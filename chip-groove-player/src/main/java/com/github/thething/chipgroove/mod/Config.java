@@ -32,7 +32,7 @@ final class Config {
     }
 
     void reset() {
-        this.clockHz = Player.PAL_CLOCK_HZ;
+        this.clockHz = ModTables.PAL_CLOCK_HZ;
         this.samplingRate = DEFAULT_SAMPLING_RATE;
         this.minPeriod = DEFAULT_MIN_PERIOD;
         this.maxPeriod = DEFAULT_MAX_PERIOD;

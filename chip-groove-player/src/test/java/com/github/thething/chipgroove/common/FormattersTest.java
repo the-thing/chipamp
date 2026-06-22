@@ -19,7 +19,6 @@ class FormattersTest {
         modLoader = new ModLoader();
     }
 
-    // TODO print more patterns
     @Test
     void shouldReturnFormattedPatterns() throws IOException {
         String expected = Resources.readText("axel-patterns.txt");
@@ -43,7 +42,7 @@ class FormattersTest {
         Mod mod = modLoader.load("DJ Metune - Axel F.mod");
         String formatted = Formatters.formatRow(mod, 5, 10);
 
-        assertThat(formatted).isEqualTo("0000014A | 05 | 0A | A-3 12 --- | F-3 05 A01 | --- -- --- | --- -- EB1 |");
+        assertThat(formatted).isEqualTo("0005 | 10 | A-3 12 --- | F-3 05 A01 | --- -- --- | --- -- EB1 |");
     }
 
     @Test

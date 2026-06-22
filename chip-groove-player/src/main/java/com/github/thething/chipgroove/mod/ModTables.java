@@ -6,6 +6,11 @@ import java.util.List;
 
 public final class ModTables {
 
+    public static final int PAL_CLOCK_HZ = 3_546_895;
+
+    public static final int NTSC_CLOCK_HZ = 3_579_545;
+
+
     /**
      * ProTracker period table. Octaves 0 and 4 are non-standard.
      *

@@ -83,8 +83,7 @@ public final class Formatters {
     }
 
     public static void formatRow(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
-        out.append(' ');
-        out.append(Strings.padLeft(String.valueOf(patternIndex), 3, '0'));
+        out.append(Strings.padLeft(String.valueOf(patternIndex), 4, '0'));
         out.append(" |");
 
         out.append(' ');

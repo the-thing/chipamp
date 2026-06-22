@@ -18,9 +18,6 @@ import static java.util.Objects.requireNonNull;
 // TODO add a global volume multiplier
 public final class Player {
 
-    public static final int PAL_CLOCK_HZ = 3_546_895;
-    public static final int NTSC_CLOCK_HZ = 3_579_545;
-
     private static final int CHANNEL_COUNT = 8;
     private static final byte[] TMP_BUFFER = new byte[4];
 
