@@ -62,6 +62,10 @@ public final class Player {
     }
 
     public void setMod(Mod mod) {
+        if (mod.getChannelCount() > CHANNEL_COUNT) {
+            throw new IllegalArgumentException("Mod has more channels than the player supports");
+        }
+
         this.mod = mod;
         reset();
     }
@@ -203,11 +207,8 @@ public final class Player {
                 continue;
             }
 
-            if (channels[i].left) {
-                left += sample;
-            } else {
-                right += sample;
-            }
+            left += sample * channels[i].left;
+            right += sample * channels[i].right;
         }
 
         left = Maths.clamp(left, -1.0f, 1.0f);
@@ -283,7 +284,7 @@ public final class Player {
                         instrument.effectType() == EffectType.TONE_PORTAMENTO_WITH_VOLUME_SLIDE;
 
                 if (portamento) {
-                    // for portamento, we only set target
+                    // for portamento, we only set target period
                     channel.portamentoTargetPeriod = period;
                 } else if (activeSample != null) {
                     channel.updatePeriod(period, clockHz, samplingRate);
@@ -318,8 +319,12 @@ public final class Player {
     }
 
     public void setClockHz(int clockHz) {
+        if (clockHz <= 0) {
+            throw new IllegalArgumentException("clockHz must be greater than zero");
+        }
+
         this.config.clockHz = clockHz;
-        // TODO this needs to trigger updates
+        recalculatePeriods();
     }
 
     public void setSamplingRate(int samplingRate) {
@@ -328,7 +333,15 @@ public final class Player {
         }
 
         config.samplingRate = samplingRate;
-        // TODO this needs to trigger updates for current states
+        recalculatePeriods();
+    }
+
+    private void recalculatePeriods() {
+        if (mod != null) {
+            for (int i = 0; i < mod.getChannelCount(); i++) {
+                channels[i].updatePeriod(channels[i].period, config.clockHz, config.samplingRate);
+            }
+        }
     }
 
     public void setStereoEnabled(boolean stereoEnabled) {
@@ -369,19 +382,17 @@ public final class Player {
         player.setLogInfoEnabled(true);
         player.setLogErrorEnabled(true);
         player.setMod(mod);
-        player.setMuted(0, true);
-        player.setMuted(1, true);
+        // player.setMuted(0, true);
+        // player.setMuted(1, true);
         // player.setMuted(2, true);
-        player.setMuted(3, true);
+        // player.setMuted(3, true);
 
-        player.changePositionSequence(0);
-        player.play(1);
-        // player.play();
+        player.play(2);
 
         // TODO add suport for dynamic array
-//        byte[] buffer = new byte[1024 * 1024 * 1024];
-//        AudioFormat format = player.getCompatibleAudioFormat();
-//        int readCount = player.read(buffer);
-//        Resources.saveAudio(new File("space debris.wav"), format, buffer, 0, readCount);
+        // byte[] buffer = new byte[1024 * 1024 * 1024];
+        // AudioFormat format = player.getCompatibleAudioFormat();
+        // int readCount = player.read(buffer);
+        // Resources.saveAudio(new File("space debris.wav"), format, buffer, 0, readCount);
     }
 }

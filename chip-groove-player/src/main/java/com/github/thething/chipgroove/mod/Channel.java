@@ -1,5 +1,7 @@
 package com.github.thething.chipgroove.mod;
 
+import static com.github.thething.chipgroove.common.Requirements.requireInRange;
+
 final class Channel {
 
     int period;
@@ -7,7 +9,8 @@ final class Channel {
     double samplePosition;
     double sampleIncrement;
     int volume;
-    boolean left; // hardware panning, left == true -> 100% goes to left channel, otherwise 100% goes to right channel
+    float left;
+    float right;
 
     /**
      * Effect data for the current row.
@@ -41,8 +44,8 @@ final class Channel {
     WaveformType tremoloWaveformType;
 
     Channel(boolean left) {
-        this.left = left;
         reset();
+        setPanningPosition(left ? 0.0f : 1.0f);
     }
 
     void reset() {
@@ -119,5 +122,10 @@ final class Channel {
 
         double noteHz = Mods.periodToHz(period, clockHz);
         sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
+    }
+
+    void setPanningPosition(float right) {
+        this.right = requireInRange(right, 0.0f, 1.0f);
+        this.left = 1.0f - right;
     }
 }

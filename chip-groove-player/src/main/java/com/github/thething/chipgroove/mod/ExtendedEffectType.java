@@ -113,8 +113,7 @@ public enum ExtendedEffectType implements Effect {
     ROUGH_PANNING(0x08) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // original amiga doesn't support this effect
-            // TODO
+            channel.setPanningPosition(channel.effectArgumentY / 16.0f);
         }
 
         @Override
