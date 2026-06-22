@@ -12,4 +12,8 @@ public final class Maths {
     public static float clamp(float value, float min, float max) {
         return Math.max(min, Math.min(value, max));
     }
+
+    public static int nextPowerOfTwo(int value) {
+        return 1 << (32 - Integer.numberOfLeadingZeros(value - 1));
+    }
 }

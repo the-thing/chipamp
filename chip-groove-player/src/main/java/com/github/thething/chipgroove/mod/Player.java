@@ -2,12 +2,14 @@ package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.Formatters;
 import com.github.thething.chipgroove.common.Maths;
+import com.github.thething.chipgroove.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.io.File;
 import java.io.IOException;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
@@ -221,10 +223,16 @@ public final class Player {
         short lefty = (short) (left * 32767.0f);
         short righty = (short) (right * 32767.0f);
 
-        output[offset] = (byte) (lefty & 0xFF);
-        output[offset + 1] = (byte) ((lefty >> 8) & 0xFF);
-        output[offset + 2] = (byte) (righty & 0xFF);
-        output[offset + 3] = (byte) ((righty >> 8) & 0xFF);
+        if (config.stereoEnabled) {
+            output[offset] = (byte) (lefty & 0xFF);
+            output[offset + 1] = (byte) ((lefty >> 8) & 0xFF);
+            output[offset + 2] = (byte) (righty & 0xFF);
+            output[offset + 3] = (byte) ((righty >> 8) & 0xFF);
+        } else {
+            short mono = (short) ((lefty + righty) / 2);
+            output[offset] = (byte) (mono & 0xFF);
+            output[offset + 1] = (byte) ((mono >> 8) & 0xFF);
+        }
 
         sampleIndex++;
     }
@@ -374,7 +382,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Captain - Space Debris.mod");
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
         Player player = new Player();
         player.setStereoFoldDownEnabled(true);
@@ -386,12 +394,12 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-        player.play();
+        // player.play();
 
-        // TODO add suport for dynamic array
-        // byte[] buffer = new byte[1024 * 1024 * 1024];
-        // AudioFormat format = player.getCompatibleAudioFormat();
-        // int readCount = player.read(buffer);
-        // Resources.saveAudio(new File("space debris.wav"), format, buffer, 0, readCount);
+         // TODO add suport for dynamic array
+//         byte[] buffer = new byte[1024 * 1024 * 1024];
+//         AudioFormat format = player.getCompatibleAudioFormat();
+//         int readCount = player.read(buffer);
+//         Resources.saveAudio(new File("axel-mono.wav"), format, buffer, 0, readCount);
     }
 }

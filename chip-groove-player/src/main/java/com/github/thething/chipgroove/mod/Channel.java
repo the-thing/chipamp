@@ -65,6 +65,8 @@ final class Channel {
         effectArgumentY = 0;
 
         portamentoTargetPeriod = 0;
+        portamentoSpeed = 0;
+
         volumeSlide = 0;
 
         vibratoPosition = 0;
