@@ -42,12 +42,14 @@ final class Channel {
     int vibratoSpeed;
     int vibratoAmplitude;
     int vibratoPeriod; // period recorded when hitting first row in vibrato
+    boolean vibratoRetrigger;
     WaveformType vibratoWaveformType;
 
     int tremoloPosition;
     int tremoloSpeed;
     int tremoloAmplitude;
     int tremoloVolume; // volume recorded when hitting first row with tremolo
+    boolean tremoloRetrigger;
     WaveformType tremoloWaveformType;
 
     Channel(boolean right) {
@@ -83,18 +85,25 @@ final class Channel {
         vibratoSpeed = 0;
         vibratoAmplitude = 0;
         vibratoPeriod = 0;
+        vibratoRetrigger = true;
         vibratoWaveformType = WaveformType.SINE;
 
         tremoloPosition = 0;
         tremoloSpeed = 0;
         tremoloAmplitude = 0;
         tremoloVolume = 0;
+        tremoloRetrigger = true;
         tremoloWaveformType = WaveformType.SINE;
     }
 
     void resetOnNewSampleWithPeriod() {
-        vibratoPosition = 0;
-        tremoloPosition = 0;
+        if (vibratoRetrigger) {
+            vibratoPosition = 0;
+        }
+
+        if (tremoloRetrigger) {
+            tremoloPosition = 0;
+        }
     }
 
     float nextSample() {

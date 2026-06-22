@@ -61,8 +61,17 @@ public enum ExtendedEffectType implements Effect {
     SET_VIBRATO_WAVEFORM(0x04) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("SET_VIBRATO_WAVEFORM not supported");
+            int form = channel.effectArgumentY;
+            boolean retrigger = form < 4;
+
+            WaveformType waveformType = switch (form % 4) {
+                case 1 -> WaveformType.SAWTOOTH;
+                case 2 -> WaveformType.SQUARE;
+                default -> WaveformType.SINE;
+            };
+
+            channel.vibratoRetrigger = retrigger;
+            channel.vibratoWaveformType = waveformType;
         }
 
         @Override
@@ -100,13 +109,21 @@ public enum ExtendedEffectType implements Effect {
     SET_TREMOLO_WAVEFORM(0x07) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("SET_TREMOLO_WAVEFORM not supported");
+            int form = channel.effectArgumentY;
+            boolean retrigger = form < 4;
+
+            WaveformType waveformType = switch (form % 4) {
+                case 1 -> WaveformType.SAWTOOTH;
+                case 2 -> WaveformType.SQUARE;
+                default -> WaveformType.SINE;
+            };
+
+            channel.tremoloRetrigger = retrigger;
+            channel.tremoloWaveformType = waveformType;
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 
