@@ -296,8 +296,11 @@ public final class Player {
                     // for portamento, we only set target period
                     channel.portamentoTargetPeriod = period;
                 } else if (activeSample != null) {
+                    if (channelIndex == 2) {
+                        System.out.println("updatePeriodAndIncrement: " + period);
+                    }
                     channel.updatePeriodAndIncrement(period, clockHz, samplingRate);
-                    channel.samplePosition = 0.0;
+                    channel.samplePosition = 0.0f;
                     channel.resetOnNewSampleWithPeriod();
                 }
             }
@@ -417,12 +420,12 @@ public final class Player {
         player.setLogInfoEnabled(true);
         player.setLogErrorEnabled(true);
         player.setMod(mod);
-        // player.setMuted(0, true);
-        // player.setMuted(1, true);
+        player.setMuted(0, true);
+        player.setMuted(1, true);
         // player.setMuted(2, true);
-        // player.setMuted(3, true);
+        player.setMuted(3, true);
 
-        player.play();
+        player.play(1);
 
         // TODO add suport for dynamic array
 //         byte[] buffer = new byte[1024 * 1024 * 1024];

@@ -54,9 +54,9 @@ public final class Mods {
      * Period 428 → middle C (C-3) = 8287 Hz on PAL. The mixer then re-samples this to whatever output rate you have
      * chosen.
      */
-    public static double periodToHz(int period, double clock) {
+    public static float periodToHz(int period, float clock) {
         if (period <= 0) {
-            return 0.0;
+            return 0.0f;
         }
 
         return clock / period;

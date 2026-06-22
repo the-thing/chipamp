@@ -219,17 +219,6 @@ public final class ModTables {
         return -1;
     }
 
-    /**
-     * Shift a period up or down by a number of semitones, reusing the existing fine-tune period table rather than a
-     * separate ratio table. Each index step in {@link #FINE_TUNE_PERIODS} corresponds to exactly one semitone, so a
-     * shift is just a clamped index offset into the row matching the sample's fine tune.
-     * <p>
-     * Used by the arpeggio effect, which needs to jump by whole semitones rather than slide continuously like
-     * portamento/vibrato.
-     *
-     * @return the shifted period, or the original period unchanged if it isn't found in the table (e.g. it was itself
-     * produced by a continuous effect like portamento/vibrato and doesn't land exactly on a table entry)
-     */
     public static int shiftPeriodBySemitones(int period, int fineTune, int semitones) {
         if (semitones == 0) {
             return period;
@@ -246,7 +235,6 @@ public final class ModTables {
         return periods[newIndex];
     }
 
-    // TODO write test
     public static String findClosestNote(int period) {
         int index = Arrays.binarySearch(PERIODS, period);
 
