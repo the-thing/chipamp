@@ -37,6 +37,7 @@ public record Sample(String name, int fineTune, int volume, int loopStart, int l
         this.fineTune = requireInRange(fineTune, MIN_FINE_TUNE, MAX_FINE_TUNE);
         this.volume = requireInRange(volume, MIN_VOLUME, MAX_VOLUME);
         this.loopStart = requireInRange(loopStart, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
+        // some mods store loop length as 0 and not 1 world (2 bytes)
         checkFromIndexSize(loopStart, Math.max(0, loopLength - 2), data.length);
         this.loopLength = loopLength;
         requireInRange(data.length, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
