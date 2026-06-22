@@ -30,10 +30,10 @@ public final class Player {
 
     private Mod mod;
 
-    private int patternSequenceIndex;
+    private int sequenceIndex;
     private int rowIndex;
     private int tickIndex;
-    private int samplesRemainingInCurrentTick; // TODO this culd be sample index (we have to test speed change)
+    private int sampleIndex;
 
     public Player() {
         this.channels = new Channel[CHANNEL_COUNT];
@@ -48,17 +48,19 @@ public final class Player {
 
         this.config = new Config(CHANNEL_COUNT);
         this.context = new Context(config.samplingRate);
-
-        samplesRemainingInCurrentTick = context.samplesPerTick;
     }
 
     private void reset() {
         context.reset(config.samplingRate);
-        samplesRemainingInCurrentTick = context.samplesPerTick;
 
         for (int i = 0; i < CHANNEL_COUNT; i++) {
             channels[i].reset();
         }
+
+        sequenceIndex = 0;
+        rowIndex = 0;
+        tickIndex = 0;
+        sampleIndex = 0;
     }
 
     public void setMod(Mod mod) {
@@ -81,7 +83,7 @@ public final class Player {
         config.logInfoEnabled = false;
 
         try {
-            while (this.patternSequenceIndex < sequenceIndex) {
+            while (this.sequenceIndex < sequenceIndex) {
                 int readCount = read(TMP_BUFFER);
 
                 if (readCount <= 0) {
@@ -129,7 +131,7 @@ public final class Player {
         line.open(format);
         line.start();
 
-        while (patternSequenceIndex < endSequenceIndex) {
+        while (sequenceIndex < endSequenceIndex) {
             int readCount = read(buffer);
 
             if (readCount <= 0) {
@@ -163,7 +165,7 @@ public final class Player {
 
         int readCount = 0;
 
-        while (patternSequenceIndex >= startSequenceIndex && patternSequenceIndex < endSequenceIndex && length - offset >= bytesPerTick) {
+        while (sequenceIndex >= startSequenceIndex && sequenceIndex < endSequenceIndex && length - offset >= bytesPerTick) {
             tick(output, offset);
             readCount += bytesPerTick;
             offset += bytesPerTick;
@@ -173,9 +175,9 @@ public final class Player {
     }
 
     private void tick(byte[] output, int offset) {
-        if (samplesRemainingInCurrentTick <= 0) {
+        if (sampleIndex >= context.samplesPerTick) {
             if (tickIndex == 0) {
-                int patternIndex = mod.getPatternIndex(patternSequenceIndex);
+                int patternIndex = mod.getPatternIndex(sequenceIndex);
 
                 if (config.logInfoEnabled && config.logErrorEnabled) {
                     config.logger.println(Formatters.formatRow(mod, patternIndex, rowIndex));
@@ -193,7 +195,7 @@ public final class Player {
                 advanceRow();
             }
 
-            samplesRemainingInCurrentTick = context.samplesPerTick;
+            sampleIndex = 0;
         }
 
         float left = 0.0f;
@@ -227,21 +229,21 @@ public final class Player {
         output[offset + 2] = (byte) (righty & 0xFF);
         output[offset + 3] = (byte) ((righty >> 8) & 0xFF);
 
-        samplesRemainingInCurrentTick--;
+        sampleIndex++;
     }
 
     private void advanceRow() {
         if (context.jumpPending && context.breakPending) {
             // both position jump and pattern break effects are pending
-            patternSequenceIndex = context.jumpSequenceIndex;
+            sequenceIndex = context.jumpSequenceIndex;
             rowIndex = context.breakRowIndex;
         } else if (context.jumpPending) {
             // jump to row 0 of specific pattern
-            patternSequenceIndex = context.jumpSequenceIndex;
+            sequenceIndex = context.jumpSequenceIndex;
             rowIndex = 0;
         } else if (context.breakPending) {
             // jump to next pattern's specific row
-            patternSequenceIndex = patternSequenceIndex + 1;
+            sequenceIndex = sequenceIndex + 1;
             rowIndex = context.breakRowIndex;
         } else {
             // advance single row
@@ -249,7 +251,7 @@ public final class Player {
 
             if (rowIndex >= 64) {
                 rowIndex = 0;
-                patternSequenceIndex++;
+                sequenceIndex++;
             }
         }
 
@@ -261,7 +263,7 @@ public final class Player {
 
     private void handleNewRow(Mod mod, int clockHz, int samplingRate) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-            int patternIndex = mod.getPatternIndex(patternSequenceIndex);
+            int patternIndex = mod.getPatternIndex(sequenceIndex);
             Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
             Channel channel = channels[channelIndex];
 
@@ -387,7 +389,7 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-        player.play(2);
+        player.play();
 
         // TODO add suport for dynamic array
         // byte[] buffer = new byte[1024 * 1024 * 1024];
