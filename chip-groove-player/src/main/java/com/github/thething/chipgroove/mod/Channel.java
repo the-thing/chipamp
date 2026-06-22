@@ -58,8 +58,8 @@ final class Channel {
     }
 
     void reset() {
-        period = 0;
         sample = null;
+        period = 0;
         samplePosition = 0.0f;
         sampleIncrement = 0.0f;
         volume = 0;

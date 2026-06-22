@@ -2,16 +2,15 @@ package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.Formatters;
 import com.github.thething.chipgroove.common.Maths;
-import com.github.thething.chipgroove.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
@@ -93,7 +92,7 @@ public final class Player {
         }
     }
 
-    public void changePositionPattern(int patternIndex) {
+    public int changePositionPattern(int patternIndex) {
         requireNonNull(mod);
         requireInRange(patternIndex, 0, mod.getPatternCount());
 
@@ -108,7 +107,11 @@ public final class Player {
         }
 
         changePositionSequence(sequenceIndex);
+
+        return sequenceIndex;
     }
+
+    // TODO skip
 
     public int getBytesPerTick() {
         return config.stereoEnabled ? 4 : 2;
@@ -143,17 +146,35 @@ public final class Player {
         line.close();
     }
 
+    public byte[] read() {
+        requireNonNull(mod);
+        byte[] buffer = new byte[1024 * 1024];
+
+        int offset = 0;
+        int readCount;
+
+        while ((readCount = read(buffer, offset, buffer.length - offset)) > 0) {
+            offset += readCount;
+
+            if (offset == buffer.length) {
+                buffer = Arrays.copyOf(buffer, buffer.length << 1);
+            }
+        }
+
+        return Arrays.copyOf(buffer, offset);
+    }
+
     public int read(byte[] output) {
         return read(output, 0, output.length);
     }
 
     public int read(byte[] output, int offset, int length) {
-        return read(output, offset, length, 0, mod.getLength());
+        return read(output, offset, length, mod.getLength());
     }
 
-    public int read(byte[] output, int offset, int length, int startSequenceIndex, int endSequenceIndex) {
+    public int read(byte[] output, int offset, int length, int endSequenceIndex) {
         checkFromIndexSize(offset, length, output.length);
-        checkFromToIndex(startSequenceIndex, endSequenceIndex, mod.getLength());
+        checkFromToIndex(0, endSequenceIndex, mod.getLength());
 
         int bytesPerTick = getBytesPerTick();
 
@@ -161,9 +182,10 @@ public final class Player {
             throw new IllegalArgumentException("Buffer too small: " + length + " < " + bytesPerTick);
         }
 
+        int end = offset + length;
         int readCount = 0;
 
-        while (sequenceIndex >= startSequenceIndex && sequenceIndex < endSequenceIndex && length - offset >= bytesPerTick) {
+        while (sequenceIndex < endSequenceIndex && end - offset >= bytesPerTick) {
             tick(output, offset);
             readCount += bytesPerTick;
             offset += bytesPerTick;
@@ -470,7 +492,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("Hoffman - Eon.mod");
 
         Player player = new Player();
         player.setStereoFoldDownEnabled(true);
@@ -478,16 +500,16 @@ public final class Player {
         player.setLogErrorEnabled(true);
         player.setMod(mod);
         // player.setMuted(0, true);
-        // player.setMuted(1, true);
-        // player.setMuted(2, true);
-        // player.setMuted(3, true);
+        player.setMuted(1, true);
+        player.setMuted(2, true);
+        player.setMuted(3, true);
 
-        player.play();
+        int sequenceIndex = player.changePositionPattern(55);
+        player.play(sequenceIndex + 1);
 
-        // TODO add support for dynamic array
-//        byte[] buffer = new byte[1024 * 1024 * 100];
+        // TODO delay sample
+//        byte[] audio = player.read();
 //        AudioFormat format = player.getCompatibleAudioFormat();
-//        int readCount = player.read(buffer);
-//        Resources.saveAudio(new File("Allister Brimble - Superfrog World 1.wav"), format, buffer, 0, readCount);
+//        Resources.saveAudio(new File("Angelwings.wav"), format, audio);
     }
 }
