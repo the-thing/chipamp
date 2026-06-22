@@ -111,11 +111,11 @@ final class Channel {
             return 0.0f;
         }
 
-        int samplePosition = (int) this.samplePosition;
+        float samplePosition = this.samplePosition;
         float out = 0.0f;
 
         if (samplePosition < sample.getDataLength()) {
-            out = sample.getData(samplePosition) / 128.0f;
+            out = sample.getData((int) samplePosition) / 128.0f;
         }
 
         this.samplePosition += sampleIncrement;
