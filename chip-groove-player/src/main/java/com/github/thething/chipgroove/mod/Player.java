@@ -373,6 +373,18 @@ public final class Player {
         config.extendedEffectEnabled[extendedEffectType.getCode()] = enabled;
     }
 
+    public void setAllEffectsEnabled(boolean enabled) {
+        for (int i = 0; i < config.effectEnabled.length; i++) {
+            config.effectEnabled[i] = enabled;
+        }
+    }
+
+    public void setAllExtendedEffectsEnabled(boolean enabled) {
+        for (int i = 0; i < config.extendedEffectEnabled.length; i++) {
+            config.extendedEffectEnabled[i] = enabled;
+        }
+    }
+
     public void setClockHz(int clockHz) {
         if (clockHz <= 0) {
             throw new IllegalArgumentException("clockHz must be greater than zero");
@@ -458,7 +470,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Angelwings - 1995.mod");
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
         Player player = new Player();
         player.setStereoFoldDownEnabled(true);
@@ -470,7 +482,6 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-        player.setEffectEnabled(EffectType.ARPEGGIO, true);
         player.play();
 
         // TODO add support for dynamic array
