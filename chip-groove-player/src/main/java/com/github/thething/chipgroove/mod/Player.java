@@ -312,6 +312,15 @@ public final class Player {
     private void applyNewRowEffects() {
         // TODO decided what to do with effects that modify global state
 
+        // effects that modify global state and flow
+        // SET_SPEED
+        // PATTERN_BREAK
+        // POSITION_JUMP
+        // PATTERN_LOOP
+        // PATTERN_DELAY
+
+        // PATTERN_BREAK + POSITION_JUMP can happen at the same time
+
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Channel channel = channels[channelIndex];
             channel.effectType.onNewRow(channel, context, config);
