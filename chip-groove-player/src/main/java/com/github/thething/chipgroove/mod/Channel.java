@@ -8,6 +8,7 @@ final class Channel {
 
     Sample sample;
     int period;
+    boolean periodTriggered;
     float samplePosition;
     float sampleIncrement;
     int volume;
@@ -60,6 +61,7 @@ final class Channel {
     void reset() {
         sample = null;
         period = 0;
+        periodTriggered = false;
         samplePosition = 0.0f;
         sampleIncrement = 0.0f;
         volume = 0;

@@ -172,7 +172,16 @@ public enum EffectType implements Effect {
     SET_SAMPLE_OFFSET(0x09) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            channel.samplePosition = ((channel.effectArgumentX << 4) | channel.effectArgumentY) * 256;
+            if (!channel.periodTriggered) {
+                return;
+            }
+
+            if (channel.sample == null) {
+                return;
+            }
+
+            float offset = ((channel.effectArgumentX << 4) | channel.effectArgumentY) * 256.0f;
+            channel.samplePosition = offset;
         }
 
         @Override

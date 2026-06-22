@@ -111,7 +111,7 @@ public final class Player {
         return sequenceIndex;
     }
 
-    // TODO skip
+    // TODO add skip methods (ticks, samples, rows, patterns)
 
     public int getBytesPerTick() {
         return config.stereoEnabled ? 4 : 2;
@@ -322,6 +322,8 @@ public final class Player {
                 channel.sample = sample;
                 channel.volume = sample.volume();
             }
+
+            channel.periodTriggered = period > 0;
 
             if (period > 0) {
                 Sample activeSample = channel.sample;
