@@ -37,14 +37,14 @@ public final class Player {
 
     public Player() {
         this.channels = new Channel[CHANNEL_COUNT];
-        this.channels[0] = new Channel(true);
-        this.channels[1] = new Channel(false);
-        this.channels[2] = new Channel(false);
-        this.channels[3] = new Channel(true);
-        this.channels[4] = new Channel(true);
-        this.channels[5] = new Channel(false);
-        this.channels[6] = new Channel(false);
-        this.channels[7] = new Channel(true);
+        this.channels[0] = new Channel(false);
+        this.channels[1] = new Channel(true);
+        this.channels[2] = new Channel(true);
+        this.channels[3] = new Channel(false);
+        this.channels[4] = new Channel(false);
+        this.channels[5] = new Channel(true);
+        this.channels[6] = new Channel(true);
+        this.channels[7] = new Channel(false);
 
         this.config = new Config(CHANNEL_COUNT);
         this.context = new Context(config.samplingRate);
@@ -207,8 +207,8 @@ public final class Player {
                 continue;
             }
 
-            left += sample * channels[i].left;
-            right += sample * channels[i].right;
+            left += sample * channels[i].leftPanning;
+            right += sample * channels[i].rightPanning;
         }
 
         left = Maths.clamp(left, -1.0f, 1.0f);

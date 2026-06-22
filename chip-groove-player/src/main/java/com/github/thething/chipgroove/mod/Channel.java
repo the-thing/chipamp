@@ -4,13 +4,15 @@ import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 
 final class Channel {
 
+    final boolean right;
+
     int period;
     int sampleNumber;
     double samplePosition;
     double sampleIncrement;
     int volume;
-    float left;
-    float right;
+    float leftPanning;
+    float rightPanning;
 
     /**
      * Effect data for the current row.
@@ -43,9 +45,9 @@ final class Channel {
     int tremoloVolume; // volume recorded when hitting first row with tremolo
     WaveformType tremoloWaveformType;
 
-    Channel(boolean left) {
+    Channel(boolean right) {
+        this.right = right;
         reset();
-        setPanningPosition(left ? 0.0f : 1.0f);
     }
 
     void reset() {
@@ -54,6 +56,8 @@ final class Channel {
         samplePosition = 0.0;
         sampleIncrement = 0.0;
         volume = 0;
+        leftPanning = right ? 0.0f : 1.0f;
+        rightPanning = right ? 1.0f : 0.0f;
 
         effectType = EffectType.NONE;
         extendedEffectType = ExtendedEffectType.NONE;
@@ -124,8 +128,8 @@ final class Channel {
         sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
     }
 
-    void setPanningPosition(float right) {
-        this.right = requireInRange(right, 0.0f, 1.0f);
-        this.left = 1.0f - right;
+    void setPanning(float right) {
+        this.rightPanning = requireInRange(right, 0.0f, 1.0f);
+        this.leftPanning = 1.0f - right;
     }
 }
