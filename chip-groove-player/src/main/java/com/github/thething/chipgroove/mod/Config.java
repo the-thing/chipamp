@@ -11,6 +11,7 @@ final class Config {
     private static final boolean DEFAULT_STEREO_ENABLED = true;
     private static final boolean DEFAULT_STEREO_FOLD_DOWN_ENABLED = true;
     private static final boolean DEFAULT_VOLUME_SLIDE_DELTA_ENABLED = false;
+    private static final boolean DEFAULT_IGNORE_LAST_SEQUENCE_JUMP_STATEMENT_ENABLED = true;
     private static final int DEFAULT_MIN_PERIOD = 108; // minimum standard octave with fine tune +7
     private static final int DEFAULT_MAX_PERIOD = 907; // maximum standard octave with fine tune -8
     private static final int DEFAULT_CLOCK_HZ = ModTables.PAL_CLOCK_HZ;
@@ -25,6 +26,7 @@ final class Config {
     boolean stereoEnabled;
     boolean stereoFoldDownEnabled;
     boolean volumeSlideDeltaEnabled;
+    boolean ignoreLastSequenceJumpStatementEnabled;
     PrintStream logger;
     boolean logInfoEnabled;
     boolean logErrorEnabled;
@@ -43,6 +45,7 @@ final class Config {
         this.stereoEnabled = DEFAULT_STEREO_ENABLED;
         this.stereoFoldDownEnabled = DEFAULT_STEREO_FOLD_DOWN_ENABLED;
         this.volumeSlideDeltaEnabled = DEFAULT_VOLUME_SLIDE_DELTA_ENABLED;
+        this.ignoreLastSequenceJumpStatementEnabled = DEFAULT_IGNORE_LAST_SEQUENCE_JUMP_STATEMENT_ENABLED;
         this.logger = DEFAULT_LOG_STREAM;
         this.logInfoEnabled = DEFAULT_LOG_ENABLED;
         this.logErrorEnabled = DEFAULT_LOG_ROW_ENABLED;

@@ -240,6 +240,25 @@ public final class Player {
     }
 
     private void advanceRow() {
+        // make sure we don't loop forever
+        if (config.ignoreLastSequenceJumpStatementEnabled && context.jumpPending && sequenceIndex == mod.getLength() - 1) {
+            context.jumpPending = false;
+            context.jumpSequenceIndex = 0;
+            context.breakPending = false;
+            context.breakRowIndex = 0;
+
+            // reset all channels
+            for (int i = 0; i < mod.getChannelCount(); i++) {
+                channels[i].reset();
+            }
+
+            // move pointers beyond the song
+            sequenceIndex++;
+            rowIndex = 0;
+
+            return;
+        }
+
         if (context.jumpPending && context.breakPending) {
             // both position jump and pattern break effects are pending
             sequenceIndex = context.jumpSequenceIndex;
@@ -267,6 +286,7 @@ public final class Player {
         context.breakPending = false;
         context.breakRowIndex = 0;
     }
+
 
     private void handleNewRow(Mod mod, int clockHz, int samplingRate) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
@@ -391,6 +411,10 @@ public final class Player {
         this.config.volumeSlideDeltaEnabled = volumeSlideDeltaEnabled;
     }
 
+    public void setIgnoreLastSequenceJumpStatementEnabled(boolean ignoreLastSequenceJumpStatementEnabled) {
+        this.config.ignoreLastSequenceJumpStatementEnabled = ignoreLastSequenceJumpStatementEnabled;
+    }
+
     public void setLogger(PrintStream logger) {
         this.config.logger = requireNonNull(logger);
     }
@@ -422,12 +446,12 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-        player.play();
+        // player.play();
 
         // TODO add suport for dynamic array
-//         byte[] buffer = new byte[1024 * 1024 * 1024];
-//         AudioFormat format = player.getCompatibleAudioFormat();
-//         int readCount = player.read(buffer);
-//         Resources.saveAudio(new File("Angelwings - 1995.wav"), format, buffer, 0, readCount);
+        byte[] buffer = new byte[1024 * 1024 * 100];
+        AudioFormat format = player.getCompatibleAudioFormat();
+        int readCount = player.read(buffer);
+        Resources.saveAudio(new File("Allister Brimble - Superfrog World 1.wav"), format, buffer, 0, readCount);
     }
 }
