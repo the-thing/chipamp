@@ -1,5 +1,7 @@
 package com.github.thething.chipgroove.mod;
 
+import com.github.thething.chipgroove.common.Maths;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +11,6 @@ public final class ModTables {
     public static final int PAL_CLOCK_HZ = 3_546_895;
 
     public static final int NTSC_CLOCK_HZ = 3_579_545;
-
 
     /**
      * ProTracker period table. Octaves 0 and 4 are non-standard.
@@ -203,16 +204,46 @@ public final class ModTables {
     }
 
     public static int getPeriodIndex(int period) {
-        // fine tune 0 is at index 8
-        int[] standardPeriods = FINE_TUNE_PERIODS[8];
+        return getPeriodIndex(period, 0);
+    }
 
-        for (int i = 0; i < standardPeriods.length; i++) {
-            if (period == standardPeriods[i]) {
+    public static int getPeriodIndex(int period, int fineTune) {
+        int[] periods = FINE_TUNE_PERIODS[fineTune + 8];
+
+        for (int i = 0; i < periods.length; i++) {
+            if (period == periods[i]) {
                 return i;
             }
         }
 
         return -1;
+    }
+
+    /**
+     * Shift a period up or down by a number of semitones, reusing the existing fine-tune period table rather than a
+     * separate ratio table. Each index step in {@link #FINE_TUNE_PERIODS} corresponds to exactly one semitone, so a
+     * shift is just a clamped index offset into the row matching the sample's fine tune.
+     * <p>
+     * Used by the arpeggio effect, which needs to jump by whole semitones rather than slide continuously like
+     * portamento/vibrato.
+     *
+     * @return the shifted period, or the original period unchanged if it isn't found in the table (e.g. it was itself
+     * produced by a continuous effect like portamento/vibrato and doesn't land exactly on a table entry)
+     */
+    public static int shiftPeriodBySemitones(int period, int fineTune, int semitones) {
+        if (semitones == 0) {
+            return period;
+        }
+
+        int[] periods = FINE_TUNE_PERIODS[fineTune + 8];
+        int index = getPeriodIndex(period, fineTune);
+
+        if (index == -1) {
+            return period;
+        }
+
+        int newIndex = Maths.clamp(index + semitones, 0, periods.length - 1);
+        return periods[newIndex];
     }
 
     // TODO write test

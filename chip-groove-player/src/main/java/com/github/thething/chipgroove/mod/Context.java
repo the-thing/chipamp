@@ -5,8 +5,6 @@ final class Context {
     private static final int DEFAULT_SPEED = 6;
     private static final int DEFAULT_TEMPO = 125;
 
-    // TODO check which of these effects modify global state
-
     int speed; // ticks per row
     int tempo; // beats per minute
     int samplesPerTick;
@@ -21,14 +19,14 @@ final class Context {
 
     void reset(int samplingRate) {
         speed = DEFAULT_SPEED;
-        updateTempo(DEFAULT_TEMPO, samplingRate);
+        updateTempoAndSamplesPerTick(DEFAULT_TEMPO, samplingRate);
         jumpPending = false;
         jumpSequenceIndex = 0;
         breakPending = false;
         breakRowIndex = 0;
     }
 
-    void updateTempo(int tempo, int samplingRate) {
+    void updateTempoAndSamplesPerTick(int tempo, int samplingRate) {
         this.tempo = tempo;
         this.samplesPerTick = samplesPerTick(tempo, samplingRate);
     }

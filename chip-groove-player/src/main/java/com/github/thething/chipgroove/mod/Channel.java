@@ -6,10 +6,10 @@ final class Channel {
 
     final boolean right;
 
+    Sample sample;
     int period;
-    int sampleNumber;
-    double samplePosition;
-    double sampleIncrement;
+    double samplePosition; // TODO change to float
+    double sampleIncrement; // TODO change to flaot
     int volume;
     float leftPanning;
     float rightPanning;
@@ -27,6 +27,9 @@ final class Channel {
      * List of effect that are related to specific effects, but they also persist and should carry over even if there
      * are different effects in between.
      */
+
+    int arpeggioPosition;
+    int arpeggioPeriod;
 
     int portamentoTargetPeriod;
     int portamentoSpeed;
@@ -52,7 +55,7 @@ final class Channel {
 
     void reset() {
         period = 0;
-        sampleNumber = 0;
+        sample = null;
         samplePosition = 0.0;
         sampleIncrement = 0.0;
         volume = 0;
@@ -63,6 +66,9 @@ final class Channel {
         extendedEffectType = ExtendedEffectType.NONE;
         effectArgumentX = 0;
         effectArgumentY = 0;
+
+        arpeggioPosition = 0;
+        arpeggioPeriod = 0;
 
         portamentoTargetPeriod = 0;
         portamentoSpeed = 0;
@@ -87,14 +93,8 @@ final class Channel {
         tremoloPosition = 0;
     }
 
-    float nextSample(Mod mod) {
-        if (sampleNumber <= 0) {
-            return 0.0f;
-        }
-
-        Sample sample = mod.getSample(sampleNumber - 1);
-
-        if (sample.isEmpty()) {
+    float nextSample() {
+        if (sample == null || sample.isEmpty()) {
             return 0.0f;
         }
 
@@ -123,11 +123,16 @@ final class Channel {
         return out * (volume / 64.0f);
     }
 
-    void updatePeriod(int period, int clockHz, int samplingRate) {
+    void updatePeriodAndIncrement(int period, int clockHz, int samplingRate) {
         this.period = period;
 
         double noteHz = Mods.periodToHz(period, clockHz);
         sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0;
+    }
+
+    void updateIncrement(int period, double clockHz, int samplingRate) {
+        double noteHz = Mods.periodToHz(period, clockHz);
+        this.sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0.0;
     }
 
     void setPanning(float right) {

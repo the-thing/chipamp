@@ -9,13 +9,23 @@ public enum EffectType implements Effect {
     ARPEGGIO(0x00) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("ARPEGGIO not supported");
+            channel.arpeggioPosition = 0;
+            channel.arpeggioPeriod = channel.period;
+            channel.updateIncrement(channel.period, config.clockHz, config.samplingRate);
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
+            channel.arpeggioPosition++;
+
+            int semitones = switch (channel.arpeggioPosition % 3) {
+                case 1 -> channel.effectArgumentX;
+                case 2 -> channel.effectArgumentY;
+                default -> 0;
+            };
+
+            int newPeriod = ModTables.shiftPeriodBySemitones(channel.arpeggioPeriod, channel.sample.fineTune(), semitones);
+            channel.updateIncrement(newPeriod, config.clockHz, config.samplingRate);
         }
     },
 
@@ -29,7 +39,7 @@ public enum EffectType implements Effect {
         public void onMidRow(Channel channel, Context context, Config config) {
             int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
             int newPeriod = Maths.clamp(channel.period - adjustment, config.minPeriod, config.maxPeriod);
-            channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
+            channel.updatePeriodAndIncrement(newPeriod, config.clockHz, config.samplingRate);
         }
     },
 
@@ -42,7 +52,7 @@ public enum EffectType implements Effect {
         public void onMidRow(Channel channel, Context context, Config config) {
             int adjustment = (channel.effectArgumentX << 4) | channel.effectArgumentY;
             int newPeriod = Maths.clamp(channel.period + adjustment, config.minPeriod, config.maxPeriod);
-            channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
+            channel.updatePeriodAndIncrement(newPeriod, config.clockHz, config.samplingRate);
         }
     },
 
@@ -238,7 +248,7 @@ public enum EffectType implements Effect {
             if (speedOrTempo < 0x20) {
                 context.speed = speedOrTempo;
             } else {
-                context.updateTempo(speedOrTempo, config.samplingRate);
+                context.updateTempoAndSamplesPerTick(speedOrTempo, config.samplingRate);
             }
         }
 
@@ -296,7 +306,7 @@ public enum EffectType implements Effect {
         }
 
         newPeriod = Maths.clamp(newPeriod, config.minPeriod, config.maxPeriod);
-        channel.updatePeriod(newPeriod, config.clockHz, config.samplingRate);
+        channel.updatePeriodAndIncrement(newPeriod, config.clockHz, config.samplingRate);
     }
 
     private static void applyToneVibrato(Channel channel, Config config) {

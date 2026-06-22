@@ -24,7 +24,7 @@ public enum ExtendedEffectType implements Effect {
         public void onNewRow(Channel channel, Context context, Config config) {
             int adjustment = channel.effectArgumentY;
             channel.period = Maths.clamp(channel.period - adjustment, config.minPeriod, config.maxPeriod);
-            channel.updatePeriod(channel.period, config.clockHz, config.samplingRate);
+            channel.updatePeriodAndIncrement(channel.period, config.clockHz, config.samplingRate);
         }
 
         @Override
@@ -37,7 +37,7 @@ public enum ExtendedEffectType implements Effect {
         public void onNewRow(Channel channel, Context context, Config config) {
             int adjustment = channel.effectArgumentY;
             channel.period = Maths.clamp(channel.period + adjustment, config.minPeriod, config.maxPeriod);
-            channel.updatePeriod(channel.period, config.clockHz, config.samplingRate);
+            channel.updatePeriodAndIncrement(channel.period, config.clockHz, config.samplingRate);
         }
 
         @Override

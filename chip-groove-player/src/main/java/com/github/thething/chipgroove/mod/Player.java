@@ -11,13 +11,13 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
 import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.requireNonNull;
 
-// TODO add a global volume multiplier
 public final class Player {
 
     private static final int CHANNEL_COUNT = 8;
@@ -58,7 +58,6 @@ public final class Player {
 
         sequenceIndex = 0;
         rowIndex = 0;
-        tickIndex = 0;
         sampleIndex = 0;
     }
 
@@ -202,7 +201,7 @@ public final class Player {
 
         for (int i = 0; i < mod.getChannelCount(); i++) {
             // we increment the sample even if the channel is muted (need to push the sample position)
-            float sample = channels[i].nextSample(mod);
+            float sample = channels[i].nextSample();
 
             if (config.muted[i]) {
                 continue;
@@ -211,6 +210,9 @@ public final class Player {
             left += sample * channels[i].leftPanning;
             right += sample * channels[i].rightPanning;
         }
+
+        left *= config.volumeMultiplier;
+        right *= config.volumeMultiplier;
 
         left = Maths.clamp(left, -1.0f, 1.0f);
         right = Maths.clamp(right, -1.0f, 1.0f);
@@ -276,12 +278,12 @@ public final class Player {
             int period = instrument.period();
 
             if (sample != null) {
-                channel.sampleNumber = instrument.sampleNumber();
+                channel.sample = sample;
                 channel.volume = sample.volume();
             }
 
             if (period > 0) {
-                Sample activeSample = channel.sampleNumber > 0 ? mod.getSample(channel.sampleNumber - 1) : null;
+                Sample activeSample = channel.sample;
 
                 if (activeSample != null && activeSample.fineTune() != 0) {
                     period = ModTables.getFineTunePeriod(period, activeSample.fineTune());
@@ -294,7 +296,7 @@ public final class Player {
                     // for portamento, we only set target period
                     channel.portamentoTargetPeriod = period;
                 } else if (activeSample != null) {
-                    channel.updatePeriod(period, clockHz, samplingRate);
+                    channel.updatePeriodAndIncrement(period, clockHz, samplingRate);
                     channel.samplePosition = 0.0;
                     channel.resetOnNewSampleWithPeriod();
                 }
@@ -310,17 +312,6 @@ public final class Player {
     }
 
     private void applyNewRowEffects() {
-        // TODO decided what to do with effects that modify global state
-
-        // effects that modify global state and flow
-        // SET_SPEED
-        // PATTERN_BREAK
-        // POSITION_JUMP
-        // PATTERN_LOOP
-        // PATTERN_DELAY
-
-        // PATTERN_BREAK + POSITION_JUMP can happen at the same time
-
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Channel channel = channels[channelIndex];
             channel.effectType.onNewRow(channel, context, config);
@@ -332,6 +323,10 @@ public final class Player {
             Channel channel = channels[channelIndex];
             channel.effectType.onMidRow(channel, context, config);
         }
+    }
+
+    public void setMuted(int channelIndex, boolean muted) {
+        config.muted[channelIndex] = muted;
     }
 
     public void setClockHz(int clockHz) {
@@ -355,9 +350,33 @@ public final class Player {
     private void recalculatePeriods() {
         if (mod != null) {
             for (int i = 0; i < mod.getChannelCount(); i++) {
-                channels[i].updatePeriod(channels[i].period, config.clockHz, config.samplingRate);
+                channels[i].updatePeriodAndIncrement(channels[i].period, config.clockHz, config.samplingRate);
             }
         }
+    }
+
+    public void setMinPeriod(int minPeriod) {
+        if (minPeriod < 0) {
+            throw new IllegalArgumentException("minPeriod must be greater than zero");
+        }
+
+        this.config.minPeriod = minPeriod;
+    }
+
+    public void setMaxPeriod(int maxPeriod) {
+        if (maxPeriod < 0) {
+            throw new IllegalArgumentException("maxPeriod must be greater than zero");
+        }
+
+        this.config.maxPeriod = maxPeriod;
+    }
+
+    public void setVolumeMultiplier(float volumeMultiplier) {
+        if (volumeMultiplier < 0.0f) {
+            throw new IllegalArgumentException("volumeMultiplier must be greater than or equal to zero");
+        }
+
+        config.volumeMultiplier = volumeMultiplier;
     }
 
     public void setStereoEnabled(boolean stereoEnabled) {
@@ -372,8 +391,8 @@ public final class Player {
         this.config.volumeSlideDeltaEnabled = volumeSlideDeltaEnabled;
     }
 
-    public void setMuted(int channelIndex, boolean muted) {
-        config.muted[channelIndex] = muted;
+    public void setLogger(PrintStream logger) {
+        this.config.logger = requireNonNull(logger);
     }
 
     public void setLogInfoEnabled(boolean enabled) {
@@ -391,7 +410,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("Angelwings - 1995.mod");
 
         Player player = new Player();
         player.setStereoFoldDownEnabled(true);
@@ -403,12 +422,12 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-        // player.play();
+        player.play();
 
-         // TODO add suport for dynamic array
+        // TODO add suport for dynamic array
 //         byte[] buffer = new byte[1024 * 1024 * 1024];
 //         AudioFormat format = player.getCompatibleAudioFormat();
 //         int readCount = player.read(buffer);
-//         Resources.saveAudio(new File("axel-mono.wav"), format, buffer, 0, readCount);
+//         Resources.saveAudio(new File("Angelwings - 1995.wav"), format, buffer, 0, readCount);
     }
 }

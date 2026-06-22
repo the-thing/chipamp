@@ -13,12 +13,15 @@ final class Config {
     private static final boolean DEFAULT_VOLUME_SLIDE_DELTA_ENABLED = false;
     private static final int DEFAULT_MIN_PERIOD = 108; // minimum standard octave with fine tune +7
     private static final int DEFAULT_MAX_PERIOD = 907; // maximum standard octave with fine tune -8
+    private static final int DEFAULT_CLOCK_HZ = ModTables.PAL_CLOCK_HZ;
+    private static final float DEFAULT_VOLUME_MULTIPLIER = 1.0f;
 
     final boolean[] muted;
     int clockHz;
     int samplingRate;
     int minPeriod;
     int maxPeriod;
+    float volumeMultiplier;
     boolean stereoEnabled;
     boolean stereoFoldDownEnabled;
     boolean volumeSlideDeltaEnabled;
@@ -32,10 +35,11 @@ final class Config {
     }
 
     void reset() {
-        this.clockHz = ModTables.PAL_CLOCK_HZ;
+        this.clockHz = DEFAULT_CLOCK_HZ;
         this.samplingRate = DEFAULT_SAMPLING_RATE;
         this.minPeriod = DEFAULT_MIN_PERIOD;
         this.maxPeriod = DEFAULT_MAX_PERIOD;
+        this.volumeMultiplier = DEFAULT_VOLUME_MULTIPLIER;
         this.stereoEnabled = DEFAULT_STEREO_ENABLED;
         this.stereoFoldDownEnabled = DEFAULT_STEREO_FOLD_DOWN_ENABLED;
         this.volumeSlideDeltaEnabled = DEFAULT_VOLUME_SLIDE_DELTA_ENABLED;
