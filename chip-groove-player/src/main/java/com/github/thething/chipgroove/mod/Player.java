@@ -240,7 +240,7 @@ public final class Player {
     }
 
     private void advanceRow() {
-        // make sure we don't loop forever
+        // make sure we don't loop forever and stop the song at any jump statement in the last pattern
         if (config.ignoreLastSequenceJumpStatementEnabled && context.jumpPending && sequenceIndex == mod.getLength() - 1) {
             context.jumpPending = false;
             context.jumpSequenceIndex = 0;
@@ -286,7 +286,6 @@ public final class Player {
         context.breakPending = false;
         context.breakRowIndex = 0;
     }
-
 
     private void handleNewRow(Mod mod, int clockHz, int samplingRate) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
