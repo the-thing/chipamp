@@ -1,6 +1,7 @@
 package com.github.thething.chipgroove.mod;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 
 final class Config {
 
@@ -12,12 +13,16 @@ final class Config {
     private static final boolean DEFAULT_STEREO_FOLD_DOWN_ENABLED = true;
     private static final boolean DEFAULT_VOLUME_SLIDE_DELTA_ENABLED = false;
     private static final boolean DEFAULT_IGNORE_LAST_SEQUENCE_JUMP_STATEMENT_ENABLED = true;
+    private static final boolean DEFAULT_EFFECT_ENABLED = true;
     private static final int DEFAULT_MIN_PERIOD = 108; // minimum standard octave with fine tune +7
     private static final int DEFAULT_MAX_PERIOD = 907; // maximum standard octave with fine tune -8
     private static final int DEFAULT_CLOCK_HZ = ModTables.PAL_CLOCK_HZ;
     private static final float DEFAULT_VOLUME_MULTIPLIER = 1.0f;
 
+
     final boolean[] muted;
+    final boolean[] effectEnabled;
+    final boolean[] extendedEffectEnabled;
     int clockHz;
     int samplingRate;
     int minPeriod;
@@ -33,10 +38,17 @@ final class Config {
 
     Config(int channelCount) {
         this.muted = new boolean[channelCount];
+        this.effectEnabled = new boolean[16];
+        Arrays.fill(this.effectEnabled, DEFAULT_EFFECT_ENABLED);
+        this.extendedEffectEnabled = new boolean[16];
+        Arrays.fill(this.extendedEffectEnabled, DEFAULT_EFFECT_ENABLED);
         reset();
     }
 
     void reset() {
+        Arrays.fill(this.muted, false);
+        Arrays.fill(this.effectEnabled, DEFAULT_EFFECT_ENABLED);
+        Arrays.fill(this.extendedEffectEnabled, DEFAULT_EFFECT_ENABLED);
         this.clockHz = DEFAULT_CLOCK_HZ;
         this.samplingRate = DEFAULT_SAMPLING_RATE;
         this.minPeriod = DEFAULT_MIN_PERIOD;

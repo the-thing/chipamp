@@ -10,7 +10,9 @@ public enum ExtendedEffectType implements Effect {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
             // TODO some sort of Amiga hardware filter
-            System.out.println("SET_FILTER not supported");
+            if (config.logErrorEnabled) {
+                config.logger.println("SET_FILTER not supported");
+            }
         }
 
         @Override

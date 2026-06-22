@@ -236,11 +236,27 @@ public enum EffectType implements Effect {
     EXTENDED_EFFECT(0x0E) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
+            if (channel.extendedEffectType == ExtendedEffectType.NONE) {
+                return;
+            }
+
+            if (!config.extendedEffectEnabled[channel.extendedEffectType.getCode()]) {
+                return;
+            }
+
             channel.extendedEffectType.onNewRow(channel, context, config);
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
+            if (channel.extendedEffectType == ExtendedEffectType.NONE) {
+                return;
+            }
+
+            if (!config.extendedEffectEnabled[channel.extendedEffectType.getCode()]) {
+                return;
+            }
+
             channel.extendedEffectType.onMidRow(channel, context, config);
         }
     },

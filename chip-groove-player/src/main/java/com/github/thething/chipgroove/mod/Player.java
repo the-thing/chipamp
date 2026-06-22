@@ -333,6 +333,15 @@ public final class Player {
     private void applyNewRowEffects() {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Channel channel = channels[channelIndex];
+
+            if (channel.effectType == EffectType.NONE) {
+                continue;
+            }
+
+            if (!config.effectEnabled[channel.effectType.getCode()]) {
+                continue;
+            }
+
             channel.effectType.onNewRow(channel, context, config);
         }
     }
@@ -346,6 +355,22 @@ public final class Player {
 
     public void setMuted(int channelIndex, boolean muted) {
         config.muted[channelIndex] = muted;
+    }
+
+    public void setEffectEnabled(EffectType effectType, boolean enabled) {
+        if (effectType == null || effectType == EffectType.NONE) {
+            throw new IllegalArgumentException("effectType must not be null or NONE");
+        }
+
+        config.effectEnabled[effectType.getCode()] = enabled;
+    }
+
+    public void setExtendedEffectEnabled(ExtendedEffectType extendedEffectType, boolean enabled) {
+        if (extendedEffectType == null || extendedEffectType == ExtendedEffectType.NONE) {
+            throw new IllegalArgumentException("extendedEffectType must not be null or NONE");
+        }
+
+        config.extendedEffectEnabled[extendedEffectType.getCode()] = enabled;
     }
 
     public void setClockHz(int clockHz) {
@@ -433,7 +458,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Allister Brimble - Superfrog World 1.mod");
+        Mod mod = modLoader.load("Angelwings - 1995.mod");
 
         Player player = new Player();
         player.setStereoFoldDownEnabled(true);
@@ -445,6 +470,7 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
+        player.setEffectEnabled(EffectType.ARPEGGIO, true);
         player.play();
 
         // TODO add support for dynamic array
