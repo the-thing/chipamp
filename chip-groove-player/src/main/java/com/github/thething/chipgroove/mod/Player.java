@@ -188,6 +188,8 @@ public final class Player {
         return playedPatternCount;
     }
 
+    // TODO play and skip need to be change how they read rows
+
     public int playRows(int rowCount) throws LineUnavailableException {
         AudioFormat format = getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -307,6 +309,16 @@ public final class Player {
         }
 
         return Arrays.copyOf(buffer, offset);
+    }
+
+    public int readPatterns(int patternCount) {
+        // TODO
+        return 0;
+    }
+
+    public int readRows(int rowCount) {
+        // TODO
+        return 0;
     }
 
     public int read(byte[] output) {

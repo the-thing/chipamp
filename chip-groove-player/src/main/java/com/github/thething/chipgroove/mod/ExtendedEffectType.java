@@ -195,7 +195,7 @@ public enum ExtendedEffectType implements Effect {
     DELAY_SAMPLE(0x0D) {
         @Override
         public void onPreEffect(Channel channel, Config config, int period, Sample sample) {
-            // do not update sample, period, sample position or sample when note triggers for portamento
+            // do not update sample, period, sample position or vibrato / tremolo state
             channel.delayedPeriod = period > 0 ? period : channel.period;
             channel.delayedSample = sample != null ? sample : channel.sample;
         }
@@ -230,12 +230,14 @@ public enum ExtendedEffectType implements Effect {
             channel.delayedTickIndex++;
 
             if (channel.delayedTriggerTickIndex == channel.delayedTickIndex) {
+                // trigger new period with sample
                 channel.sample = channel.delayedSample;
                 channel.volume = channel.delayedSample.volume();
                 channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
                 channel.samplePosition = 0.0f;
                 channel.resetOnNewSampleWithPeriod();
 
+                // reset delayed sample
                 channel.delayedTickIndex = 0;
                 channel.delayedTriggerTickIndex = 0;
                 channel.delayedSample = null;
