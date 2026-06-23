@@ -111,8 +111,6 @@ public final class Player {
         return sequenceIndex;
     }
 
-    // TODO add skip methods (ticks, samples, rows, patterns)
-
     public int getBytesPerTick() {
         return config.stereoEnabled ? 4 : 2;
     }
@@ -144,6 +142,149 @@ public final class Player {
 
         line.drain();
         line.close();
+    }
+
+    public int playPatterns(int patternCount) throws LineUnavailableException {
+        AudioFormat format = getCompatibleAudioFormat();
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+        SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+        line.open(format);
+        line.start();
+
+        int playedPatternCount = playPatterns(line, patternCount);
+
+        line.drain();
+        line.close();
+
+        return playedPatternCount;
+    }
+
+    public int playPatterns(SourceDataLine line, int patternCount) {
+        requireNonNull(mod);
+
+        if (patternCount < 0) {
+            return 0;
+        }
+
+        byte[] buffer = new byte[4];
+        int lastSequenceIndex = sequenceIndex;
+        int playedPatternCount = 0;
+
+        while (sequenceIndex < mod.getPatternSequenceCount() && playedPatternCount < patternCount) {
+            int readCount = read(buffer);
+
+            if (readCount <= 0) {
+                throw new RuntimeException("Unexpected end of audio");
+            }
+
+            line.write(buffer, 0, readCount);
+
+            if (lastSequenceIndex != sequenceIndex) {
+                playedPatternCount++;
+                lastSequenceIndex = sequenceIndex;
+            }
+        }
+
+        return playedPatternCount;
+    }
+
+    public int playRows(int rowCount) throws LineUnavailableException {
+        AudioFormat format = getCompatibleAudioFormat();
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+        SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+        line.open(format);
+        line.start();
+
+        int playedRowCount = playRows(line, rowCount);
+
+        line.drain();
+        line.close();
+
+        return playedRowCount;
+    }
+
+    public int playRows(SourceDataLine line, int rowCount) {
+        requireNonNull(mod);
+
+        if (rowCount < 0) {
+            return 0;
+        }
+
+        byte[] buffer = new byte[4];
+
+        int lastRow = rowIndex;
+        int lastSequenceIndex = sequenceIndex;
+        int playedRowCount = 0;
+
+        while (sequenceIndex < mod.getPatternSequenceCount() && playedRowCount < rowCount) {
+            int readCount = read(buffer);
+
+            if (readCount <= 0) {
+                throw new RuntimeException("Unexpected end of audio");
+            }
+
+            line.write(buffer, 0, readCount);
+
+            if (rowIndex != lastRow || lastSequenceIndex != sequenceIndex) {
+                playedRowCount++;
+                lastRow = rowIndex;
+                lastSequenceIndex = sequenceIndex;
+            }
+        }
+
+        return playedRowCount;
+    }
+
+    public int skipPatterns(int patternCount) {
+        requireNonNull(mod);
+
+        if (patternCount < 0) {
+            return 0;
+        }
+
+        int skippedPatternCount = 0;
+
+        // TODO
+
+        return skippedPatternCount;
+    }
+
+    public int skipRows(int rowCount) {
+        requireNonNull(mod);
+        int skippedRowCount = 0;
+
+        int lastSequenceIndex = sequenceIndex;
+        int lastRowIndex = rowIndex;
+
+        while (sequenceIndex < mod.getPatternSequenceCount() && skippedRowCount < rowCount) {
+            tick(TMP_BUFFER, 0);
+
+            if (rowIndex != lastRowIndex || lastSequenceIndex != sequenceIndex) {
+                skippedRowCount++;
+                lastRowIndex = rowIndex;
+                lastSequenceIndex = sequenceIndex;
+            }
+        }
+
+        return skippedRowCount;
+    }
+
+    public int skipTicks(int tickCount) {
+        requireNonNull(mod);
+        int skippedTickCount = 0;
+
+        // TODO
+
+        return skippedTickCount;
+    }
+
+    public int skipSamples(int sampleCount) {
+        requireNonNull(mod);
+        int skippedSampleCount = 0;
+
+        // TODO
+
+        return skippedSampleCount;
     }
 
     public byte[] read() {
@@ -496,6 +637,10 @@ public final class Player {
         ModLoader modLoader = new ModLoader();
         Mod mod = modLoader.load("Hoffman - Eon.mod");
 
+        // TODO remove
+        // 49104
+        // System.out.println(mod.getSample(8).getDataLength());
+
         Player player = new Player();
         player.setStereoFoldDownEnabled(true);
         player.setLogInfoEnabled(true);
@@ -507,7 +652,11 @@ public final class Player {
         player.setMuted(3, true);
 
         int sequenceIndex = player.changePositionPattern(55);
-        player.play(sequenceIndex + 1);
+        // player.playPatterns(1);
+        // player.play(sequenceIndex + 1);
+
+//        player.skipRows(56);
+//        player.playRows(2);
 
         // TODO delay sample
 //        byte[] audio = player.read();

@@ -181,7 +181,7 @@ public enum EffectType implements Effect {
             }
 
             float offset = ((channel.effectArgumentX << 4) | channel.effectArgumentY) * 256.0f;
-            channel.samplePosition = offset;
+            channel.samplePosition = Math.min(offset, channel.sample.getDataLength());
         }
 
         @Override
