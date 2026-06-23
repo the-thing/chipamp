@@ -243,8 +243,16 @@ public final class Player {
         }
 
         int skippedPatternCount = 0;
+        int lastSequenceIndex = sequenceIndex;
 
-        // TODO
+        while (sequenceIndex < mod.getPatternSequenceCount() && skippedPatternCount < patternCount) {
+            tick(TMP_BUFFER, 0);
+
+            if (lastSequenceIndex != sequenceIndex) {
+                skippedPatternCount++;
+                lastSequenceIndex = sequenceIndex;
+            }
+        }
 
         return skippedPatternCount;
     }
@@ -267,24 +275,6 @@ public final class Player {
         }
 
         return skippedRowCount;
-    }
-
-    public int skipTicks(int tickCount) {
-        requireNonNull(mod);
-        int skippedTickCount = 0;
-
-        // TODO
-
-        return skippedTickCount;
-    }
-
-    public int skipSamples(int sampleCount) {
-        requireNonNull(mod);
-        int skippedSampleCount = 0;
-
-        // TODO
-
-        return skippedSampleCount;
     }
 
     public byte[] read() {
@@ -636,10 +626,6 @@ public final class Player {
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
         Mod mod = modLoader.load("Hoffman - Eon.mod");
-
-        // TODO remove
-        // 49104
-        // System.out.println(mod.getSample(8).getDataLength());
 
         Player player = new Player();
         player.setStereoFoldDownEnabled(true);
