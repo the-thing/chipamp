@@ -9,7 +9,7 @@ public enum EffectType implements Effect {
     ARPEGGIO(0x00) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            channel.arpeggioPosition = 0;
+            channel.arpeggioTickIndex = 0;
             channel.arpeggioPeriod = channel.period;
 
             // it possible that the later ARPEGGIO rows do not have the note so we have to reset the increment based
@@ -21,9 +21,9 @@ public enum EffectType implements Effect {
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            channel.arpeggioPosition++;
+            channel.arpeggioTickIndex++;
 
-            int semitones = switch (channel.arpeggioPosition % 3) {
+            int semitones = switch (channel.arpeggioTickIndex % 3) {
                 case 1 -> channel.effectArgumentX;
                 case 2 -> channel.effectArgumentY;
                 default -> 0;
@@ -63,6 +63,30 @@ public enum EffectType implements Effect {
 
     TONE_PORTAMENTO(0x03) {
         @Override
+        public void onPreEffect(Channel channel, Config config, int period, Sample sample) {
+            if (sample != null) {
+                channel.sample = sample;
+                channel.volume = sample.volume();
+            }
+
+            // do not update period or sample position when note triggers for portamento
+
+            if (period > 0) {
+                Sample activeSample = sample;
+
+                if (activeSample == null) {
+                    activeSample = channel.sample;
+                }
+
+                if (activeSample != null && activeSample.fineTune() != 0) {
+                    period = ModTables.getFineTunePeriod(period, activeSample.fineTune());
+                }
+
+                channel.portamentoTargetPeriod = period;
+            }
+        }
+
+        @Override
         public void onNewRow(Channel channel, Context context, Config config) {
             int portamentoSpeed = (channel.effectArgumentX << 4) | channel.effectArgumentY;
 
@@ -101,6 +125,30 @@ public enum EffectType implements Effect {
     },
 
     TONE_PORTAMENTO_WITH_VOLUME_SLIDE(0x05) {
+        @Override
+        public void onPreEffect(Channel channel, Config config, int period, Sample sample) {
+            if (sample != null) {
+                channel.sample = sample;
+                channel.volume = sample.volume();
+            }
+
+            // do not update period or sample position when note triggers for portamento
+
+            if (period > 0) {
+                Sample activeSample = sample;
+
+                if (activeSample == null) {
+                    activeSample = channel.sample;
+                }
+
+                if (activeSample != null && activeSample.fineTune() != 0) {
+                    period = ModTables.getFineTunePeriod(period, activeSample.fineTune());
+                }
+
+                channel.portamentoTargetPeriod = period;
+            }
+        }
+
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
             // tone portamento with volume slide doesn't store portamento arguments
@@ -170,6 +218,7 @@ public enum EffectType implements Effect {
     },
 
     SET_SAMPLE_OFFSET(0x09) {
+
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
             if (!channel.periodTriggered) {
@@ -180,7 +229,7 @@ public enum EffectType implements Effect {
                 return;
             }
 
-            float offset = ((channel.effectArgumentX << 4) | channel.effectArgumentY) * 256.0f;
+            float offset = ((channel.effectArgumentX << 4) | channel.effectArgumentY) << 8;
             channel.samplePosition = Math.min(offset, channel.sample.getDataLength());
         }
 
@@ -243,6 +292,11 @@ public enum EffectType implements Effect {
     },
 
     EXTENDED_EFFECT(0x0E) {
+        @Override
+        public void onPreEffect(Channel channel, Config config, int period, Sample sample) {
+            channel.extendedEffectType.onPreEffect(channel, config, period, sample);
+        }
+
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
             if (channel.extendedEffectType == ExtendedEffectType.NONE) {

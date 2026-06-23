@@ -344,11 +344,14 @@ public final class Player {
             if (tickIndex == 0) {
                 int patternIndex = mod.getPatternIndex(sequenceIndex);
 
-                if (config.logInfoEnabled && config.logErrorEnabled) {
-                    config.logger.println(Formatters.formatRow(mod, patternIndex, rowIndex));
+                if (config.logInfoEnabled) {
+                    config.logger.print(Formatters.formatRow(mod, patternIndex, rowIndex));
+                    config.logger.print(" {");
+                    config.logger.print(Formatters.formatEffects(mod, patternIndex, rowIndex));
+                    config.logger.println("}");
                 }
 
-                handleNewRow(mod, config.clockHz, config.samplingRate);
+                handleNewRow();
             } else {
                 applyMidRowEffects();
             }
@@ -454,7 +457,7 @@ public final class Player {
         context.breakRowIndex = 0;
     }
 
-    private void handleNewRow(Mod mod, int clockHz, int samplingRate) {
+    private void handleNewRow() {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             int patternIndex = mod.getPatternIndex(sequenceIndex);
             Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
@@ -463,37 +466,12 @@ public final class Player {
             Sample sample = instrument.sampleNumber() > 0 ? mod.getSample(instrument.sampleNumber() - 1) : null;
             int period = instrument.period();
 
-            if (sample != null) {
-                channel.sample = sample;
-                channel.volume = sample.volume();
-            }
-
-            boolean portamento = instrument.effectType() == EffectType.TONE_PORTAMENTO ||
-                    instrument.effectType() == EffectType.TONE_PORTAMENTO_WITH_VOLUME_SLIDE;
-
-            channel.periodTriggered = period > 0 && !portamento;
-
-            if (period > 0) {
-                Sample activeSample = channel.sample;
-
-                if (activeSample != null && activeSample.fineTune() != 0) {
-                    period = ModTables.getFineTunePeriod(period, activeSample.fineTune());
-                }
-
-                if (portamento) {
-                    // for portamento, we only set target period
-                    channel.portamentoTargetPeriod = period;
-                } else if (activeSample != null) {
-                    channel.updatePeriodAndIncrement(period, clockHz, samplingRate);
-                    channel.samplePosition = 0.0f;
-                    channel.resetOnNewSampleWithPeriod();
-                }
-            }
-
             channel.effectType = instrument.effectType();
             channel.extendedEffectType = instrument.extendedEffectType();
             channel.effectArgumentX = instrument.effectArgumentX();
             channel.effectArgumentY = instrument.effectArgumentY();
+
+            instrument.effectType().onPreEffect(channel, config, period, sample);
         }
 
         applyNewRowEffects();
@@ -651,16 +629,13 @@ public final class Player {
         player.setMuted(2, true);
         player.setMuted(3, true);
 
-        int sequenceIndex = player.changePositionPattern(55);
+        player.changePositionPattern(11);
+        // player.skipRows(56);
         // player.playPatterns(1);
-        // player.play(sequenceIndex + 1);
-
-        /// player.skipRows(56);
-        // player.playRows(5);
-        player.playPatterns(1);
+        // player.play();
 
         // TODO delay sample
-//        byte[] audio = player.read();
+        byte[] audio = player.read();
 //        AudioFormat format = player.getCompatibleAudioFormat();
 //        Resources.saveAudio(new File("Angelwings.wav"), format, audio);
     }

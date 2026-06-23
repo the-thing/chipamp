@@ -167,14 +167,20 @@ public final class Formatters {
             Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
 
             if (channelIndex != 0) {
-                out.append(" / ");
+                out.append(",");
             }
+
+            out.append("\"");
+            out.append(channelIndex);
+            out.append("\":\"");
 
             if (instrument.effectType() != EffectType.EXTENDED_EFFECT) {
                 out.append(instrument.effectType());
             } else {
                 out.append(instrument.extendedEffectType());
             }
+
+            out.append("\"");
         }
     }
 }

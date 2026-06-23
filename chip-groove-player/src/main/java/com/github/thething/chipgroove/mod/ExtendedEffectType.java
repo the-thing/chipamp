@@ -142,16 +142,16 @@ public enum ExtendedEffectType implements Effect {
     RETRIGGER_SAMPLE(0x09) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            channel.retriggerPosition = 0;
+            channel.retriggerTickIndex = 0;
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            channel.retriggerPosition++;
+            channel.retriggerTickIndex++;
 
             int interval = channel.effectArgumentY;
 
-            if (interval > 0 && channel.retriggerPosition % interval == 0) {
+            if (interval > 0 && channel.retriggerTickIndex % interval == 0) {
                 channel.samplePosition = 0.0f;
             }
         }
@@ -194,14 +194,53 @@ public enum ExtendedEffectType implements Effect {
 
     DELAY_SAMPLE(0x0D) {
         @Override
+        public void onPreEffect(Channel channel, Config config, int period, Sample sample) {
+            // do not update sample, period, sample position or sample when note triggers for portamento
+            channel.delayedPeriod = period > 0 ? period : channel.period;
+            channel.delayedSample = sample != null ? sample : channel.sample;
+        }
+
+        @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("DELAY_SAMPLE not supported");
+            channel.delayedTickIndex = 0;
+
+            int delay = channel.effectArgumentY;
+
+            if (delay == 0) {
+                // trigger immediately
+                channel.sample = channel.delayedSample;
+                channel.volume = channel.delayedSample.volume();
+                channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
+                channel.samplePosition = 0.0f;
+                channel.resetOnNewSampleWithPeriod();
+            } else if (delay > 0 && delay < context.speed) {
+                channel.delayedTriggerTickIndex = delay;
+            }
+
+            // otherwise the delayed sample never triggers
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
+            if (channel.delayedTriggerTickIndex == 0) {
+                // nothing to trigger
+                return;
+            }
+
+            channel.delayedTickIndex++;
+
+            if (channel.delayedTriggerTickIndex == channel.delayedTickIndex) {
+                channel.sample = channel.delayedSample;
+                channel.volume = channel.delayedSample.volume();
+                channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
+                channel.samplePosition = 0.0f;
+                channel.resetOnNewSampleWithPeriod();
+
+                channel.delayedTickIndex = 0;
+                channel.delayedTriggerTickIndex = 0;
+                channel.delayedSample = null;
+                channel.delayedPeriod = 0;
+            }
         }
     },
 

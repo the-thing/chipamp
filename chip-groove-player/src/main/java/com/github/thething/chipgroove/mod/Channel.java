@@ -29,13 +29,13 @@ final class Channel {
      * are different effects in between.
      */
 
-    int arpeggioPosition;
+    int arpeggioTickIndex;
     int arpeggioPeriod;
 
     int portamentoTargetPeriod;
     int portamentoSpeed;
 
-    int retriggerPosition;
+    int retriggerTickIndex;
 
     int volumeSlide; // volume recorded when hitting first row with volume slide or vibrato / tremolo with volume side
 
@@ -52,6 +52,11 @@ final class Channel {
     int tremoloVolume; // volume recorded when hitting first row with tremolo
     boolean tremoloRetrigger;
     WaveformType tremoloWaveformType;
+
+    int delayedTickIndex;
+    int delayedTriggerTickIndex;
+    int delayedPeriod;
+    Sample delayedSample;
 
     Channel(boolean right) {
         this.right = right;
@@ -73,13 +78,13 @@ final class Channel {
         effectArgumentX = 0;
         effectArgumentY = 0;
 
-        arpeggioPosition = 0;
+        arpeggioTickIndex = 0;
         arpeggioPeriod = 0;
 
         portamentoTargetPeriod = 0;
         portamentoSpeed = 0;
 
-        retriggerPosition = 0;
+        retriggerTickIndex = 0;
 
         volumeSlide = 0;
 
