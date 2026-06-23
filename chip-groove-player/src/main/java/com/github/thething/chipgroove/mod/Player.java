@@ -19,7 +19,7 @@ import static java.util.Objects.checkFromIndexSize;
 import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.requireNonNull;
 
-// TODO play and skip need to be change how they read rows
+// TODO play and skip need to be change how they read rows and patterns (affected are read / play / skip)
 public final class Player {
 
     private static final int CHANNEL_COUNT = 8;
