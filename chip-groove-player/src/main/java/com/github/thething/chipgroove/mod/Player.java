@@ -2,12 +2,14 @@ package com.github.thething.chipgroove.mod;
 
 import com.github.thething.chipgroove.common.Formatters;
 import com.github.thething.chipgroove.common.Maths;
+import com.github.thething.chipgroove.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -17,6 +19,7 @@ import static java.util.Objects.checkFromIndexSize;
 import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.requireNonNull;
 
+// TODO play and skip need to be change how they read rows
 public final class Player {
 
     private static final int CHANNEL_COUNT = 8;
@@ -43,7 +46,6 @@ public final class Player {
         this.channels[5] = new Channel(true);
         this.channels[6] = new Channel(true);
         this.channels[7] = new Channel(false);
-
         this.config = new Config(CHANNEL_COUNT);
         this.context = new Context(config.samplingRate);
     }
@@ -188,8 +190,6 @@ public final class Player {
         return playedPatternCount;
     }
 
-    // TODO play and skip need to be change how they read rows
-
     public int playRows(int rowCount) throws LineUnavailableException {
         AudioFormat format = getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -311,9 +311,34 @@ public final class Player {
         return Arrays.copyOf(buffer, offset);
     }
 
-    public int readPatterns(int patternCount) {
-        // TODO
-        return 0;
+    public byte[] readPatterns(int patternCount) {
+        requireNonNull(mod);
+
+        byte[] buffer = new byte[4096];
+        byte[] tickBuffer = new byte[getBytesPerTick()];
+
+        int offset = 0;
+        int lastSequenceIndex = sequenceIndex;
+        int readPatternCount = 0;
+
+        while (sequenceIndex < mod.getPatternSequenceCount() &&
+                readPatternCount < patternCount) {
+
+            tick(tickBuffer);
+            System.arraycopy(tickBuffer, 0, buffer, offset, tickBuffer.length);
+            offset += getBytesPerTick();
+
+            if (offset == buffer.length) {
+                buffer = Arrays.copyOf(buffer, buffer.length << 1);
+            }
+
+            if (sequenceIndex != lastSequenceIndex) {
+                lastSequenceIndex = sequenceIndex;
+                readPatternCount++;
+            }
+        }
+
+        return Arrays.copyOf(buffer, offset);
     }
 
     public int readRows(int rowCount) {
@@ -349,6 +374,10 @@ public final class Player {
         }
 
         return readCount;
+    }
+
+    private void tick(byte[] output) {
+        tick(output, 0);
     }
 
     private void tick(byte[] output, int offset) {
@@ -396,13 +425,13 @@ public final class Player {
         left *= config.volumeMultiplier;
         right *= config.volumeMultiplier;
 
-        left = Maths.clamp(left, -1.0f, 1.0f);
-        right = Maths.clamp(right, -1.0f, 1.0f);
-
         if (config.stereoFoldDownEnabled) {
             left = (left + right) * 0.5f;
             right = left;
         }
+
+        left = Maths.clamp(left, -1.0f, 1.0f);
+        right = Maths.clamp(right, -1.0f, 1.0f);
 
         short lefty = (short) (left * 32767.0f);
         short righty = (short) (right * 32767.0f);
@@ -624,31 +653,26 @@ public final class Player {
 
     public AudioFormat getCompatibleAudioFormat() {
         return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, config.samplingRate, 16,
-                config.stereoEnabled ? 2 : 1, 4, config.samplingRate, false);
+                config.stereoEnabled ? 2 : 1, config.stereoEnabled ? 4 : 2, config.samplingRate, false);
     }
 
-    public static void main(String[] args) throws IOException, LineUnavailableException {
+    public static void main(String[] args) throws IOException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Hoffman - Eon.mod");
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
         Player player = new Player();
-        player.setStereoFoldDownEnabled(true);
         player.setLogInfoEnabled(true);
         player.setLogErrorEnabled(true);
         player.setMod(mod);
         // player.setMuted(0, true);
-        player.setMuted(1, true);
-        player.setMuted(2, true);
-        player.setMuted(3, true);
+        // player.setMuted(1, true);
+        // player.setMuted(2, true);
+        // player.setMuted(3, true);
 
-        player.changePositionPattern(11);
-        // player.skipRows(56);
-        // player.playPatterns(1);
-        // player.play();
+        byte[] audio = player.readPatterns(1);
 
-        // TODO delay sample
-        byte[] audio = player.read();
-//        AudioFormat format = player.getCompatibleAudioFormat();
-//        Resources.saveAudio(new File("Angelwings.wav"), format, audio);
+        // byte[] audio = player.read();
+        AudioFormat format = player.getCompatibleAudioFormat();
+        Resources.saveAudio(new File("Chipamp - Axel F - Pattern 0.wav"), format, audio);
     }
 }

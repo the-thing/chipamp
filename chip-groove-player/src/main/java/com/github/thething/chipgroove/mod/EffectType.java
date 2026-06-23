@@ -218,7 +218,6 @@ public enum EffectType implements Effect {
     },
 
     SET_SAMPLE_OFFSET(0x09) {
-
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
             if (!channel.periodTriggered) {

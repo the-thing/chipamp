@@ -36,8 +36,8 @@ final class Context {
      * <p>
      * ProTracker CIA formula: tickDuration (µs) = 2_500_000 / BPM
      * <p>
-     * Converted to output samples: samplesPerTick = outputRate * tickDuration_µs / 1_000_000 = outputRate * 2_500_000 /
-     * (BPM * 1_000_000) = outputRate * 2.5 / BPM
+     * Converted to output samples: samplesPerTick = samplingRate * tickDuration_µs / 1_000_000 = samplingRate *
+     * 2_500_000 / (BPM * 1_000_000) = samplingRate * 2.5 / BPM
      * <p>
      */
     private static int samplesPerTick(int tempo, int samplingRate) {
