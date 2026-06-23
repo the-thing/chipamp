@@ -76,7 +76,7 @@ public final class Player {
         reset();
 
         // disable logging regardless of config setting, we don't want to log skipped patterns
-        boolean logEnabled = config.logInfoEnabled;
+        boolean logInfoEnabled = config.logInfoEnabled;
         config.logInfoEnabled = false;
 
         try {
@@ -88,7 +88,7 @@ public final class Player {
                 }
             }
         } finally {
-            config.logInfoEnabled = logEnabled;
+            config.logInfoEnabled = logInfoEnabled;
         }
     }
 
@@ -245,13 +245,20 @@ public final class Player {
         int skippedPatternCount = 0;
         int lastSequenceIndex = sequenceIndex;
 
-        while (sequenceIndex < mod.getPatternSequenceCount() && skippedPatternCount < patternCount) {
-            tick(TMP_BUFFER, 0);
+        boolean logInfoEnabled = config.logInfoEnabled;
+        config.logInfoEnabled = false;
 
-            if (lastSequenceIndex != sequenceIndex) {
-                skippedPatternCount++;
-                lastSequenceIndex = sequenceIndex;
+        try {
+            while (sequenceIndex < mod.getPatternSequenceCount() && skippedPatternCount < patternCount) {
+                tick(TMP_BUFFER, 0);
+
+                if (lastSequenceIndex != sequenceIndex) {
+                    skippedPatternCount++;
+                    lastSequenceIndex = sequenceIndex;
+                }
             }
+        } finally {
+            config.logInfoEnabled = logInfoEnabled;
         }
 
         return skippedPatternCount;
@@ -264,14 +271,21 @@ public final class Player {
         int lastSequenceIndex = sequenceIndex;
         int lastRowIndex = rowIndex;
 
-        while (sequenceIndex < mod.getPatternSequenceCount() && skippedRowCount < rowCount) {
-            tick(TMP_BUFFER, 0);
+        boolean logInfoEnabled = config.logInfoEnabled;
+        config.logInfoEnabled = false;
 
-            if (rowIndex != lastRowIndex || lastSequenceIndex != sequenceIndex) {
-                skippedRowCount++;
-                lastRowIndex = rowIndex;
-                lastSequenceIndex = sequenceIndex;
+        try {
+            while (sequenceIndex < mod.getPatternSequenceCount() && skippedRowCount < rowCount) {
+                tick(TMP_BUFFER, 0);
+
+                if (rowIndex != lastRowIndex || lastSequenceIndex != sequenceIndex) {
+                    skippedRowCount++;
+                    lastRowIndex = rowIndex;
+                    lastSequenceIndex = sequenceIndex;
+                }
             }
+        } finally {
+            config.logInfoEnabled = logInfoEnabled;
         }
 
         return skippedRowCount;
@@ -454,7 +468,10 @@ public final class Player {
                 channel.volume = sample.volume();
             }
 
-            channel.periodTriggered = period > 0;
+            boolean portamento = instrument.effectType() == EffectType.TONE_PORTAMENTO ||
+                    instrument.effectType() == EffectType.TONE_PORTAMENTO_WITH_VOLUME_SLIDE;
+
+            channel.periodTriggered = period > 0 && !portamento;
 
             if (period > 0) {
                 Sample activeSample = channel.sample;
@@ -462,9 +479,6 @@ public final class Player {
                 if (activeSample != null && activeSample.fineTune() != 0) {
                     period = ModTables.getFineTunePeriod(period, activeSample.fineTune());
                 }
-
-                boolean portamento = instrument.effectType() == EffectType.TONE_PORTAMENTO ||
-                        instrument.effectType() == EffectType.TONE_PORTAMENTO_WITH_VOLUME_SLIDE;
 
                 if (portamento) {
                     // for portamento, we only set target period
@@ -641,8 +655,9 @@ public final class Player {
         // player.playPatterns(1);
         // player.play(sequenceIndex + 1);
 
-//        player.skipRows(56);
-//        player.playRows(2);
+        /// player.skipRows(56);
+        // player.playRows(5);
+        player.playPatterns(1);
 
         // TODO delay sample
 //        byte[] audio = player.read();
