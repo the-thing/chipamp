@@ -28,7 +28,7 @@ class ModLoaderTest {
         assertThat(mod.getTrackerId()).isEqualTo("M.K.");
         assertThat(mod.getPatternCount()).isEqualTo(23);
 
-        mod = underTest.load("Hoffman - Eon.mod");
+        mod = underTest.load("H0ffman - Eon.mod");
         assertThat(mod.getTitle()).isEqualTo("eon");
         assertThat(mod.getLength()).isEqualTo(92);
         assertThat(mod.getSampleCount()).isEqualTo(31);

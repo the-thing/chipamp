@@ -25,6 +25,7 @@ public final class Player {
 
     private static final int DEFAULT_BUFFER_SIZE = 4096;
     private static final int CHANNEL_COUNT = 8;
+    private static final byte[] EMPTY_BUFFER = new byte[0];
     private static final byte[] TMP_BUFFER = new byte[4];
 
     private final Channel[] channels;
@@ -61,8 +62,7 @@ public final class Player {
 
         sequenceIndex = 0;
         rowIndex = 0;
-        // sampleIndex = context.samplesPerTick;
-        sampleIndex = 0;
+        sampleIndex = context.samplesPerTick;
     }
 
     public void setMod(Mod mod) {
@@ -317,6 +317,10 @@ public final class Player {
     public byte[] readPatterns(int patternCount) {
         requireNonNull(mod);
 
+        if (patternCount < 0) {
+            return EMPTY_BUFFER;
+        }
+
         int bytesPerTick = getBytesPerTick();
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
@@ -333,17 +337,45 @@ public final class Player {
             }
 
             if (sequenceIndex != lastSequenceIndex) {
-                lastSequenceIndex = sequenceIndex;
                 readPatternCount++;
+                lastSequenceIndex = sequenceIndex;
             }
         }
 
         return Arrays.copyOf(buffer, offset);
     }
 
-    public int readRows(int rowCount) {
-        // TODO
-        return 0;
+    public byte[] readRows(int rowCount) {
+        requireNonNull(mod);
+
+        if (rowCount < 0) {
+            return EMPTY_BUFFER;
+        }
+
+        int bytesPerTick = getBytesPerTick();
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+
+        int offset = 0;
+        int lastSequenceIndex = sequenceIndex;
+        int lastRowIndex = rowIndex;
+        int readRowCount = 0;
+
+        while (sequenceIndex < mod.getLength() && readRowCount < rowCount) {
+            tick(buffer, offset);
+            offset += bytesPerTick;
+
+            if (offset == buffer.length) {
+                buffer = Arrays.copyOf(buffer, buffer.length << 1);
+            }
+
+            if (sequenceIndex != lastSequenceIndex || rowIndex != lastRowIndex) {
+                readRowCount++;
+                lastSequenceIndex = sequenceIndex;
+                lastRowIndex = rowIndex;
+            }
+        }
+
+        return Arrays.copyOf(buffer, offset);
     }
 
     public int read(byte[] output) {
@@ -470,7 +502,10 @@ public final class Player {
             return;
         }
 
-        if (context.jumpPending && context.breakPending) {
+        if (context.loopPending) {
+            // looping takes priority above jumps and breaks
+            rowIndex = context.loopRowIndex;
+        } else if (context.jumpPending && context.breakPending) {
             // both position jump and pattern break effects are pending
             sequenceIndex = context.jumpSequenceIndex;
             rowIndex = context.breakRowIndex;
@@ -496,6 +531,8 @@ public final class Player {
         context.jumpSequenceIndex = 0;
         context.breakPending = false;
         context.breakRowIndex = 0;
+        context.loopPending = false;
+        context.loopRowIndex = 0;
     }
 
     private void handleNewRow() {
@@ -511,6 +548,8 @@ public final class Player {
             channel.extendedEffectType = instrument.extendedEffectType();
             channel.effectArgumentX = instrument.effectArgumentX();
             channel.effectArgumentY = instrument.effectArgumentY();
+
+            context.rowIndex = rowIndex;
 
             instrument.effectType().onPreEffect(channel, config, period, sample);
         }
@@ -658,22 +697,24 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Hoffman - Eon.mod");
+        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
 
         Player player = new Player();
         player.setLogInfoEnabled(true);
         player.setLogErrorEnabled(true);
         player.setMod(mod);
         // player.setMuted(0, true);
-        player.setMuted(1, true);
-        player.setMuted(2, true);
-        player.setMuted(3, true);
+        // player.setMuted(1, true);
+        // player.setMuted(2, true);
+        // player.setMuted(3, true);
 
-        player.changePositionSequence(13);
-        byte[] audio = player.readPatterns(1);
+        // player.play();
 
-        // byte[] audio = player.read();
+        // player.changePositionSequence(13);
+        // byte[] audio = player.readPatterns(1);
+
+        byte[] audio = player.read();
         AudioFormat format = player.getCompatibleAudioFormat();
-        Resources.saveAudio(new File("my eon pattern 11.wav"), format, audio);
+        Resources.saveAudio(new File("Jogeir Liljedahl - Nearly There.wav"), format, audio);
     }
 }

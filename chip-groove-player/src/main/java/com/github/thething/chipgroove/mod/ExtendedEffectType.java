@@ -97,13 +97,27 @@ public enum ExtendedEffectType implements Effect {
     LOOP_PATTERN(0x06) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("LOOP_PATTERN not supported");
+            int loopCounter = channel.effectArgumentY;
+            System.out.println("LOOP_PATTERN: " + loopCounter);
+
+            if (loopCounter == 0) {
+                channel.loopRowIndex = context.rowIndex;
+            } else {
+                if (channel.loopCounter == 0) {
+                    channel.loopCounter = loopCounter;
+                } else {
+                    channel.loopCounter--;
+                }
+
+                if (channel.loopCounter != 0) {
+                    context.loopPending = true;
+                    context.loopRowIndex = channel.loopRowIndex;
+                }
+            }
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 

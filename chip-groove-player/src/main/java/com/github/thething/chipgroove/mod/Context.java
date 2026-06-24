@@ -12,6 +12,11 @@ final class Context {
     int jumpSequenceIndex;
     boolean breakPending;
     int breakRowIndex;
+    boolean loopPending;
+    int loopRowIndex;
+
+    // TODO move somewhere else
+    int rowIndex;
 
     Context(int samplingRate) {
         reset(samplingRate);
@@ -24,6 +29,8 @@ final class Context {
         jumpSequenceIndex = 0;
         breakPending = false;
         breakRowIndex = 0;
+        loopPending = false;
+        loopRowIndex = 0;
     }
 
     void updateTempoAndSamplesPerTick(int tempo, int samplingRate) {

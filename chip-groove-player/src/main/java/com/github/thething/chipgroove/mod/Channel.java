@@ -58,6 +58,9 @@ final class Channel {
     int delayedPeriod;
     Sample delayedSample;
 
+    int loopRowIndex;
+    int loopCounter;
+
     Channel(boolean right) {
         this.right = right;
         reset();
