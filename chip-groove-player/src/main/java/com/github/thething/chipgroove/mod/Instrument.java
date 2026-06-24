@@ -4,8 +4,8 @@ import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.requireNonNull;
 
 public record Instrument(int sampleNumber, int period,
-                         EffectType effectType, ExtendedEffectType extendedEffectType, int effectArgumentX,
-                         int effectArgumentY) {
+                         EffectType effectType, ExtendedEffectType extendedEffectType,
+                         int effectArgumentX, int effectArgumentY) {
 
     public Instrument(
             int sampleNumber, int period,

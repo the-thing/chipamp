@@ -33,7 +33,7 @@ public final class Mod {
 
     /**
      * Pattern table: patterns to play in each song position (0..127) Each byte has a legal value of 0..63. The highest
-     * value in this table is the highest pattern stored, no patterns above this value are stored.
+     * value in this table is the highest pattern stored. No patterns above this value are stored.
      */
     private final int[] patternSequences;
 

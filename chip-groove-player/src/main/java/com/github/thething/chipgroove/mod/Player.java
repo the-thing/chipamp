@@ -13,15 +13,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Objects;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
 import static java.util.Objects.checkFromToIndex;
+import static java.util.Objects.checkIndex;
 import static java.util.Objects.requireNonNull;
 
-// TODO play and skip need to be change how they read rows and patterns (affected are read / play / skip)
 public final class Player {
 
+    private static final int DEFAULT_BUFFER_SIZE = 4096;
     private static final int CHANNEL_COUNT = 8;
     private static final byte[] TMP_BUFFER = new byte[4];
 
@@ -59,6 +61,7 @@ public final class Player {
 
         sequenceIndex = 0;
         rowIndex = 0;
+        // sampleIndex = context.samplesPerTick;
         sampleIndex = 0;
     }
 
@@ -73,7 +76,7 @@ public final class Player {
 
     public void changePositionSequence(int sequenceIndex) {
         requireNonNull(mod);
-        requireInRange(sequenceIndex, 0, mod.getLength() - 1);
+        checkIndex(sequenceIndex, mod.getLength());
 
         reset();
 
@@ -314,19 +317,16 @@ public final class Player {
     public byte[] readPatterns(int patternCount) {
         requireNonNull(mod);
 
-        byte[] buffer = new byte[4096];
-        byte[] tickBuffer = new byte[getBytesPerTick()];
+        int bytesPerTick = getBytesPerTick();
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         int offset = 0;
         int lastSequenceIndex = sequenceIndex;
         int readPatternCount = 0;
 
-        while (sequenceIndex < mod.getPatternSequenceCount() &&
-                readPatternCount < patternCount) {
-
-            tick(tickBuffer);
-            System.arraycopy(tickBuffer, 0, buffer, offset, tickBuffer.length);
-            offset += getBytesPerTick();
+        while (sequenceIndex < mod.getPatternSequenceCount() && readPatternCount < patternCount) {
+            tick(buffer, offset);
+            offset += bytesPerTick;
 
             if (offset == buffer.length) {
                 buffer = Arrays.copyOf(buffer, buffer.length << 1);
@@ -656,23 +656,24 @@ public final class Player {
                 config.stereoEnabled ? 2 : 1, config.stereoEnabled ? 4 : 2, config.samplingRate, false);
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("Hoffman - Eon.mod");
 
         Player player = new Player();
         player.setLogInfoEnabled(true);
         player.setLogErrorEnabled(true);
         player.setMod(mod);
         // player.setMuted(0, true);
-        // player.setMuted(1, true);
-        // player.setMuted(2, true);
-        // player.setMuted(3, true);
+        player.setMuted(1, true);
+        player.setMuted(2, true);
+        player.setMuted(3, true);
 
+        player.changePositionSequence(13);
         byte[] audio = player.readPatterns(1);
 
         // byte[] audio = player.read();
         AudioFormat format = player.getCompatibleAudioFormat();
-        Resources.saveAudio(new File("Chipamp - Axel F - Pattern 0.wav"), format, audio);
+        Resources.saveAudio(new File("my eon pattern 11.wav"), format, audio);
     }
 }
