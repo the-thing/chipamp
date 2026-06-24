@@ -1,6 +1,6 @@
 package com.github.thething.chipgroove.mod;
 
-public interface Effect {
+interface Effect {
 
     default void onPreEffect(Channel channel, Config config, int period, Sample sample) {
         if (sample != null) {
