@@ -82,13 +82,18 @@ public enum ExtendedEffectType implements Effect {
     SET_FINE_TUNE_VALUE(0x05) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            // TODO
-            System.out.println("SET_FINE_TUNE_VALUE not supported");
+            int fineTune = channel.effectArgumentY;
+            // convert (0-15) to signed range -8..7
+            fineTune = (fineTune << 28) >> 28;
+
+            if (channel.sample != null && channel.period > 0) {
+                int newPeriod = ModTables.getFineTunePeriod(channel.period, fineTune);
+                channel.updatePeriodAndIncrement(newPeriod, config.clockHz, config.samplingRate);
+            }
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 
