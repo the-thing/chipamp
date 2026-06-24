@@ -19,7 +19,6 @@ final class Config {
     private static final int DEFAULT_CLOCK_HZ = Mods.PAL_CLOCK_HZ;
     private static final float DEFAULT_VOLUME_MULTIPLIER = 1.0f;
 
-
     final boolean[] muted;
     final boolean[] effectEnabled;
     final boolean[] extendedEffectEnabled;
