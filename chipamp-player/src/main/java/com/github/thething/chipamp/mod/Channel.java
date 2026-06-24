@@ -8,6 +8,7 @@ final class Channel {
 
     Sample sample;
     int period;
+    // TODO this is used by a single effect so probalby should part of effects
     boolean periodTriggered; // indicates if period was set for the row
     float samplePosition;
     float sampleIncrement;
@@ -36,6 +37,8 @@ final class Channel {
     int portamentoSpeed;
 
     int retriggerTickIndex;
+
+    boolean glissandoEnabled;
 
     int volumeSlide; // volume recorded when hitting first row with volume slide or vibrato / tremolo with volume side
 
@@ -88,6 +91,8 @@ final class Channel {
         portamentoSpeed = 0;
 
         retriggerTickIndex = 0;
+
+        glissandoEnabled = false;
 
         volumeSlide = 0;
 

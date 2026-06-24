@@ -49,10 +49,7 @@ public enum ExtendedEffectType implements Effect {
     SET_GLISSANDO(0x03) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            // TODO implement
-            if (config.logErrorEnabled) {
-                config.logger.println("SET_GLISSANDO not supported");
-            }
+            channel.glissandoEnabled = channel.effectArgumentY != 0;
         }
 
         @Override

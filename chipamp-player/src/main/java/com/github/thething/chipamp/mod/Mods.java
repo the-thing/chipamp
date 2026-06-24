@@ -8,6 +8,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.github.thething.chipamp.common.Requirements.requireInRange;
+
 public final class Mods {
 
     public static final int PAL_CLOCK_HZ = 3_546_895;
@@ -200,8 +202,11 @@ public final class Mods {
     }
 
     public static int getFineTunePeriod(int period, int fineTune) {
+        requireInRange(fineTune, -8, 7);
+
         int periodIndex = getPeriodIndex(period);
         fineTune += 8;
+
         return FINE_TUNE_PERIODS[fineTune][periodIndex];
     }
 
@@ -210,6 +215,8 @@ public final class Mods {
     }
 
     public static int getPeriodIndex(int period, int fineTune) {
+        requireInRange(fineTune, -8, 7);
+
         int[] periods = FINE_TUNE_PERIODS[fineTune + 8];
 
         for (int i = 0; i < periods.length; i++) {
@@ -221,7 +228,9 @@ public final class Mods {
         return -1;
     }
 
-    public static int shiftPeriodBySemitones(int period, int fineTune, int semitones) {
+    public static int shiftUpPeriodBySemitones(int period, int fineTune, int semitones) {
+        requireInRange(fineTune, -8, 7);
+
         if (semitones == 0) {
             return period;
         }
@@ -234,7 +243,27 @@ public final class Mods {
         }
 
         int newIndex = Maths.clamp(index + semitones, 0, periods.length - 1);
+
         return periods[newIndex];
+    }
+
+    public static int findNearestPeriod(int targetPeriod, int fineTune) {
+        requireInRange(fineTune, -8, 7);
+
+        int[] periods = FINE_TUNE_PERIODS[fineTune + 8];
+        int nearest = periods[0];
+        int minDiff = Math.abs(targetPeriod - nearest);
+
+        for (int i = 1; i < periods.length; i++) {
+            int diff = Math.abs(targetPeriod - periods[i]);
+
+            if (diff < minDiff) {
+                minDiff = diff;
+                nearest = periods[i];
+            }
+        }
+
+        return nearest;
     }
 
     public static String findClosestNote(int period) {
