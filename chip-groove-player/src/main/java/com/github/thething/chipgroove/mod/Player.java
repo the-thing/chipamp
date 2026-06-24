@@ -99,11 +99,11 @@ public final class Player {
 
     public int changePositionPattern(int patternIndex) {
         requireNonNull(mod);
-        requireInRange(patternIndex, 0, mod.getPatternCount());
+        requireInRange(patternIndex, 0, mod.getLength());
 
         int sequenceIndex = 0;
 
-        while (sequenceIndex < mod.getPatternSequenceCount()) {
+        while (sequenceIndex < mod.getLength()) {
             if (mod.getPatternIndex(sequenceIndex) == patternIndex) {
                 break;
             }
@@ -175,7 +175,7 @@ public final class Player {
         int lastSequenceIndex = sequenceIndex;
         int playedPatternCount = 0;
 
-        while (sequenceIndex < mod.getPatternSequenceCount() && playedPatternCount < patternCount) {
+        while (sequenceIndex < mod.getLength() && playedPatternCount < patternCount) {
             int readCount = read(buffer);
 
             if (readCount <= 0) {
@@ -221,7 +221,7 @@ public final class Player {
         int lastSequenceIndex = sequenceIndex;
         int playedRowCount = 0;
 
-        while (sequenceIndex < mod.getPatternSequenceCount() && playedRowCount < rowCount) {
+        while (sequenceIndex < mod.getLength() && playedRowCount < rowCount) {
             int readCount = read(buffer);
 
             if (readCount <= 0) {
@@ -254,7 +254,7 @@ public final class Player {
         config.logInfoEnabled = false;
 
         try {
-            while (sequenceIndex < mod.getPatternSequenceCount() && skippedPatternCount < patternCount) {
+            while (sequenceIndex < mod.getLength() && skippedPatternCount < patternCount) {
                 tick(TMP_BUFFER, 0);
 
                 if (lastSequenceIndex != sequenceIndex) {
@@ -280,7 +280,7 @@ public final class Player {
         config.logInfoEnabled = false;
 
         try {
-            while (sequenceIndex < mod.getPatternSequenceCount() && skippedRowCount < rowCount) {
+            while (sequenceIndex < mod.getLength() && skippedRowCount < rowCount) {
                 tick(TMP_BUFFER, 0);
 
                 if (rowIndex != lastRowIndex || lastSequenceIndex != sequenceIndex) {
@@ -324,7 +324,7 @@ public final class Player {
         int lastSequenceIndex = sequenceIndex;
         int readPatternCount = 0;
 
-        while (sequenceIndex < mod.getPatternSequenceCount() && readPatternCount < patternCount) {
+        while (sequenceIndex < mod.getLength() && readPatternCount < patternCount) {
             tick(buffer, offset);
             offset += bytesPerTick;
 
