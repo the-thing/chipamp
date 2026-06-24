@@ -15,9 +15,6 @@ final class Context {
     boolean loopPending;
     int loopRowIndex;
 
-    // TODO move somewhere else
-    int rowIndex;
-
     Context(int samplingRate) {
         reset(samplingRate);
     }

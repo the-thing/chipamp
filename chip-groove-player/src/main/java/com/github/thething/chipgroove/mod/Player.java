@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
-import java.util.Objects;
 
 import static com.github.thething.chipgroove.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
@@ -74,7 +73,7 @@ public final class Player {
         reset();
     }
 
-    public void changePositionSequence(int sequenceIndex) {
+    public void seekPosition(int sequenceIndex) {
         requireNonNull(mod);
         checkIndex(sequenceIndex, mod.getLength());
 
@@ -97,23 +96,29 @@ public final class Player {
         }
     }
 
-    public int changePositionPattern(int patternIndex) {
+    public int seekPattern(int patternIndex) {
         requireNonNull(mod);
         requireInRange(patternIndex, 0, mod.getLength());
 
-        int sequenceIndex = 0;
+        int sequenceIndex = findSequenceIndex(patternIndex);
 
-        while (sequenceIndex < mod.getLength()) {
-            if (mod.getPatternIndex(sequenceIndex) == patternIndex) {
-                break;
-            }
-
-            sequenceIndex++;
+        if (sequenceIndex < 0) {
+            return sequenceIndex;
         }
 
-        changePositionSequence(sequenceIndex);
+        seekPosition(sequenceIndex);
 
         return sequenceIndex;
+    }
+
+    private int findSequenceIndex(int patternIndex) {
+        for (int sequenceIndex = 0; sequenceIndex < mod.getLength(); sequenceIndex++) {
+            if (mod.getPatternIndex(sequenceIndex) == patternIndex) {
+                return sequenceIndex;
+            }
+        }
+
+        return -1;
     }
 
     public int getBytesPerTick() {
@@ -408,10 +413,6 @@ public final class Player {
         return readCount;
     }
 
-    private void tick(byte[] output) {
-        tick(output, 0);
-    }
-
     private void tick(byte[] output, int offset) {
         if (sampleIndex >= context.samplesPerTick) {
             if (tickIndex == 0) {
@@ -549,8 +550,6 @@ public final class Player {
             channel.effectArgumentX = instrument.effectArgumentX();
             channel.effectArgumentY = instrument.effectArgumentY();
 
-            context.rowIndex = rowIndex;
-
             instrument.effectType().onPreEffect(channel, config, period, sample);
         }
 
@@ -569,7 +568,7 @@ public final class Player {
                 continue;
             }
 
-            channel.effectType.onNewRow(channel, context, config);
+            channel.effectType.onNewRow(channel, context, config, rowIndex);
         }
     }
 
@@ -697,7 +696,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
+        Mod mod = modLoader.load("H0ffman - Eon.mod");
 
         Player player = new Player();
         player.setLogInfoEnabled(true);
@@ -708,10 +707,7 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-        // player.play();
-
-        // player.changePositionSequence(13);
-        // byte[] audio = player.readPatterns(1);
+        player.play();
 
         byte[] audio = player.read();
         AudioFormat format = player.getCompatibleAudioFormat();

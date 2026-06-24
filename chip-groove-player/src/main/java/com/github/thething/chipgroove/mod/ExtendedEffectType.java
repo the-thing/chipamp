@@ -8,8 +8,7 @@ public enum ExtendedEffectType implements Effect {
 
     SET_FILTER(0x00) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO some sort of Amiga hardware filter
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             if (config.logErrorEnabled) {
                 config.logger.println("SET_FILTER not supported");
             }
@@ -22,7 +21,7 @@ public enum ExtendedEffectType implements Effect {
 
     FINE_SLIDE_UP(0x01) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int adjustment = channel.effectArgumentY;
             channel.period = Maths.clamp(channel.period - adjustment, config.minPeriod, config.maxPeriod);
             channel.updatePeriodAndIncrement(channel.period, config.clockHz, config.samplingRate);
@@ -35,7 +34,7 @@ public enum ExtendedEffectType implements Effect {
 
     FINE_SLIDE_DOWN(0x02) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int adjustment = channel.effectArgumentY;
             channel.period = Maths.clamp(channel.period + adjustment, config.minPeriod, config.maxPeriod);
             channel.updatePeriodAndIncrement(channel.period, config.clockHz, config.samplingRate);
@@ -48,20 +47,20 @@ public enum ExtendedEffectType implements Effect {
 
     SET_GLISSANDO(0x03) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
-            // TODO
-            System.out.println("SET_GLISSANDO not supported");
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
+            if (config.logErrorEnabled) {
+                config.logger.println("SET_GLISSANDO not supported");
+            }
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 
     SET_VIBRATO_WAVEFORM(0x04) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int form = channel.effectArgumentY;
             boolean retrigger = form < 4;
 
@@ -77,13 +76,12 @@ public enum ExtendedEffectType implements Effect {
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 
     SET_FINE_TUNE_VALUE(0x05) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             // TODO
             System.out.println("SET_FINE_TUNE_VALUE not supported");
         }
@@ -96,12 +94,12 @@ public enum ExtendedEffectType implements Effect {
 
     LOOP_PATTERN(0x06) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int loopCounter = channel.effectArgumentY;
             System.out.println("LOOP_PATTERN: " + loopCounter);
 
             if (loopCounter == 0) {
-                channel.loopRowIndex = context.rowIndex;
+                channel.loopRowIndex = rowIndex;
             } else {
                 if (channel.loopCounter == 0) {
                     channel.loopCounter = loopCounter;
@@ -123,7 +121,7 @@ public enum ExtendedEffectType implements Effect {
 
     SET_TREMOLO_WAVEFORM(0x07) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int form = channel.effectArgumentY;
             boolean retrigger = form < 4;
 
@@ -144,7 +142,7 @@ public enum ExtendedEffectType implements Effect {
 
     ROUGH_PANNING(0x08) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             channel.setPanning(channel.effectArgumentY / 16.0f);
         }
 
@@ -155,7 +153,7 @@ public enum ExtendedEffectType implements Effect {
 
     RETRIGGER_SAMPLE(0x09) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             channel.retriggerTickIndex = 0;
         }
 
@@ -173,7 +171,7 @@ public enum ExtendedEffectType implements Effect {
 
     FINE_VOLUME_SLIDE_UP(0x0A) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             channel.volume = Maths.clamp(channel.volume + channel.effectArgumentY, 0, 64);
         }
 
@@ -184,7 +182,7 @@ public enum ExtendedEffectType implements Effect {
 
     FINE_VOLUME_SLIDE_DOWN(0x0B) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             channel.volume = Maths.clamp(channel.volume - channel.effectArgumentY, 0, 64);
         }
 
@@ -195,7 +193,7 @@ public enum ExtendedEffectType implements Effect {
 
     CUT_SAMPLE(0x0C) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             // TODO
             System.out.println("CUT_SAMPLE not supported");
         }
@@ -215,7 +213,7 @@ public enum ExtendedEffectType implements Effect {
         }
 
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             channel.delayedTickIndex = 0;
 
             int delay = channel.effectArgumentY;
@@ -262,7 +260,7 @@ public enum ExtendedEffectType implements Effect {
 
     DELAY_PATTERN(0x0E) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             // TODO
             System.out.println("DELAY_PATTERN not supported");
         }
@@ -275,7 +273,7 @@ public enum ExtendedEffectType implements Effect {
 
     INVERT_LOOP(0x0F) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             // TODO
             System.out.println("INVERT_LOOP not supported");
         }
@@ -288,7 +286,7 @@ public enum ExtendedEffectType implements Effect {
 
     NONE(0xFF) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
 
         }
 

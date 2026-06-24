@@ -8,7 +8,7 @@ public enum EffectType implements Effect {
 
     ARPEGGIO(0x00) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             channel.arpeggioTickIndex = 0;
             channel.arpeggioPeriod = channel.period;
 
@@ -36,7 +36,7 @@ public enum EffectType implements Effect {
 
     SLIDE_UP(0x01) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
 
         }
 
@@ -50,7 +50,7 @@ public enum EffectType implements Effect {
 
     SLIDE_DOWN(0x02) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
         }
 
         @Override
@@ -87,7 +87,7 @@ public enum EffectType implements Effect {
         }
 
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int portamentoSpeed = (channel.effectArgumentX << 4) | channel.effectArgumentY;
 
             if (portamentoSpeed != 0) {
@@ -103,7 +103,7 @@ public enum EffectType implements Effect {
 
     VIBRATO(0x04) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             // continue with previous vibrato speed if not provided
             if (channel.effectArgumentX != 0) {
                 channel.vibratoSpeed = channel.effectArgumentX;
@@ -150,7 +150,7 @@ public enum EffectType implements Effect {
         }
 
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             // tone portamento with volume slide doesn't store portamento arguments
             // it just continues the old portamento if present
             EffectType.storeVolumeSlide(channel, config.volumeSlideDeltaEnabled);
@@ -165,7 +165,7 @@ public enum EffectType implements Effect {
 
     VIBRATO_WITH_VOLUME_SLIDE(0x06) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             EffectType.storeVolumeSlide(channel, config.volumeSlideDeltaEnabled);
         }
 
@@ -178,7 +178,7 @@ public enum EffectType implements Effect {
 
     TREMOLO(0x07) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             // use old tremolo speed if not specified
             if (channel.effectArgumentX != 0) {
                 channel.tremoloSpeed = channel.effectArgumentX;
@@ -206,7 +206,7 @@ public enum EffectType implements Effect {
 
     SET_PANNING_POSITION(0x08) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             // original amiga doesn't support this effect
             int panningPosition = (channel.effectArgumentX) << 4 | channel.effectArgumentY;
             channel.setPanning(panningPosition / 255.0f);
@@ -219,7 +219,7 @@ public enum EffectType implements Effect {
 
     SET_SAMPLE_OFFSET(0x09) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             if (!channel.periodTriggered) {
                 return;
             }
@@ -240,7 +240,7 @@ public enum EffectType implements Effect {
 
     VOLUME_SLIDE(0x0A) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             EffectType.storeVolumeSlide(channel, config.volumeSlideDeltaEnabled);
         }
 
@@ -252,7 +252,7 @@ public enum EffectType implements Effect {
 
     POSITION_JUMP(0x0B) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int jumpSequenceIndex = (channel.effectArgumentX << 4) | channel.effectArgumentY;
             context.jumpPending = true;
             context.jumpSequenceIndex = jumpSequenceIndex;
@@ -265,7 +265,7 @@ public enum EffectType implements Effect {
 
     SET_VOLUME(0x0C) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int volume = (channel.effectArgumentX << 4) | channel.effectArgumentY;
             channel.volume = Maths.clamp(volume, 0, 64);
         }
@@ -278,7 +278,7 @@ public enum EffectType implements Effect {
 
     PATTERN_BREAK(0x0D) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int row = channel.effectArgumentX * 10 + channel.effectArgumentY;
             context.breakPending = true;
             context.breakRowIndex = Maths.clamp(row, 0, 63);
@@ -297,7 +297,7 @@ public enum EffectType implements Effect {
         }
 
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             if (channel.extendedEffectType == ExtendedEffectType.NONE) {
                 return;
             }
@@ -306,7 +306,7 @@ public enum EffectType implements Effect {
                 return;
             }
 
-            channel.extendedEffectType.onNewRow(channel, context, config);
+            channel.extendedEffectType.onNewRow(channel, context, config, rowIndex);
         }
 
         @Override
@@ -325,7 +325,7 @@ public enum EffectType implements Effect {
 
     SET_SPEED(0x0F) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int speedOrTempo = (channel.effectArgumentX << 4) | channel.effectArgumentY;
 
             if (speedOrTempo < 0x20) {
@@ -343,7 +343,7 @@ public enum EffectType implements Effect {
 
     NONE(0xFF) {
         @Override
-        public void onNewRow(Channel channel, Context context, Config config) {
+        public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
 
         }
 

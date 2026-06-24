@@ -30,7 +30,7 @@ public interface Effect {
         }
     }
 
-    void onNewRow(Channel channel, Context context, Config config);
+    void onNewRow(Channel channel, Context context, Config config, int rowIndex);
 
     void onMidRow(Channel channel, Context context, Config config);
 }
