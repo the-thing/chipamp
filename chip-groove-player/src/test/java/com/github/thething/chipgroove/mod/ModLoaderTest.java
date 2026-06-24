@@ -47,7 +47,7 @@ class ModLoaderTest {
 
     @Test
     void shouldLoadEmptyAmigaModule() throws IOException {
-        Mod mod = underTest.load("empty.mod");
+        Mod mod = underTest.load("chip/empty.mod");
         assertThat(mod.getTitle()).isEqualTo("");
         assertThat(mod.getLength()).isEqualTo(1);
         assertThat(mod.getSampleCount()).isEqualTo(31);
