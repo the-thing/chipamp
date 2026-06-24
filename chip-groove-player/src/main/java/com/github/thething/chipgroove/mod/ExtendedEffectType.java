@@ -96,7 +96,6 @@ public enum ExtendedEffectType implements Effect {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             int loopCounter = channel.effectArgumentY;
-            System.out.println("LOOP_PATTERN: " + loopCounter);
 
             if (loopCounter == 0) {
                 channel.loopRowIndex = rowIndex;
