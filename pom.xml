@@ -27,9 +27,9 @@
         <maven.assembly.plugin.version>3.8.0</maven.assembly.plugin.version>
     </properties>
     <scm>
-        <connection>scm:git:git://github.com/the-thing/chip-groove.git</connection>
-        <developerConnection>scm:git:git@github.com:the-thing/chip-groove.git</developerConnection>
-        <url>https://github.com/the-thing/chip-groove</url>
+        <connection>scm:git:git://github.com/the-thing/chipamp.git</connection>
+        <developerConnection>scm:git:git@github.com:the-thing/chipamp.git</developerConnection>
+        <url>https://github.com/the-thing/chipamp</url>
         <tag>main</tag>
     </scm>
     <dependencyManagement>
