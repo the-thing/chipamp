@@ -29,7 +29,7 @@ public enum EffectType implements Effect {
                 default -> 0;
             };
 
-            int newPeriod = ModTables.shiftPeriodBySemitones(channel.arpeggioPeriod, channel.sample.fineTune(), semitones);
+            int newPeriod = Mods.shiftPeriodBySemitones(channel.arpeggioPeriod, channel.sample.fineTune(), semitones);
             channel.updateIncrement(newPeriod, config.clockHz, config.samplingRate);
         }
     },
@@ -79,7 +79,7 @@ public enum EffectType implements Effect {
                 }
 
                 if (activeSample != null && activeSample.fineTune() != 0) {
-                    period = ModTables.getFineTunePeriod(period, activeSample.fineTune());
+                    period = Mods.getFineTunePeriod(period, activeSample.fineTune());
                 }
 
                 channel.portamentoTargetPeriod = period;
@@ -142,7 +142,7 @@ public enum EffectType implements Effect {
                 }
 
                 if (activeSample != null && activeSample.fineTune() != 0) {
-                    period = ModTables.getFineTunePeriod(period, activeSample.fineTune());
+                    period = Mods.getFineTunePeriod(period, activeSample.fineTune());
                 }
 
                 channel.portamentoTargetPeriod = period;
@@ -196,7 +196,7 @@ public enum EffectType implements Effect {
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
             WaveformType tremoloWaveformType = channel.tremoloWaveformType;
-            int waveformValue = ModTables.getWaveformValue(tremoloWaveformType, channel.tremoloPosition);
+            int waveformValue = Mods.getWaveformValue(tremoloWaveformType, channel.tremoloPosition);
             int delta = (channel.tremoloAmplitude * waveformValue) / 64;
 
             channel.volume = Maths.clamp(channel.tremoloVolume + delta, 0, 64);
@@ -394,7 +394,7 @@ public enum EffectType implements Effect {
 
     private static void applyToneVibrato(Channel channel, Config config) {
         WaveformType vibratoWaveformType = channel.vibratoWaveformType;
-        int waveformValue = ModTables.getWaveformValue(vibratoWaveformType, channel.vibratoPosition);
+        int waveformValue = Mods.getWaveformValue(vibratoWaveformType, channel.vibratoPosition);
         int delta = (channel.vibratoAmplitude * waveformValue) / 64;
 
         channel.period = Maths.clamp(channel.vibratoPeriod + delta, config.minPeriod, config.maxPeriod);

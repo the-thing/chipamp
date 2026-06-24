@@ -18,7 +18,7 @@ interface Effect {
 
         if (period > 0) {
             if (activeSample != null && activeSample.fineTune() != 0) {
-                period = ModTables.getFineTunePeriod(period, activeSample.fineTune());
+                period = Mods.getFineTunePeriod(period, activeSample.fineTune());
             }
 
             if (activeSample != null) {

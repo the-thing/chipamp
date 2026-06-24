@@ -9,6 +9,7 @@ public enum ExtendedEffectType implements Effect {
     SET_FILTER(0x00) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
+            // TODO implement
             if (config.logErrorEnabled) {
                 config.logger.println("SET_FILTER not supported");
             }
@@ -48,6 +49,7 @@ public enum ExtendedEffectType implements Effect {
     SET_GLISSANDO(0x03) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
+            // TODO implement
             if (config.logErrorEnabled) {
                 config.logger.println("SET_GLISSANDO not supported");
             }
@@ -87,7 +89,7 @@ public enum ExtendedEffectType implements Effect {
             fineTune = (fineTune << 28) >> 28;
 
             if (channel.sample != null && channel.period > 0) {
-                int newPeriod = ModTables.getFineTunePeriod(channel.period, fineTune);
+                int newPeriod = Mods.getFineTunePeriod(channel.period, fineTune);
                 channel.updatePeriodAndIncrement(newPeriod, config.clockHz, config.samplingRate);
             }
         }

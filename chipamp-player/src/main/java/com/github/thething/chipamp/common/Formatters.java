@@ -1,7 +1,7 @@
 package com.github.thething.chipamp.common;
 
 import com.github.thething.chipamp.mod.Mod;
-import com.github.thething.chipamp.mod.ModTables;
+import com.github.thething.chipamp.mod.Mods;
 import com.github.thething.chipamp.mod.Instrument;
 import com.github.thething.chipamp.mod.EffectType;
 
@@ -92,10 +92,10 @@ public final class Formatters {
 
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Instrument pattern = mod.getInstrument(patternIndex, rowIndex, channelIndex);
-            String note = ModTables.getNote(pattern.period());
+            String note = Mods.getNote(pattern.period());
 
             if (note == null && pattern.period() > 0) {
-                note = ModTables.getCustomNote(pattern.period());
+                note = Mods.getCustomNote(pattern.period());
             } else if (note == null) {
                 note = "---";
             }
