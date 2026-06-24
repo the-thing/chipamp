@@ -12,7 +12,7 @@ public enum EffectType implements Effect {
             channel.arpeggioTickIndex = 0;
             channel.arpeggioPeriod = channel.period;
 
-            // it possible that the later ARPEGGIO rows do not have the note so we have to reset the increment based
+            // it possible that the later ARPEGGIO rows do not have the note, so we have to reset the increment based
             // on the current (last) note
             // A#5 06 037
             // ... 08 037
