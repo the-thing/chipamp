@@ -14,7 +14,6 @@ public interface Effect {
             activeSample = channel.sample;
         }
 
-        // TODO this is currently used only by SET SAMPLE OFFSET, maybe this should only be effect-specific field?
         channel.periodTriggered = period > 0;
 
         if (period > 0) {

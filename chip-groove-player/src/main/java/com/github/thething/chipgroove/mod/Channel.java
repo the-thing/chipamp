@@ -8,7 +8,7 @@ final class Channel {
 
     Sample sample;
     int period;
-    boolean periodTriggered;
+    boolean periodTriggered; // indicates if period was set for the row
     float samplePosition;
     float sampleIncrement;
     int volume;

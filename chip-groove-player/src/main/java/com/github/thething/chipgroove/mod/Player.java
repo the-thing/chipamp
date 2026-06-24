@@ -696,7 +696,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
+        Mod mod = modLoader.load("H0ffman - Eon.mod");
 
         Player player = new Player();
         player.setLogInfoEnabled(true);
