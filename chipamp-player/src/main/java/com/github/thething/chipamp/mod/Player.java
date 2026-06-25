@@ -20,6 +20,8 @@ import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.checkIndex;
 import static java.util.Objects.requireNonNull;
 
+// TODO add infinite loop state detection (requires adding loop counter)
+// TODO fix end conditions for skips (for reads seems to be ok)
 public final class Player {
 
     private static final int DEFAULT_BUFFER_SIZE = 4096;
@@ -303,7 +305,7 @@ public final class Player {
 
     public byte[] read() {
         requireNonNull(mod);
-        byte[] buffer = new byte[1024 * 1024];
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         int offset = 0;
         int readCount;
@@ -404,7 +406,7 @@ public final class Player {
         int end = offset + length;
         int readCount = 0;
 
-        while (sequenceIndex < endSequenceIndex && end - offset >= bytesPerTick) {
+        while ((sequenceIndex < endSequenceIndex || sampleIndex < context.samplesPerTick) && end - offset >= bytesPerTick) {
             tick(output, offset);
             readCount += bytesPerTick;
             offset += bytesPerTick;
@@ -484,21 +486,11 @@ public final class Player {
     }
 
     private void advanceRow() {
+        // TODO this has to be replaced by better loop detection
         // make sure we don't loop forever and stop the song at any jump statement in the last pattern
         if (config.ignoreLastSequenceJumpStatementEnabled && context.jumpPending && sequenceIndex == mod.getLength() - 1) {
             context.jumpPending = false;
             context.jumpSequenceIndex = 0;
-            context.breakPending = false;
-            context.breakRowIndex = 0;
-
-            // reset all channels
-            for (int i = 0; i < mod.getChannelCount(); i++) {
-                channels[i].reset();
-            }
-
-            // move pointers beyond the song
-            sequenceIndex++;
-            rowIndex = 0;
 
             return;
         }
@@ -696,7 +688,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("H0ffman - Eon.mod");
+        Mod mod = modLoader.load("agent_t_-_tballs3.mod");
 
         Player player = new Player();
         player.setLogInfoEnabled(true);
@@ -707,10 +699,11 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-        player.play();
+        // player.play();
+        player.playPatterns(1);
 
         byte[] audio = player.read();
         AudioFormat format = player.getCompatibleAudioFormat();
-        Resources.saveAudio(new File("Jogeir Liljedahl - Nearly There.wav"), format, audio);
+        Resources.saveAudio(new File("Chipamp - H0ffman - Eon.mod.wav"), format, audio);
     }
 }
