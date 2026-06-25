@@ -11,7 +11,8 @@ public final class Mod {
     public static final int MAX_LENGTH = 128;
     public static final int MIN_CHANNEL_COUNT = 4;
     public static final int MAX_CHANNEL_COUNT = 8;
-    public static final int SAMPLE_LENGTH = 31;
+    public static final int SAMPLE_COUNT_1 = 31;
+    public static final int SAMPLE_COUNT_2 = 15;
     public static final int MIN_PATTERN_COUNT = 1;
     public static final int MAX_PATTERN_COUNT = 128;
 
@@ -61,7 +62,7 @@ public final class Mod {
     }
 
     private Sample[] checkSamples(Sample[] samples) {
-        if (samples.length != SAMPLE_LENGTH) {
+        if (samples.length != SAMPLE_COUNT_1 && samples.length != SAMPLE_COUNT_2) {
             throw new IllegalArgumentException("Invalid sample length: " + samples.length);
         }
 

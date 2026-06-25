@@ -690,6 +690,8 @@ public final class Player {
         ModLoader modLoader = new ModLoader();
         Mod mod = modLoader.load("agent_t_-_tballs3.mod");
 
+        System.out.println(mod.getSampleCount());
+
         Player player = new Player();
         player.setLogInfoEnabled(true);
         player.setLogErrorEnabled(true);

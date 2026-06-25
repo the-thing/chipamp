@@ -23,7 +23,7 @@ import static java.util.Objects.requireNonNull;
  *                   bytes).
  * @param data       Sample data.
  */
-public record Sample(String name, int fineTune, int volume, int loopStart, int loopLength, byte[] data) {
+public record Sample(String name, int fineTune, int volume, int loopStart, int loopLength, byte[] data, int actualLength) {
 
     private static final int MIN_DATA_LENGTH = 0;
     private static final int MAX_DATA_LENGTH = 131_072;
@@ -32,16 +32,20 @@ public record Sample(String name, int fineTune, int volume, int loopStart, int l
     private static final int MIN_VOLUME = 0;
     private static final int MAX_VOLUME = 64;
 
-    public Sample(String name, int fineTune, int volume, int loopStart, int loopLength, byte[] data) {
+    public Sample(String name, int fineTune, int volume, int loopStart, int loopLength, byte[] data, int actualLength) {
         this.name = requireNonNull(name);
         this.fineTune = requireInRange(fineTune, MIN_FINE_TUNE, MAX_FINE_TUNE);
         this.volume = requireInRange(volume, MIN_VOLUME, MAX_VOLUME);
         this.loopStart = requireInRange(loopStart, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
         // some mods store loop length as 0 and not 1 world (2 bytes)
+
+        System.out.println("loopStart: " + loopStart + ", loopLength: " + loopLength + ", data.length: " + data.length + ", actualLength: " + actualLength);
+
         checkFromIndexSize(loopStart, Math.max(0, loopLength - 2), data.length);
         this.loopLength = loopLength;
         requireInRange(data.length, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
         this.data = data;
+        this.actualLength = actualLength;
     }
 
     /**

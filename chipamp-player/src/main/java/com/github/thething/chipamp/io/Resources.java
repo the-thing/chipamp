@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import static java.util.Objects.checkFromIndexSize;
 
@@ -31,6 +32,28 @@ public final class Resources {
         }
 
         return in;
+    }
+
+    public static byte[] readBytes(String name) throws IOException {
+        try (InputStream in = getResourceAsStream(name)) {
+            return readBytes(in);
+        }
+    }
+
+    public static byte[] readBytes(InputStream in) throws IOException {
+        byte[] buffer = new byte[DEFAULT_BUFFER_LENGTH];
+        int offset = 0;
+        int readCount;
+
+        while ((readCount = in.read(buffer, offset, buffer.length - offset)) != -1) {
+            offset += readCount;
+
+            if (offset == buffer.length) {
+                buffer = Arrays.copyOf(buffer, buffer.length << 1);
+            }
+        }
+
+        return Arrays.copyOf(buffer, offset);
     }
 
     public static String readText(String name) throws IOException {
