@@ -224,7 +224,7 @@ public enum ExtendedEffectType implements Effect {
             if (delay == 0) {
                 // trigger immediately
                 channel.sample = channel.delayedSample;
-                channel.volume = channel.delayedSample.volume();
+                channel.volume = channel.delayedSample.getVolume();
                 channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
                 channel.samplePosition = 0.0f;
                 channel.resetOnNewSampleWithPeriod();
@@ -247,7 +247,7 @@ public enum ExtendedEffectType implements Effect {
             if (channel.delayedTriggerTickIndex == channel.delayedTickIndex) {
                 // trigger new period with sample
                 channel.sample = channel.delayedSample;
-                channel.volume = channel.delayedSample.volume();
+                channel.volume = channel.delayedSample.getVolume();
                 channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
                 channel.samplePosition = 0.0f;
                 channel.resetOnNewSampleWithPeriod();

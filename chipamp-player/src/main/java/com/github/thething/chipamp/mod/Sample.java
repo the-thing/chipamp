@@ -1,7 +1,6 @@
 package com.github.thething.chipamp.mod;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 import static com.github.thething.chipamp.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
@@ -70,12 +69,6 @@ public final class Sample {
         return Arrays.copyOf(data, data.length);
     }
 
-    /**
-     * Sample length in bytes. The tracker overwrites the first word of the sample, so a length of 2 still means an
-     * empty sample.
-     *
-     * @return sample length in bytes
-     */
     public int getDataLength() {
         return data.length;
     }
@@ -84,27 +77,27 @@ public final class Sample {
         return data.length <= 2;
     }
 
-    public String name() {
+    public String getName() {
         return name;
     }
 
-    public int fineTune() {
+    public int getFineTune() {
         return fineTune;
     }
 
-    public int volume() {
+    public int getVolume() {
         return volume;
     }
 
-    public int loopStart() {
+    public int getLoopStart() {
         return loopStart;
     }
 
-    public int loopLength() {
+    public int getLoopLength() {
         return loopLength;
     }
 
-    public int loopEnd() {
+    public int getLoopEnd() {
         return loopEnd;
     }
 }

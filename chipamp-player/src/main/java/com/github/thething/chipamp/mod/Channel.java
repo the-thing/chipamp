@@ -136,10 +136,10 @@ final class Channel {
         this.samplePosition += sampleIncrement;
 
         if (sample.isLoopEnabled()) {
-            float loopEnd = sample.loopStart() + sample.loopLength();
+            float loopEnd = sample.getLoopStart() + sample.getLoopLength();
 
             if (this.samplePosition >= loopEnd) {
-                this.samplePosition = sample.loopStart() + (this.samplePosition - loopEnd) % sample.loopLength();
+                this.samplePosition = sample.getLoopStart() + (this.samplePosition - loopEnd) % sample.getLoopLength();
             }
         } else {
             if (this.samplePosition >= sample.getDataLength()) {

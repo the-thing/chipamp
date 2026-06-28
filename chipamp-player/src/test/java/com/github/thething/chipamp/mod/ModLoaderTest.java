@@ -1,7 +1,6 @@
 package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.io.Resources;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -81,16 +80,22 @@ class ModLoaderTest {
 
             System.out.println("Loading MOD: " + file.getName() + ", file size = " + file.length());
             Mod mod = underTest.load(file);
-
-            for (int i = 0; i < mod.getSampleCount(); i++) {
-                Sample sample = mod.getSample(i);
-
-                if (sample.loopStart() != 0) {
-                    System.out.println(sample.name() + " = " + sample.loopStart());
-                }
-            }
+            assertThat(mod).isNotNull();
         }
     }
 
-    // TODO how many modules are compressed by PP20
+    @Test
+    public void shouldLoadModWithShortenedSample() throws IOException {
+        Mod mod = underTest.load("chip/elmstreet.mod");
+        assertThat(mod.getChannelCount()).isEqualTo(4);
+        assertThat(mod.getSampleCount()).isEqualTo(31);
+
+        Sample sample = mod.getSample(22);
+        assertThat(sample.getName()).isEqualTo("st-06:fred9");
+        assertThat(sample.getDataLength()).isEqualTo(15_094);
+        assertThat(sample.getLoopStart()).isEqualTo(0);
+        assertThat(sample.getLoopEnd()).isEqualTo(0);
+        assertThat(sample.getLoopLength()).isEqualTo(0);
+        assertThat(sample.getVolume()).isEqualTo(64);
+    }
 }

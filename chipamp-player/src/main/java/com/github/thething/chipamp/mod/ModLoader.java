@@ -12,6 +12,7 @@ import java.util.function.ToIntFunction;
 
 import static java.util.Objects.requireNonNull;
 
+// TODO add support for PP20 PowerPacker decompression
 public final class ModLoader {
 
     private static final int INSTRUMENT_LENGTH = 4;
@@ -33,8 +34,7 @@ public final class ModLoader {
 
     public Mod load(File file) throws IOException {
         try (FileInputStream in = new FileInputStream(file)) {
-            byte[] bytes = Resources.readBytes(in);
-            return load(bytes);
+            return load(Resources.readBytes(in));
         }
     }
 
@@ -42,7 +42,6 @@ public final class ModLoader {
         return load(Resources.readBytes(name));
     }
 
-    // TODO add support for PP20 PowerPacker decompression
     public Mod load(byte[] data) {
         int offset = 0;
 
@@ -125,13 +124,18 @@ public final class ModLoader {
     private int loadSamples(byte[] data, int offset, SampleHeader[] sampleHeaders, String trackerId, Sample[] out) {
         for (int i = 0; i < sampleHeaders.length; i++) {
             // there might be corrupted samples that are shorter than the header says (end of file)
-            int actualLength = Math.min(sampleHeaders[i].length(), data.length - offset);
             int expectedLength = sampleHeaders[i].length();
+            int actualLength = Math.min(expectedLength, data.length - offset);
 
-            if (actualLength != expectedLength) {
-                System.err.println("Warning: sample " + (i + 1) + " is shorter than expected: " + expectedLength + ", trackerId = " + trackerId);
+            if (expectedLength != actualLength) {
+                System.err.println("Warning: sample " + ( i + 1) + " is shorter than expected (" + expectedLength + " vs " + actualLength + ")");
+
+                if (Math.abs(expectedLength - actualLength) < 5) {
+                    System.out.println("dudfsdf");
+                }
             }
 
+            // it is possible that actual and expected length are different
             byte[] sampleData = new byte[sampleHeaders[i].length()];
 
             System.arraycopy(data, offset, sampleData, 0, actualLength);

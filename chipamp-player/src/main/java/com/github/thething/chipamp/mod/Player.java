@@ -685,7 +685,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
 
         Player player = new Player();
         player.setLogInfoEnabled(true);

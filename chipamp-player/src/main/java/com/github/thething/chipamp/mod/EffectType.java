@@ -34,7 +34,7 @@ public enum EffectType implements Effect {
                 default -> 0;
             };
 
-            int newPeriod = Mods.shiftUpPeriodBySemitones(channel.arpeggioPeriod, channel.sample.fineTune(), semitones);
+            int newPeriod = Mods.shiftUpPeriodBySemitones(channel.arpeggioPeriod, channel.sample.getFineTune(), semitones);
             channel.updateIncrement(newPeriod, config.clockHz, config.samplingRate);
         }
     },
@@ -71,7 +71,7 @@ public enum EffectType implements Effect {
         public void onPreEffect(Channel channel, Config config, int period, Sample sample) {
             if (sample != null) {
                 channel.sample = sample;
-                channel.volume = sample.volume();
+                channel.volume = sample.getVolume();
             }
 
             // do not update period or sample position when note triggers for portamento
@@ -83,8 +83,8 @@ public enum EffectType implements Effect {
                     activeSample = channel.sample;
                 }
 
-                if (activeSample != null && activeSample.fineTune() != 0) {
-                    period = Mods.getFineTunePeriod(period, activeSample.fineTune());
+                if (activeSample != null && activeSample.getFineTune() != 0) {
+                    period = Mods.getFineTunePeriod(period, activeSample.getFineTune());
                 }
 
                 channel.portamentoTargetPeriod = period;
@@ -134,7 +134,7 @@ public enum EffectType implements Effect {
         public void onPreEffect(Channel channel, Config config, int period, Sample sample) {
             if (sample != null) {
                 channel.sample = sample;
-                channel.volume = sample.volume();
+                channel.volume = sample.getVolume();
             }
 
             // do not update period or sample position when note triggers for portamento
@@ -146,8 +146,8 @@ public enum EffectType implements Effect {
                     activeSample = channel.sample;
                 }
 
-                if (activeSample != null && activeSample.fineTune() != 0) {
-                    period = Mods.getFineTunePeriod(period, activeSample.fineTune());
+                if (activeSample != null && activeSample.getFineTune() != 0) {
+                    period = Mods.getFineTunePeriod(period, activeSample.getFineTune());
                 }
 
                 channel.portamentoTargetPeriod = period;
@@ -394,7 +394,7 @@ public enum EffectType implements Effect {
         }
 
         if (channel.glissandoEnabled) {
-            int fineTune = channel.sample != null ? channel.sample.fineTune() : 0;
+            int fineTune = channel.sample != null ? channel.sample.getFineTune() : 0;
             newPeriod = Mods.findNearestPeriod(newPeriod, fineTune);
         }
 
