@@ -129,10 +129,6 @@ public final class ModLoader {
 
             if (expectedLength != actualLength) {
                 System.err.println("Warning: sample " + ( i + 1) + " is shorter than expected (" + expectedLength + " vs " + actualLength + ")");
-
-                if (Math.abs(expectedLength - actualLength) < 5) {
-                    System.out.println("dudfsdf");
-                }
             }
 
             // it is possible that actual and expected length are different

@@ -81,6 +81,14 @@ class ModLoaderTest {
             System.out.println("Loading MOD: " + file.getName() + ", file size = " + file.length());
             Mod mod = underTest.load(file);
             assertThat(mod).isNotNull();
+
+            for (int i = 0; i < mod.getSampleCount(); i++) {
+                Sample sample = mod.getSample(i);
+
+                if (sample.getDataLength() > 0 && sample.getDataLength() < 100) {
+                    System.out.println("Sample " + (i + 1) + " is 2 bytes long: " + sample.getDataLength());
+                }
+            }
         }
     }
 
@@ -97,5 +105,10 @@ class ModLoaderTest {
         assertThat(sample.getLoopEnd()).isEqualTo(0);
         assertThat(sample.getLoopLength()).isEqualTo(0);
         assertThat(sample.getVolume()).isEqualTo(64);
+    }
+
+    @Test
+    public void shouldTrimSampleLengthOfTwoToZero() {
+        // TODO sample length of 2 should be
     }
 }
