@@ -1,12 +1,14 @@
 package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.common.ExtraArrays;
+import com.github.thething.chipamp.common.Strings;
 import com.github.thething.chipamp.io.Resources;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
@@ -15,16 +17,13 @@ public final class ModLoader {
 
     private static final int INSTRUMENT_LENGTH = 4;
     private static final int SAMPLE_HEADER_LENGTH = 30;
-    private static final Set<String> DEFAULT_TRACKER_IDS = Set.of(
-            "M.K.", "M!K!", "FLT4", "N.T.", "NSMS", "LARD", "OKTA", "CD61",
-            "EX08", "FLT8", "CD81", "OCTA", "MTN\0", "IT10",
-            "CMNT", "PTDT", "SO31");
+    private static final Set<String> DEFAULT_TRACKER_IDS = Set.of("M.K.", "M!K!", "N.T.", "NSMS", "LARD", "OKTA", "OCTA");
 
     private final Set<String> knownTrackerIds;
     private final SampleFactory sampleFactory;
 
     public ModLoader() {
-        this(DEFAULT_TRACKER_IDS, DefaultSampleFactory.INSTANCE);
+        this(DEFAULT_TRACKER_IDS, OpenMPTSampleFactory.INSTANCE);
     }
 
     public ModLoader(Set<String> knownTrackerIds, SampleFactory sampleFactory) {
@@ -43,6 +42,7 @@ public final class ModLoader {
         return load(Resources.readBytes(name));
     }
 
+    // TODO add support for PP20 PowerPacker
     public Mod load(byte[] data) {
         int offset = 0;
 
@@ -61,8 +61,12 @@ public final class ModLoader {
             sampleCount = Mod.SAMPLE_COUNT_2;
         }
 
+        System.out.println("probeTrackerId: " + probeTrackerId);
+
         SampleHeader[] sampleHeaders = loadSampleHeaders(data, offset, sampleCount);
         offset += sampleHeaders.length * SAMPLE_HEADER_LENGTH;
+
+         System.out.println("Sample headers: " + Arrays.toString(sampleHeaders));
 
         int length = data[offset] & 0xFF;
         offset++;
@@ -74,6 +78,9 @@ public final class ModLoader {
 
         int[] patternSequences = loadPatternSequences(data, offset);
         offset += patternSequences.length;
+
+        // TODO remove
+        // System.out.println("Pattern sequences: " + Arrays.toString(patternSequences));
 
         String trackerId;
 
@@ -96,30 +103,54 @@ public final class ModLoader {
         int remaining = data.length - offset;
 
         if (remaining > 0) {
-            System.out.println("Warning: " + remaining + " bytes are not used");
+            System.err.println("Warning: " + remaining + " bytes are not used");
         }
 
         return new Mod(title, length, samples, patternSequences, trackerId, patterns);
     }
 
     private static int detectChannelCount(String trackerId) {
-        // XXCH
-        if (trackerId.charAt(2) == 'C' && trackerId.charAt(3) == 'H') {
+        // (XX)CH
+        if (Strings.isDigit(trackerId, 0) && Strings.isDigit(trackerId, 1) && trackerId.charAt(2) == 'C' && trackerId.charAt(3) == 'H') {
             return Integer.parseInt(trackerId.substring(0, 2));
         }
 
-        // XCHN
-        if (trackerId.charAt(1) == 'C' && trackerId.charAt(2) == 'H' && trackerId.charAt(3) == 'N') {
-            return Integer.parseInt(trackerId.substring(0, 1));
+        // (X)CHN
+        if (Strings.isDigit(trackerId, 0) && trackerId.charAt(1) == 'C' && trackerId.charAt(2) == 'H' && trackerId.charAt(3) == 'N') {
+            return trackerId.charAt(0) - '0';
         }
 
-        // TODO TDZX
-        // TODO FA0X
+        // TDZ(X)
+        if (trackerId.charAt(0) == 'T' && trackerId.charAt(1) == 'D' && trackerId.charAt(2) == 'Z' && Strings.isDigit(trackerId, 3)) {
+            return trackerId.charAt(3) - '0';
+        }
 
-        return switch (trackerId) {
-            case "FLT8", "EX08" -> 8;
-            default -> 4;
-        };
+        // FA0(X)
+        if (trackerId.charAt(0) == 'F' && trackerId.charAt(1) == 'A' && trackerId.charAt(2) == '0' && Strings.isDigit(trackerId, 3)) {
+            return trackerId.charAt(3) - '0';
+        }
+
+        // FLT(X)
+        if (trackerId.charAt(0) == 'F' && trackerId.charAt(1) == 'L' && trackerId.charAt(2) == 'T' && Strings.isDigit(trackerId, 3)) {
+            return trackerId.charAt(3) - '0';
+        }
+
+        // EX0(X)
+        if (trackerId.charAt(0) == 'E' && trackerId.charAt(1) == 'X' && trackerId.charAt(2) == '0' && Strings.isDigit(trackerId, 3)) {
+            return trackerId.charAt(3) - '0';
+        }
+
+        // CD(X)1
+        if (trackerId.charAt(0) == 'C' && trackerId.charAt(1) == 'D' && Strings.isDigit(trackerId, 2) && trackerId.charAt(3) == '1') {
+            return trackerId.charAt(2) - '0';
+        }
+
+        // OKTA, OCTA
+        if (Strings.equals(trackerId, "OKTA") || Strings.equals(trackerId, "OCTA")) {
+            return 8;
+        }
+
+        return 4;
     }
 
     private boolean isKnownTrackerId(String trackerId) {
@@ -127,15 +158,37 @@ public final class ModLoader {
             return true;
         }
 
-        // XXCH
-        if (trackerId.charAt(2) == 'C' && trackerId.charAt(3) == 'H') {
+        // (XX)CH
+        if (Strings.isDigit(trackerId, 0) && Strings.isDigit(trackerId, 1) && trackerId.charAt(2) == 'C' && trackerId.charAt(3) == 'H') {
             return true;
         }
 
-        // TODO add more
-        // XCHN
-        // TDZX
-        // FA0X
+        // (X)CHN
+        if (Strings.isDigit(trackerId, 0) && trackerId.charAt(1) == 'C' && trackerId.charAt(2) == 'H' && trackerId.charAt(3) == 'N') {
+            return true;
+        }
+
+        // TDZ(X)
+        if (trackerId.charAt(0) == 'T' && trackerId.charAt(1) == 'D' && trackerId.charAt(2) == 'Z' && Strings.isDigit(trackerId, 3)) {
+            return true;
+        }
+
+        // FA0(X)
+        if (trackerId.charAt(0) == 'F' && trackerId.charAt(1) == 'A' && trackerId.charAt(2) == '0' && Strings.isDigit(trackerId, 3)) {
+            return true;
+        }
+
+        // FLT(X)
+        if (trackerId.charAt(0) == 'F' && trackerId.charAt(1) == 'L' && trackerId.charAt(2) == 'T' && Strings.isDigit(trackerId, 3)) {
+            return true;
+        }
+
+        // EX0(X)
+        if (trackerId.charAt(0) == 'E' && trackerId.charAt(1) == 'X' && trackerId.charAt(2) == '0' && Strings.isDigit(trackerId, 3)) {
+            return true;
+        }
+
+        // TODO CD(X)1
 
         return false;
     }
@@ -164,9 +217,10 @@ public final class ModLoader {
         for (int i = 0; i < sampleHeaders.length; i++) {
             // there might be corrupted samples that are shorter than the header says (end of file)
             int actualLength = Math.min(sampleHeaders[i].length(), data.length - offset);
+            int expectedLength = sampleHeaders[i].length();
 
-            if (actualLength != sampleHeaders[i].length()) {
-                System.out.println("Warning: sample " + i + " is shorter than expected");
+            if (actualLength != expectedLength) {
+                System.err.println("Warning: sample " + ( i + 1) + " is shorter than expected: " + expectedLength + ", trackerId = " + trackerId);
             }
 
             byte[] sampleData = new byte[sampleHeaders[i].length()];
@@ -175,6 +229,7 @@ public final class ModLoader {
             offset += actualLength;
 
             SampleHeader sampleHeader = sampleHeaders[i];
+            System.out.println("sample index: " + (i + 1));
 
             out[i] = sampleFactory.createSample(sampleHeader, trackerId, sampleData);
         }

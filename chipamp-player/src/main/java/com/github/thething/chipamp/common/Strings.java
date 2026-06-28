@@ -46,4 +46,27 @@ public final class Strings {
 
         out.append(value);
     }
+
+    public static boolean isDigit(String str, int index) {
+        char c = str.charAt(index);
+        return c >= '0' && c <= '9';
+    }
+
+    public static boolean equals(String str1, String str2) {
+        if (str1 == str2) {
+            return true;
+        }
+
+        if (str1.length() != str2.length()) {
+            return false;
+        }
+
+        for (int i = 0; i < str1.length(); i++) {
+            if (str1.charAt(i) != str2.charAt(i)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

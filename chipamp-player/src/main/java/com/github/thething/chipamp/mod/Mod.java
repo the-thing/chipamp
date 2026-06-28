@@ -9,7 +9,7 @@ public final class Mod {
     public static final int PATTERN_SEQUENCE_COUNT = 128;
     public static final int MIN_LENGTH = 1;
     public static final int MAX_LENGTH = 128;
-    public static final int MIN_CHANNEL_COUNT = 4;
+    public static final int MIN_CHANNEL_COUNT = 1;
     public static final int MAX_CHANNEL_COUNT = 16;
     public static final int SAMPLE_COUNT_1 = 31;
     public static final int SAMPLE_COUNT_2 = 15;
