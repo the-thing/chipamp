@@ -1,15 +1,13 @@
 package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.common.ExtraArrays;
-import com.github.thething.chipamp.common.Strings;
 import com.github.thething.chipamp.io.Resources;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
-import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
 import static java.util.Objects.requireNonNull;
@@ -18,18 +16,17 @@ public final class ModLoader {
 
     private static final int INSTRUMENT_LENGTH = 4;
     private static final int SAMPLE_HEADER_LENGTH = 30;
-    private static final Set<String> DEFAULT_TRACKER_IDS = Set.of("M.K.", "M!K!", "N.T.", "NSMS", "LARD", "OKTA", "OCTA");
 
-    private final Set<String> knownTrackerIds;
+    private final Predicate<String> trackerDetector;
     private final ToIntFunction<String> channelDetector;
     private final SampleFactory sampleFactory;
 
     public ModLoader() {
-        this(DEFAULT_TRACKER_IDS, DefaultChannelDetector.INSTANCE, OpenMPTSampleFactory.INSTANCE);
+        this(DefaultTrackerDetector.INSTANCE, DefaultChannelDetector.INSTANCE, OpenMPTSampleFactory.INSTANCE);
     }
 
-    public ModLoader(Set<String> knownTrackerIds, ToIntFunction<String> channelDetector, SampleFactory sampleFactory) {
-        this.knownTrackerIds = requireNonNull(knownTrackerIds);
+    public ModLoader(Predicate<String> trackerDetector, ToIntFunction<String> channelDetector, SampleFactory sampleFactory) {
+        this.trackerDetector = requireNonNull(trackerDetector);
         this.channelDetector = requireNonNull(channelDetector);
         this.sampleFactory = requireNonNull(sampleFactory);
     }
@@ -45,7 +42,7 @@ public final class ModLoader {
         return load(Resources.readBytes(name));
     }
 
-    // TODO add support for PP20 PowerPacker
+    // TODO add support for PP20 PowerPacker decompression
     public Mod load(byte[] data) {
         int offset = 0;
 
@@ -56,7 +53,7 @@ public final class ModLoader {
         String probeTrackerId = new String(data, probeOffset, 4, StandardCharsets.US_ASCII);
         int sampleCount;
 
-        boolean knownTackerId = isKnownTrackerId(probeTrackerId);
+        boolean knownTackerId = trackerDetector.test(probeTrackerId);
 
         if (knownTackerId) {
             sampleCount = Mod.SAMPLE_COUNT_1;
@@ -103,46 +100,6 @@ public final class ModLoader {
         }
 
         return new Mod(title, length, samples, patternSequences, trackerId, patterns);
-    }
-
-    private boolean isKnownTrackerId(String trackerId) {
-        if (knownTrackerIds.contains(trackerId)) {
-            return true;
-        }
-
-        // (XX)CH
-        if (Strings.isDigit(trackerId, 0) && Strings.isDigit(trackerId, 1) && trackerId.charAt(2) == 'C' && trackerId.charAt(3) == 'H') {
-            return true;
-        }
-
-        // (X)CHN
-        if (Strings.isDigit(trackerId, 0) && trackerId.charAt(1) == 'C' && trackerId.charAt(2) == 'H' && trackerId.charAt(3) == 'N') {
-            return true;
-        }
-
-        // TDZ(X)
-        if (trackerId.charAt(0) == 'T' && trackerId.charAt(1) == 'D' && trackerId.charAt(2) == 'Z' && Strings.isDigit(trackerId, 3)) {
-            return true;
-        }
-
-        // FA0(X)
-        if (trackerId.charAt(0) == 'F' && trackerId.charAt(1) == 'A' && trackerId.charAt(2) == '0' && Strings.isDigit(trackerId, 3)) {
-            return true;
-        }
-
-        // FLT(X)
-        if (trackerId.charAt(0) == 'F' && trackerId.charAt(1) == 'L' && trackerId.charAt(2) == 'T' && Strings.isDigit(trackerId, 3)) {
-            return true;
-        }
-
-        // EX0(X)
-        if (trackerId.charAt(0) == 'E' && trackerId.charAt(1) == 'X' && trackerId.charAt(2) == '0' && Strings.isDigit(trackerId, 3)) {
-            return true;
-        }
-
-        // TODO CD(X)1
-
-        return false;
     }
 
     private static String loadTitle(byte[] bytes) {

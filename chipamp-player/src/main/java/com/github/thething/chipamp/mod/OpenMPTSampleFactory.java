@@ -8,9 +8,7 @@ public final class OpenMPTSampleFactory implements SampleFactory {
 
     public static final OpenMPTSampleFactory INSTANCE = new OpenMPTSampleFactory();
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Sample createSample(ModLoader.SampleHeader header, String trackerId, byte[] sampleData) {
         int loopStart = header.loopStart();
         int loopLength = header.loopLength();
