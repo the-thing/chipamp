@@ -198,7 +198,7 @@ public final class Mods {
     }
 
     public static String getNote(int period) {
-        if (period > PERIODS.length) {
+        if (period > NOTES.length) {
             return null;
         }
 

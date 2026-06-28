@@ -685,9 +685,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Angelwings - 1995.mod");
-
-        System.out.println(mod.getSampleCount());
+        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
 
         Player player = new Player();
         player.setLogInfoEnabled(true);
@@ -699,8 +697,6 @@ public final class Player {
         // player.setMuted(3, true);
 
         player.play();
-        // player.seekPattern(3);
-        // player.playPatterns(1);
 
 //        byte[] audio = player.read();
 //        AudioFormat format = player.getCompatibleAudioFormat();

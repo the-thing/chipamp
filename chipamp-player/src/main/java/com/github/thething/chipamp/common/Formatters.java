@@ -4,6 +4,7 @@ import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.Mods;
 import com.github.thething.chipamp.mod.Instrument;
 import com.github.thething.chipamp.mod.EffectType;
+import com.github.thething.chipamp.mod.Sample;
 
 // TODO add new column (sound) for volume and compare with MPT (not sure yet)
 public final class Formatters {
@@ -92,11 +93,15 @@ public final class Formatters {
 
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Instrument pattern = mod.getInstrument(patternIndex, rowIndex, channelIndex);
-            String note = Mods.getNote(pattern.period());
+            String note;
 
-            if (note == null && pattern.period() > 0) {
-                note = Mods.getCustomNote(pattern.period());
-            } else if (note == null) {
+            if (pattern.period() > 0) {
+                note = Mods.getNote(pattern.period());
+
+                if (note == null) {
+                    note = Mods.getCustomNote(pattern.period());
+                }
+            } else {
                 note = "---";
             }
 

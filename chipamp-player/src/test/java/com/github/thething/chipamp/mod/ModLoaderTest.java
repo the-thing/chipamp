@@ -1,6 +1,7 @@
 package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.io.Resources;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,34 +56,19 @@ class ModLoaderTest {
         assertThat(mod.getSampleCount()).isEqualTo(31);
         assertThat(mod.getPatternSequenceCount()).isEqualTo(128);
         assertThat(mod.getTrackerId()).isEqualTo("M.K.");
-        assertThat(mod. getPatternCount()).isEqualTo(1);
+        assertThat(mod.getPatternCount()).isEqualTo(1);
     }
-
-    @Test
-    void test() throws IOException {
-        Mod mod = underTest.load("chip/broken2/katherina_part1.mod");
-    }
-
-    // TODO find mods that have sample length == 2
 
     @Test
     void shouldLoadBrokenModules() throws IOException {
         for (File file : Resources.listFiles("chip/broken")) {
-
             if (!file.getName().endsWith(".mod")) {
                 continue;
             }
 
-            System.out.println("Loading MOD: " + file.getName() + ", file size = " + file.length());
+            System.out.println("Loading broken MOD: " + file.getName());
             Mod mod = underTest.load(file);
-
-            for (int i = 0; i < mod.getSampleCount(); i++) {
-                Sample sample = mod.getSample(i);
-
-                if (sample.loopStart() != 0) {
-                    System.out.println(sample.name() + " = " + sample.loopStart());
-                }
-            }
+            assertThat(mod).isNotNull();
         }
     }
 

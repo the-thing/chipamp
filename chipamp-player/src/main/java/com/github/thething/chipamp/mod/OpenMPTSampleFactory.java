@@ -17,28 +17,33 @@ public final class OpenMPTSampleFactory implements SampleFactory {
         int sampleLength = sampleData.length;
 
         if (loopStart + loopLength > sampleLength) {
-            // TODO remove later
-            System.out.println("kupa: " + header.name() + " / " + header.loopStart() + " / " + header.loopLength() + " / " + sampleLength + ", trackerId=" + trackerId);
-
             if (sampleLength == 0) {
+                // disable loop if length is zero
                 loopStart = 0;
                 loopLength = 0;
             } else if (loopStart == 0) {
+                // expand to loop length if start is zero
                 sampleData = Arrays.copyOf(sampleData, loopLength);
             } else if (Strings.equals(trackerId, "M.K.")) {
+                // for M.K. tracker decrease loop start by half
                 loopStart >>= 1;
 
                 if (loopStart + loopLength > sampleLength) {
-                    // if still breaches the sample, just shorten the length
+                    // if still breaches the sample, just shorten the loopLength
                     loopStart <<= 1;
                     loopLength -= loopStart;
                 }
             } else {
+                // truncate sample length to loopStart / 2 and set loopStart to zero
                 sampleLength -= loopStart >> 1;
+                sampleData = Arrays.copyOf(sampleData, sampleLength);
                 loopStart = 0;
-            }
 
-            System.out.println("After, loopStart=" + loopStart + ", loopLength=" + loopLength + ", sampleLength=" + sampleLength);
+                if (loopStart + loopLength > sampleLength) {
+                    // if still breaches, truncate the sample
+                    sampleData = Arrays.copyOf(sampleData, loopLength);
+                }
+            }
         }
 
         return new Sample(header.name(), header.fineTune(), header.volume(), loopStart, loopLength, sampleData);

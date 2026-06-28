@@ -23,6 +23,11 @@ public enum EffectType implements Effect {
         public void onMidRow(Channel channel, Context context, Config config) {
             channel.arpeggioTickIndex++;
 
+            if (channel.sample == null) {
+                // there are mods that have arpeggio with no sample
+                return;
+            }
+
             int semitones = switch (channel.arpeggioTickIndex % 3) {
                 case 1 -> channel.effectArgumentX;
                 case 2 -> channel.effectArgumentY;

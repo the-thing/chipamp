@@ -61,12 +61,8 @@ public final class ModLoader {
             sampleCount = Mod.SAMPLE_COUNT_2;
         }
 
-        System.out.println("probeTrackerId: " + probeTrackerId);
-
         SampleHeader[] sampleHeaders = loadSampleHeaders(data, offset, sampleCount);
         offset += sampleHeaders.length * SAMPLE_HEADER_LENGTH;
-
-         System.out.println("Sample headers: " + Arrays.toString(sampleHeaders));
 
         int length = data[offset] & 0xFF;
         offset++;
@@ -78,9 +74,6 @@ public final class ModLoader {
 
         int[] patternSequences = loadPatternSequences(data, offset);
         offset += patternSequences.length;
-
-        // TODO remove
-        // System.out.println("Pattern sequences: " + Arrays.toString(patternSequences));
 
         String trackerId;
 
@@ -229,7 +222,6 @@ public final class ModLoader {
             offset += actualLength;
 
             SampleHeader sampleHeader = sampleHeaders[i];
-            System.out.println("sample index: " + (i + 1));
 
             out[i] = sampleFactory.createSample(sampleHeader, trackerId, sampleData);
         }
