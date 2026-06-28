@@ -4,9 +4,9 @@ import com.github.thething.chipamp.common.Strings;
 
 import java.util.function.ToIntFunction;
 
-public final class DefaultChannelCountExtractor implements ToIntFunction<String> {
+public final class DefaultChannelDetector implements ToIntFunction<String> {
 
-    public static final DefaultChannelCountExtractor INSTANCE = new DefaultChannelCountExtractor();
+    public static final DefaultChannelDetector INSTANCE = new DefaultChannelDetector();
 
     @Override
     public int applyAsInt(String trackerId) {

@@ -8,8 +8,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Set;
+import java.util.function.IntFunction;
+import java.util.function.ToIntFunction;
 
 import static java.util.Objects.requireNonNull;
 
@@ -20,14 +21,16 @@ public final class ModLoader {
     private static final Set<String> DEFAULT_TRACKER_IDS = Set.of("M.K.", "M!K!", "N.T.", "NSMS", "LARD", "OKTA", "OCTA");
 
     private final Set<String> knownTrackerIds;
+    private final ToIntFunction<String> channelDetector;
     private final SampleFactory sampleFactory;
 
     public ModLoader() {
-        this(DEFAULT_TRACKER_IDS, OpenMPTSampleFactory.INSTANCE);
+        this(DEFAULT_TRACKER_IDS, DefaultChannelDetector.INSTANCE, OpenMPTSampleFactory.INSTANCE);
     }
 
-    public ModLoader(Set<String> knownTrackerIds, SampleFactory sampleFactory) {
+    public ModLoader(Set<String> knownTrackerIds, ToIntFunction<String> channelDetector, SampleFactory sampleFactory) {
         this.knownTrackerIds = requireNonNull(knownTrackerIds);
+        this.channelDetector = requireNonNull(channelDetector);
         this.sampleFactory = requireNonNull(sampleFactory);
     }
 
@@ -85,7 +88,7 @@ public final class ModLoader {
         }
 
         int patternCount = ExtraArrays.max(patternSequences) + 1;
-        int channelCount = detectChannelCount(probeTrackerId);
+        int channelCount = channelDetector.applyAsInt(probeTrackerId);
 
         Instrument[][][] patterns = loadPatterns(data, offset, patternCount, channelCount);
         offset += patterns.length * Mod.ROW_COUNT * channelCount * INSTRUMENT_LENGTH;
@@ -100,50 +103,6 @@ public final class ModLoader {
         }
 
         return new Mod(title, length, samples, patternSequences, trackerId, patterns);
-    }
-
-    private static int detectChannelCount(String trackerId) {
-        // (XX)CH
-        if (Strings.isDigit(trackerId, 0) && Strings.isDigit(trackerId, 1) && trackerId.charAt(2) == 'C' && trackerId.charAt(3) == 'H') {
-            return Integer.parseInt(trackerId.substring(0, 2));
-        }
-
-        // (X)CHN
-        if (Strings.isDigit(trackerId, 0) && trackerId.charAt(1) == 'C' && trackerId.charAt(2) == 'H' && trackerId.charAt(3) == 'N') {
-            return trackerId.charAt(0) - '0';
-        }
-
-        // TDZ(X)
-        if (trackerId.charAt(0) == 'T' && trackerId.charAt(1) == 'D' && trackerId.charAt(2) == 'Z' && Strings.isDigit(trackerId, 3)) {
-            return trackerId.charAt(3) - '0';
-        }
-
-        // FA0(X)
-        if (trackerId.charAt(0) == 'F' && trackerId.charAt(1) == 'A' && trackerId.charAt(2) == '0' && Strings.isDigit(trackerId, 3)) {
-            return trackerId.charAt(3) - '0';
-        }
-
-        // FLT(X)
-        if (trackerId.charAt(0) == 'F' && trackerId.charAt(1) == 'L' && trackerId.charAt(2) == 'T' && Strings.isDigit(trackerId, 3)) {
-            return trackerId.charAt(3) - '0';
-        }
-
-        // EX0(X)
-        if (trackerId.charAt(0) == 'E' && trackerId.charAt(1) == 'X' && trackerId.charAt(2) == '0' && Strings.isDigit(trackerId, 3)) {
-            return trackerId.charAt(3) - '0';
-        }
-
-        // CD(X)1
-        if (trackerId.charAt(0) == 'C' && trackerId.charAt(1) == 'D' && Strings.isDigit(trackerId, 2) && trackerId.charAt(3) == '1') {
-            return trackerId.charAt(2) - '0';
-        }
-
-        // OKTA, OCTA
-        if (Strings.equals(trackerId, "OKTA") || Strings.equals(trackerId, "OCTA")) {
-            return 8;
-        }
-
-        return 4;
     }
 
     private boolean isKnownTrackerId(String trackerId) {
@@ -213,7 +172,7 @@ public final class ModLoader {
             int expectedLength = sampleHeaders[i].length();
 
             if (actualLength != expectedLength) {
-                System.err.println("Warning: sample " + ( i + 1) + " is shorter than expected: " + expectedLength + ", trackerId = " + trackerId);
+                System.err.println("Warning: sample " + (i + 1) + " is shorter than expected: " + expectedLength + ", trackerId = " + trackerId);
             }
 
             byte[] sampleData = new byte[sampleHeaders[i].length()];
