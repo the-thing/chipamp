@@ -12,6 +12,8 @@ public final class DefaultSampleFactory implements SampleFactory {
         int loopLength = header.loopLength();
         int sampleLength = sampleData.length;
 
+        System.out.println("Sample name=" + header.name() + ", trackerId=" + trackerId);
+
         // TODO remove later
         if (header.loopStart() > sampleLength) {
             System.out.println("dupa: " + header.name() + " / " + header.loopStart() + " / " + header.loopLength() + " / " + sampleLength);
