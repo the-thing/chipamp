@@ -1,6 +1,7 @@
 package com.github.thething.chipamp.mod;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import static com.github.thething.chipamp.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
@@ -23,7 +24,7 @@ import static java.util.Objects.requireNonNull;
  *                   bytes).
  * @param data       Sample data.
  */
-public record Sample(String name, int fineTune, int volume, int loopStart, int loopLength, byte[] data, int actualLength) {
+public final class Sample {
 
     private static final int MIN_DATA_LENGTH = 0;
     private static final int MAX_DATA_LENGTH = 131_072;
@@ -31,21 +32,24 @@ public record Sample(String name, int fineTune, int volume, int loopStart, int l
     private static final int MAX_FINE_TUNE = 7;
     private static final int MIN_VOLUME = 0;
     private static final int MAX_VOLUME = 64;
+    private final String name;
+    private final int fineTune;
+    private final int volume;
+    private final int loopStart;
+    private final int loopLength;
+    private final int loopEnd;
+    private final byte[] data;
 
-    public Sample(String name, int fineTune, int volume, int loopStart, int loopLength, byte[] data, int actualLength) {
+    public Sample(String name, int fineTune, int volume, int loopStart, int loopLength, byte[] data) {
         this.name = requireNonNull(name);
         this.fineTune = requireInRange(fineTune, MIN_FINE_TUNE, MAX_FINE_TUNE);
         this.volume = requireInRange(volume, MIN_VOLUME, MAX_VOLUME);
         this.loopStart = requireInRange(loopStart, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
-        // some mods store loop length as 0 and not 1 world (2 bytes)
-
-        System.out.println("loopStart: " + loopStart + ", loopLength: " + loopLength + ", data.length: " + data.length + ", actualLength: " + actualLength);
-
-        checkFromIndexSize(loopStart, Math.max(0, loopLength - 2), data.length);
+        checkFromIndexSize(loopStart, loopLength, data.length);
         this.loopLength = loopLength;
+        this.loopEnd = loopStart + loopLength;
         requireInRange(data.length, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
         this.data = data;
-        this.actualLength = actualLength;
     }
 
     /**
@@ -62,7 +66,6 @@ public record Sample(String name, int fineTune, int volume, int loopStart, int l
         return data[index];
     }
 
-    @Override
     public byte[] data() {
         return Arrays.copyOf(data, data.length);
     }
@@ -79,5 +82,29 @@ public record Sample(String name, int fineTune, int volume, int loopStart, int l
 
     public boolean isEmpty() {
         return data.length <= 2;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public int fineTune() {
+        return fineTune;
+    }
+
+    public int volume() {
+        return volume;
+    }
+
+    public int loopStart() {
+        return loopStart;
+    }
+
+    public int loopLength() {
+        return loopLength;
+    }
+
+    public int loopEnd() {
+        return loopEnd;
     }
 }

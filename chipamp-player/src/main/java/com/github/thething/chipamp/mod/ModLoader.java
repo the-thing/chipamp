@@ -18,18 +18,20 @@ public final class ModLoader {
     private static final int INSTRUMENT_LENGTH = 4;
     private static final int SAMPLE_HEADER_LENGTH = 30;
     private static final Set<String> DEFAULT_TRACKER_IDS = Set.of(
-            "M.K.", "M!K!", "FLT4", "FLT8",
-            "4CHN", "6CHN", "8CHN", "CD81",
-            "OCTA");
+            "M.K.", "M!K!", "FLT4", "N.T.", "NSMS", "LARD", "OKTA", "CD61",
+            "FA08", "EX08", "FLT8", "4CHN", "6CHN", "8CHN", "CD81", "10CH",
+            "OCTA", "TDZ8", "MTN\0", "IT10", "CMNT", "PTDT", "SO31");
 
     private final Set<String> knownTrackerIds;
+    private final SampleFactory sampleFactory;
 
     public ModLoader() {
-        this(DEFAULT_TRACKER_IDS);
+        this(DEFAULT_TRACKER_IDS, DefaultSampleFactory.INSTANCE);
     }
 
-    public ModLoader(Set<String> knownTrackerIds) {
+    public ModLoader(Set<String> knownTrackerIds, SampleFactory sampleFactory) {
         this.knownTrackerIds = requireNonNull(knownTrackerIds);
+        this.sampleFactory = requireNonNull(sampleFactory);
     }
 
     public Mod load(File file) throws IOException {
@@ -73,9 +75,10 @@ public final class ModLoader {
 
         int probeOffset = 20 + 31 * SAMPLE_HEADER_LENGTH + 2 + Mod.PATTERN_SEQUENCE_COUNT;
         String probeTrackerId = new String(data, probeOffset, 4, StandardCharsets.US_ASCII);
+        System.out.println("probeTrackerId: " + probeTrackerId);
         int sampleCount;
 
-        if (knownTrackerIds.contains(probeTrackerId)) {
+        if (isKnownTrackerId(probeTrackerId)) {
             sampleCount = Mod.SAMPLE_COUNT_1;
         } else {
             sampleCount = Mod.SAMPLE_COUNT_2;
@@ -104,32 +107,56 @@ public final class ModLoader {
             trackerId = new String("");
         }
 
+        System.out.println("trackerId: " + trackerId + ", sampleCount: " + sampleCount);
+
         int patternCount = ExtraArrays.max(patternSequences) + 1;
         int channelCount = detectChannelCount(probeTrackerId);
 
         Instrument[][][] patterns = loadPatterns(data, offset, patternCount, channelCount);
         offset += patterns.length * Mod.ROW_COUNT * channelCount * INSTRUMENT_LENGTH;
 
-        Sample[] samples = loadSamples(data, offset, sampleHeaders);
+        Sample[] samples = new Sample[sampleCount];
+        offset = loadSamples(data, offset, sampleHeaders, samples);
 
-        for (int i = 0; i < samples.length; i++) {
-            // TODO this is wrong
-            offset += samples[i].actualLength();
-        }
+        int remaining = data.length - offset;
 
-        if (offset != data.length) {
-            throw new RuntimeException("Unexpected data length: " + offset + " != " + data.length);
-        }
+//        if (remaining > 0) {
+//            throw new RuntimeException("Unexpected data length: " + offset + " != " + data.length + ", remaining: " + remaining);
+//        }
 
         return new Mod(title, length, samples, patternSequences, trackerId, patterns);
     }
 
     private static int detectChannelCount(String trackerId) {
+        // XXCH
+        if (trackerId.charAt(2) == 'C' && trackerId.charAt(3) == 'H') {
+            return Integer.parseInt(trackerId.substring(0, 2));
+        }
+
+        // XCHN
+        if (trackerId.charAt(1) == 'C' && trackerId.charAt(2) == 'H' && trackerId.charAt(3) == 'N') {
+            return Integer.parseInt(trackerId.substring(0, 1));
+        }
+
+        // TODO TDZX
+        // TODO FA0X
+
         return switch (trackerId) {
-            case "FLT8", "8CHN" -> 8;
-            case "6CHN" -> 6;
+            case "FLT8", "EX08" -> 8;
             default -> 4;
         };
+    }
+
+    private boolean isKnownTrackerId(String trackerId) {
+        if (knownTrackerIds.contains(trackerId)) {
+            return true;
+        }
+
+        if (trackerId.charAt(2) == 'C' && trackerId.charAt(3) == 'H') {
+            return true;
+        }
+
+        return false;
     }
 
     private static String loadTitle(DataInput in) throws IOException {
@@ -193,37 +220,36 @@ public final class ModLoader {
 
             SampleHeader sampleHeader = sampleHeaders[i];
             samples[i] = new Sample(sampleHeader.name, sampleHeader.fineTune, sampleHeader.volume,
-                    sampleHeader.loopStart, sampleHeader.loopLength, sampleData, sampleHeader.length);
+                    sampleHeader.loopStart, sampleHeader.loopLength, sampleData);
         }
 
         return samples;
     }
 
-    private static Sample[] loadSamples(byte[] data, int offset, SampleHeader[] sampleHeaders) {
-        Sample[] samples = new Sample[sampleHeaders.length];
-
-        System.out.println("data.length = " + data.length);
-
-        for (int i = 0; i < samples.length; i++) {
-            System.out.println("Loading sample, offset = " + offset + ", length = " + sampleHeaders[i].length() + ", name = " + sampleHeaders[i].name);
-
+    private int loadSamples(byte[] data, int offset, SampleHeader[] sampleHeaders, String trackerId, Sample[] out) {
+        for (int i = 0; i < sampleHeaders.length; i++) {
+            // there might be corrupted samples that are shorter than the header says
             int actualLength = Math.min(sampleHeaders[i].length(), data.length - offset);
 
+            // TODO remove later
+            // System.out.println("name: " + sampleHeaders[i].name + ", actualLength: " + actualLength + ", sampleHeaders[i].length(): " + sampleHeaders[i].length());
+
+            // TODO remove later
             if (actualLength != sampleHeaders[i].length()) {
-                System.out.println("actualLength = " + actualLength);
-                System.out.println("Warning: sample length mismatch");
+                System.out.println("Warning: sample " + i + " is shorter than the header says: " + actualLength + " < " + sampleHeaders[i].length());
             }
 
             byte[] sampleData = new byte[sampleHeaders[i].length()];
+
             System.arraycopy(data, offset, sampleData, 0, actualLength);
             offset += actualLength;
 
             SampleHeader sampleHeader = sampleHeaders[i];
-            samples[i] = new Sample(sampleHeader.name, sampleHeader.fineTune, sampleHeader.volume,
-                    sampleHeader.loopStart, sampleHeader.loopLength, sampleData, actualLength);
+
+            out[i] = sampleFactory.createSample(sampleHeader, trackerId, sampleData);
         }
 
-        return samples;
+        return offset;
     }
 
     private static SampleHeader[] loadSampleHeaders(DataInput in) throws IOException {
@@ -249,13 +275,16 @@ public final class ModLoader {
         int loopStart = in.readUnsignedShort() << 1; // in words - multiply by 2
         int loopLength = in.readUnsignedShort() << 1; // in words - multiply by 2
 
-        System.out.println("loopStart: " + loopStart + ", loopLength: " + loopLength);
+        if (loopLength == 2) {
+            loopLength = 0;
+        }
 
+        // FIXME need to write sample recovery
         // there are some mods where loop length is larger than actual data length
         // currently we limit it to length
-        if (loopStart + loopLength > length) {
-            loopLength = length - loopStart;
-        }
+//        if (loopStart + loopLength > length) {
+//            loopLength = length - loopStart;
+//        }
 
         return new SampleHeader(name, length, fineTune, volume, loopStart, loopLength);
     }
@@ -264,14 +293,14 @@ public final class ModLoader {
         SampleHeader[] sampleHeaders = new SampleHeader[sampleCount];
 
         for (int i = 0; i < sampleHeaders.length; i++) {
-            sampleHeaders[i] = loadSampleheader(data, offset);
+            sampleHeaders[i] = loadSampleHeader(data, offset);
             offset += SAMPLE_HEADER_LENGTH;
         }
 
         return sampleHeaders;
     }
 
-    private static SampleHeader loadSampleheader(byte[] data, int offset) {
+    private static SampleHeader loadSampleHeader(byte[] data, int offset) {
         String name = loadSampleName(data, offset);
         offset += 22;
 
@@ -292,16 +321,20 @@ public final class ModLoader {
 
         int loopLength = ExtraArrays.getBigEndianUnsignedShort(data, offset) << 1; // in words - multiply by 2
 
-        System.out.println("name: " + name);
-        System.out.println("loopStart: " + loopStart + ", loopLength: " + loopLength + ", length: " + length);
+        if (loopLength == 2) {
+            loopLength = 0;
+        }
+
+//        System.out.println("name: " + name);
+//        System.out.println("loopStart: " + loopStart + ", loopLength: " + loopLength + ", length: " + length);
 
         // there are some mods where loop length is larger than actual data length
         // currently we limit it to length
         // TODO move this somewhere else
-        if (loopStart + loopLength > length) {
-            System.out.println("Warning: loop length is larger than actual data length");
-            loopLength = length - loopStart;
-        }
+//        if (loopStart + loopLength > length) {
+//            System.out.println("Warning: loop length is larger than actual data length");
+//            loopLength = length - loopStart;
+//        }
 
         return new SampleHeader(name, length, fineTune, volume, loopStart, loopLength);
     }
@@ -420,6 +453,6 @@ public final class ModLoader {
         return new Instrument(sampleNumber, period, effectType, extendedEffectType, effectArgumentX, effectArgumentY);
     }
 
-    private record SampleHeader(String name, int length, int fineTune, int volume, int loopStart, int loopLength) {
+    public record SampleHeader(String name, int length, int fineTune, int volume, int loopStart, int loopLength) {
     }
 }

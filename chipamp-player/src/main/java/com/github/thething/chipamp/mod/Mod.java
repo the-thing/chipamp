@@ -10,7 +10,7 @@ public final class Mod {
     public static final int MIN_LENGTH = 1;
     public static final int MAX_LENGTH = 128;
     public static final int MIN_CHANNEL_COUNT = 4;
-    public static final int MAX_CHANNEL_COUNT = 8;
+    public static final int MAX_CHANNEL_COUNT = 16;
     public static final int SAMPLE_COUNT_1 = 31;
     public static final int SAMPLE_COUNT_2 = 15;
     public static final int MIN_PATTERN_COUNT = 1;

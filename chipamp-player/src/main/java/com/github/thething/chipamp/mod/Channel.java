@@ -8,7 +8,7 @@ final class Channel {
 
     Sample sample;
     int period;
-    // TODO this is used by a single effect so probalby should part of effects
+    // TODO this is used by a single effect so probably should part of effects
     boolean periodTriggered; // indicates if period was set for the row
     float samplePosition;
     float sampleIncrement;

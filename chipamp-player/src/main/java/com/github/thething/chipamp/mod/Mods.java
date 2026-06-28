@@ -198,6 +198,10 @@ public final class Mods {
     }
 
     public static String getNote(int period) {
+        if (period > PERIODS.length) {
+            return null;
+        }
+
         return NOTES[period];
     }
 
@@ -368,5 +372,22 @@ public final class Mods {
         }
 
         return clock / period;
+    }
+
+    public static boolean containsCustomNotes(Mod mod) {
+        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+            for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
+                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+                    Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+                    int period = instrument.period();
+
+                    if (getNote(period) == null) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }

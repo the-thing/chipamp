@@ -25,7 +25,6 @@ import static java.util.Objects.requireNonNull;
 public final class Player {
 
     private static final int DEFAULT_BUFFER_SIZE = 4096;
-    private static final int CHANNEL_COUNT = 8;
     private static final byte[] EMPTY_BUFFER = new byte[0];
     private static final byte[] TMP_BUFFER = new byte[4];
 
@@ -41,23 +40,21 @@ public final class Player {
     private int sampleIndex;
 
     public Player() {
-        this.channels = new Channel[CHANNEL_COUNT];
-        this.channels[0] = new Channel(false);
-        this.channels[1] = new Channel(true);
-        this.channels[2] = new Channel(true);
-        this.channels[3] = new Channel(false);
-        this.channels[4] = new Channel(false);
-        this.channels[5] = new Channel(true);
-        this.channels[6] = new Channel(true);
-        this.channels[7] = new Channel(false);
-        this.config = new Config(CHANNEL_COUNT);
+        this.channels = new Channel[Mod.MAX_CHANNEL_COUNT];
+
+        for (int i = 0; i < channels.length; i++) {
+            boolean right = (i & 3) == 1 || (i & 3) == 2;
+            this.channels[i] = new Channel(right);
+        }
+
+        this.config = new Config(channels.length);
         this.context = new Context(config.samplingRate);
     }
 
     private void reset() {
         context.reset(config.samplingRate);
 
-        for (int i = 0; i < CHANNEL_COUNT; i++) {
+        for (int i = 0; i < channels.length; i++) {
             channels[i].reset();
         }
 
@@ -67,7 +64,7 @@ public final class Player {
     }
 
     public void setMod(Mod mod) {
-        if (mod.getChannelCount() > CHANNEL_COUNT) {
+        if (mod.getChannelCount() > channels.length) {
             throw new IllegalArgumentException("Mod has more channels than the player supports");
         }
 
@@ -688,7 +685,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("agent_t_-_tballs3.mod");
+        Mod mod = modLoader.load("Angelwings - 1995.mod");
 
         System.out.println(mod.getSampleCount());
 
@@ -701,11 +698,12 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-        // player.play();
-        player.playPatterns(1);
+        player.play();
+        // player.seekPattern(3);
+        // player.playPatterns(1);
 
-        byte[] audio = player.read();
-        AudioFormat format = player.getCompatibleAudioFormat();
-        Resources.saveAudio(new File("Chipamp - H0ffman - Eon.mod.wav"), format, audio);
+//        byte[] audio = player.read();
+//        AudioFormat format = player.getCompatibleAudioFormat();
+//        Resources.saveAudio(new File("Chipamp - H0ffman - Eon.mod.wav"), format, audio);
     }
 }

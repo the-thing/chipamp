@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -32,6 +33,26 @@ public final class Resources {
         }
 
         return in;
+    }
+
+    public static File[] listFiles(String name) {
+        URL resource = Resources.class.getClassLoader().getResource(name);
+
+        if (resource == null) {
+            throw new RuntimeException("Resource not found: " + name);
+        }
+
+        File file = new File(resource.getFile());
+
+        if (!file.exists()) {
+            throw new RuntimeException("File not found: " + file.getAbsolutePath());
+        }
+
+        if (!file.isDirectory()) {
+            throw new RuntimeException("Not a directory: " + file.getAbsolutePath());
+        }
+
+        return file.listFiles();
     }
 
     public static byte[] readBytes(String name) throws IOException {
