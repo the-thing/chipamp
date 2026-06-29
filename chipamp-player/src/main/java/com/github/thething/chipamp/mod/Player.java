@@ -50,7 +50,7 @@ public final class Player {
         this.visited = new HashSet<>();
     }
 
-    private void reset() {
+    public void reset() {
         context.reset(config.samplingRate);
 
         visited.clear();
@@ -518,23 +518,28 @@ public final class Player {
             }
         }
 
-        if (config.loopDetectionEnabled) {
-            State next = new State(nextSequenceIndex, nextRowIndex, nextLoopPending, nextLoopRowIndex, nextLoopCounter);
-            boolean added = visited.add(next);
+//        if (config.loopDetectionEnabled) {
+//            State next = new State(nextSequenceIndex, nextRowIndex, nextLoopPending, nextLoopRowIndex, nextLoopCounter);
+//            boolean added = visited.add(next);
+//
+//            System.out.println("next: " + next);
+//
+//            if (added) {
+//                sequenceIndex = nextSequenceIndex;
+//                rowIndex = nextRowIndex;
+//            } else {
+//                if (config.loggingEnabled) {
+//                    System.err.println("Warning: infinite loop detected at row " + rowIndex + " of pattern " + mod.getPatternIndex(sequenceIndex));
+//                }
+//
+//                // break the loop by advancing outside of pattern sequences
+//                sequenceIndex = mod.getPatternSequenceCount() + 1;
+//                rowIndex = 0;
+//            }
+//        }
 
-            if (added) {
-                sequenceIndex = nextSequenceIndex;
-                rowIndex = nextRowIndex;
-            } else {
-                if (config.loggingEnabled) {
-                    System.err.println("Warning: loop detected at row " + rowIndex + " of pattern " + mod.getPatternIndex(sequenceIndex));
-                }
-
-                // break the loop by advancing outside of pattern sequences
-                sequenceIndex = mod.getPatternSequenceCount() + 1;
-                rowIndex = 0;
-            }
-        }
+        sequenceIndex = nextSequenceIndex;
+        rowIndex = nextRowIndex;
 
         context.jumpPending = false;
         context.jumpSequenceIndex = 0;
