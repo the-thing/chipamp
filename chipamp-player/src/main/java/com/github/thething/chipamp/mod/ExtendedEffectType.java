@@ -215,6 +215,8 @@ public enum ExtendedEffectType implements Effect {
             // do not update sample, period, sample position or vibrato / tremolo state
             channel.delayedPeriod = period > 0 ? period : channel.period;
             channel.delayedSample = sample != null ? sample : channel.sample;
+
+            // TODO should we reset vibrato or tremolo state here?
         }
 
         @Override

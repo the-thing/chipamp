@@ -87,6 +87,8 @@ public enum EffectType implements Effect {
                     period = Mods.getFineTunePeriod(period, activeSample.getFineTune());
                 }
 
+                // TODO should we reset vibrato or tremolo state here?
+
                 channel.portamentoTargetPeriod = period;
             }
         }
@@ -149,6 +151,8 @@ public enum EffectType implements Effect {
                 if (activeSample != null && activeSample.getFineTune() != 0) {
                     period = Mods.getFineTunePeriod(period, activeSample.getFineTune());
                 }
+
+                // TODO should we reset vibrato or tremolo state here?
 
                 channel.portamentoTargetPeriod = period;
             }

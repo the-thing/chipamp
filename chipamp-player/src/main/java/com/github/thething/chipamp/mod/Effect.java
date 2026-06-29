@@ -24,8 +24,6 @@ interface Effect {
             if (activeSample != null) {
                 channel.updatePeriodAndIncrement(period, config.clockHz, config.samplingRate);
                 channel.samplePosition = 0.0f;
-
-                // TODO check effects that override onPreEffect if they have to reset
                 channel.resetOnNewSampleWithPeriod();
             }
         }
