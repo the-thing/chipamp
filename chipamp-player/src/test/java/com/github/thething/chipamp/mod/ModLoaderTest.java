@@ -85,27 +85,6 @@ class ModLoaderTest {
     }
 
     @Test
-    void test() throws IOException {
-        for (File file : new File("C:\\Users\\Marcin\\Downloads\\dupa").listFiles()) {
-            if (!file.getName().endsWith(".mod")) {
-                continue;
-            }
-
-            System.out.println("Loading MOD: " + file.getName() + ", file size = " + file.length());
-            Mod mod = underTest.load(file);
-            assertThat(mod).isNotNull();
-
-            for (int i = 0; i < mod.getSampleCount(); i++) {
-                Sample sample = mod.getSample(i);
-
-                if (sample.getDataLength() > 0 && sample.getDataLength() <= 2) {
-                    System.out.println("Sample " + (i + 1) + " is 2 bytes long: " + sample.getDataLength());
-                }
-            }
-        }
-    }
-
-    @Test
     public void shouldLoadModWithShortenedSample() throws IOException {
         Mod mod = underTest.load("chip/elmstreet.mod");
         assertThat(mod.getChannelCount()).isEqualTo(4);
@@ -135,6 +114,40 @@ class ModLoaderTest {
         assertThat(sample.getVolume()).isEqualTo(0);
     }
 
-    // TODO also do the same test for loopLength == 2
-    // TODO check if there are 0 length samples that have no volume?
+    @Test
+    public void shouldTrimLoopLengthOfTwoToZero() throws IOException {
+        Mod mod = underTest.load("chip/eisenzeit.mod");
+        assertThat(mod.getChannelCount()).isEqualTo(4);
+        assertThat(mod.getSampleCount()).isEqualTo(31);
+
+        Sample sample = mod.getSample(0);
+        assertThat(sample.getName()).isEqualTo(".(c).1995.r^c^p.!....");
+        assertThat(sample.getDataLength()).isEqualTo(8_588);
+        assertThat(sample.getLoopStart()).isEqualTo(0);
+        assertThat(sample.getLoopEnd()).isEqualTo(0);
+        assertThat(sample.getLoopLength()).isEqualTo(0);
+        assertThat(sample.getVolume()).isEqualTo(64);
+    }
+
+    // TODO remove
+    @Test
+    void test() throws IOException {
+        for (File file : new File("C:\\Users\\Marcin\\Downloads\\dupa").listFiles()) {
+            if (!file.getName().endsWith(".mod")) {
+                continue;
+            }
+
+            System.out.println("Loading MOD: " + file.getName() + ", file size = " + file.length());
+            Mod mod = underTest.load(file);
+            assertThat(mod).isNotNull();
+
+            for (int i = 0; i < mod.getSampleCount(); i++) {
+                Sample sample = mod.getSample(i);
+
+                if (sample.getDataLength() == 0 && sample.getVolume() > 0) {
+                    System.out.println("Sample " + (i + 1) + " has length 0, but has volume");
+                }
+            }
+        }
+    }
 }

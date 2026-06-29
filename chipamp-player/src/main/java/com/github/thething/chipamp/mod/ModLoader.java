@@ -129,6 +129,7 @@ public final class ModLoader {
             int offsetLength = actualLength;
 
             if (actualLength == expectedLength && expectedLength == 2) {
+                // sample of length 2 is still empty
                 actualLength = 0;
                 expectedLength = 0;
             }
@@ -177,7 +178,6 @@ public final class ModLoader {
         int loopLength = ExtraArrays.getBigEndianUnsignedShort(data, offset) << 1; // in words - multiply by 2
 
         if (loopLength == 2) {
-            System.out.println();
             // loop length equal to 0 or 2 bytes (1 in words) still means loop is disabled
             loopLength = 0;
         }
