@@ -67,15 +67,9 @@ public final class Sample {
         requireInRange(data.length, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
         this.data = data;
     }
-
-    /**
-     * Loop enabled flag. The tracker overwrites the first word of the sample, so a length of 2 still means an empty
-     * sample.
-     *
-     * @return sample length in bytes
-     */
+    
     public boolean isLoopEnabled() {
-        return loopLength > 2;
+        return loopLength > 0;
     }
 
     public byte getData(int index) {
@@ -91,7 +85,7 @@ public final class Sample {
     }
 
     public boolean isEmpty() {
-        return data.length <= 2;
+        return data.length == 0;
     }
 
     public String getName() {

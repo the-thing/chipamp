@@ -685,7 +685,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load("Jogeir Liljedahl - Nearly There.mod");
+        Mod mod = modLoader.load(new File("C:\\Users\\Marcin\\Downloads\\mods\\Slawomir Mrozek - Franko End.mod"));
 
         Player player = new Player();
         player.setLogInfoEnabled(true);
@@ -702,4 +702,5 @@ public final class Player {
 //        AudioFormat format = player.getCompatibleAudioFormat();
 //        Resources.saveAudio(new File("Chipamp - H0ffman - Eon.mod.wav"), format, audio);
     }
+
 }

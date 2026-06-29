@@ -12,7 +12,7 @@ import java.util.function.ToIntFunction;
 
 import static java.util.Objects.requireNonNull;
 
-// TODO add support for PP20 PowerPacker decompression
+// TODO add support for PowerPacker (PP20) decompression
 public final class ModLoader {
 
     private static final int INSTRUMENT_LENGTH = 4;
@@ -123,19 +123,21 @@ public final class ModLoader {
 
     private int loadSamples(byte[] data, int offset, SampleHeader[] sampleHeaders, String trackerId, Sample[] out) {
         for (int i = 0; i < sampleHeaders.length; i++) {
-            // there might be corrupted samples that are shorter than the header says (end of file)
+            // it is possible that file cuts off abruptly and expected length from header is different from the actual
             int expectedLength = sampleHeaders[i].length();
             int actualLength = Math.min(expectedLength, data.length - offset);
+            int offsetLength = actualLength;
 
-            if (expectedLength != actualLength) {
-                System.err.println("Warning: sample " + ( i + 1) + " is shorter than expected (" + expectedLength + " vs " + actualLength + ")");
+            if (actualLength == expectedLength && expectedLength == 2) {
+                actualLength = 0;
+                expectedLength = 0;
             }
 
             // it is possible that actual and expected length are different
-            byte[] sampleData = new byte[sampleHeaders[i].length()];
+            byte[] sampleData = new byte[expectedLength];
 
             System.arraycopy(data, offset, sampleData, 0, actualLength);
-            offset += actualLength;
+            offset += offsetLength;
 
             SampleHeader sampleHeader = sampleHeaders[i];
 
@@ -175,6 +177,7 @@ public final class ModLoader {
         int loopLength = ExtraArrays.getBigEndianUnsignedShort(data, offset) << 1; // in words - multiply by 2
 
         if (loopLength == 2) {
+            System.out.println();
             // loop length equal to 0 or 2 bytes (1 in words) still means loop is disabled
             loopLength = 0;
         }

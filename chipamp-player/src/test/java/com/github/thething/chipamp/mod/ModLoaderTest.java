@@ -72,7 +72,20 @@ class ModLoaderTest {
     }
 
     @Test
-    void shouldLoadAllModules() throws IOException {
+    void shouldLoadBrokenModules2() throws IOException {
+        for (File file : Resources.listFiles("chip/broken2")) {
+            if (!file.getName().endsWith(".mod")) {
+                continue;
+            }
+
+            System.out.println("Loading broken MOD: " + file.getName());
+            Mod mod = underTest.load(file);
+            assertThat(mod).isNotNull();
+        }
+    }
+
+    @Test
+    void test() throws IOException {
         for (File file : new File("C:\\Users\\Marcin\\Downloads\\dupa").listFiles()) {
             if (!file.getName().endsWith(".mod")) {
                 continue;
@@ -85,7 +98,7 @@ class ModLoaderTest {
             for (int i = 0; i < mod.getSampleCount(); i++) {
                 Sample sample = mod.getSample(i);
 
-                if (sample.getDataLength() > 0 && sample.getDataLength() < 100) {
+                if (sample.getDataLength() > 0 && sample.getDataLength() <= 2) {
                     System.out.println("Sample " + (i + 1) + " is 2 bytes long: " + sample.getDataLength());
                 }
             }
@@ -108,7 +121,20 @@ class ModLoaderTest {
     }
 
     @Test
-    public void shouldTrimSampleLengthOfTwoToZero() {
-        // TODO sample length of 2 should be
+    public void shouldTrimSampleLengthOfTwoToZero() throws IOException {
+        Mod mod = underTest.load("chip/enjoy_the_happiness.mod");
+        assertThat(mod.getChannelCount()).isEqualTo(4);
+        assertThat(mod.getSampleCount()).isEqualTo(31);
+
+        Sample sample = mod.getSample(10);
+        assertThat(sample.getName()).isEqualTo("PO33 2RR, ENGLAND.");
+        assertThat(sample.getDataLength()).isEqualTo(0);
+        assertThat(sample.getLoopStart()).isEqualTo(0);
+        assertThat(sample.getLoopEnd()).isEqualTo(0);
+        assertThat(sample.getLoopLength()).isEqualTo(0);
+        assertThat(sample.getVolume()).isEqualTo(0);
     }
+
+    // TODO also do the same test for loopLength == 2
+    // TODO check if there are 0 length samples that have no volume?
 }
