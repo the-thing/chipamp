@@ -9,7 +9,9 @@ import static java.util.Objects.requireNonNull;
 
 public final class DefaultTrackerDetector implements Predicate<String> {
 
-    private static final Set<String> DEFAULT_TRACKER_IDS = Set.of("M.K.", "M!K!", "N.T.", "NSMS", "LARD", "OKTA", "OCTA");
+    private static final Set<String> DEFAULT_TRACKER_IDS = Set.of(
+            "M.K.", "M!K!", "M&K!", "N.T.", "NSMS", "LARD", "OKTA", "OCTA");
+
     public static final DefaultTrackerDetector INSTANCE = new DefaultTrackerDetector();
 
     private final Set<String> knownTrackerIds;
