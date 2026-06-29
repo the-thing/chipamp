@@ -14,7 +14,7 @@ final class Config {
     private static final int DEFAULT_MIN_PERIOD = Mods.MIN_PERIOD;
     private static final int DEFAULT_MAX_PERIOD = Mods.MAX_PERIOD;
     private static final int DEFAULT_CLOCK_HZ = Mods.PAL_CLOCK_HZ;
-    private static final float DEFAULT_VOLUME_MULTIPLIER = 1.0f;
+    private static final float DEFAULT_VOLUME_MULTIPLIER = 0.5f;
 
     final boolean[] muted;
     final boolean[] effectEnabled;
