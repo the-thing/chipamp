@@ -103,7 +103,6 @@ public enum ExtendedEffectType implements Effect {
 
             if (loopCounter == 0) {
                 channel.loopRowIndex = rowIndex;
-                channel.loopCounter = 0;
             } else {
                 if (channel.loopCounter == 0) {
                     channel.loopCounter = loopCounter;

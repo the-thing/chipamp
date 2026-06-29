@@ -110,8 +110,8 @@ final class Channel {
         tremoloRetrigger = true;
         tremoloWaveformType = WaveformType.SINE;
 
-        loopRowIndex = 0;
-        loopCounter = 0;
+//        loopRowIndex = 0;
+//        loopCounter = 0;
     }
 
     void resetOnNewSampleWithPeriod() {
