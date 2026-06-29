@@ -1,11 +1,9 @@
 package com.github.thething.chipamp.mod;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.sound.sampled.LineUnavailableException;
-import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,14 +16,14 @@ public class PlayerTest {
     @BeforeEach
     void setUp() {
         underTest = new Player();
-        underTest.setLoggingEnabled(true);
-
         modLoader = new ModLoader(true);
     }
 
     // TODO remove later
     @Test
     public void foo() throws IOException, LineUnavailableException {
+        underTest = new Player();
+        underTest.setLoggingEnabled(true);
         Mod mod = modLoader.load("chip/Jogeir Liljedahl - Nearly There.mod");
 
         Player player = new Player();
@@ -50,13 +48,16 @@ public class PlayerTest {
         underTest.setMod(mod);
 
         byte[] audio = underTest.read();
-        assertThat(audio.length).isEqualTo(1921024);
-//
-//        underTest.reset();
-//        underTest.setLoopDetectionEnabled(false);
-//
-//        audio = underTest.read();
-//        assertThat(audio.length).isEqualTo(1921024);
+        assertThat(audio.length).isEqualTo(74_889_920);
+    }
+
+    @Test
+    public void shouldReadModWithInfiniteLoop() throws IOException {
+        Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
+        underTest.setMod(mod);
+
+        byte[] audio = underTest.read();
+        assertThat(audio.length).isEqualTo(25_743_360);
     }
 
 }

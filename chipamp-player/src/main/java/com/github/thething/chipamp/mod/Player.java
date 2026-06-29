@@ -518,25 +518,22 @@ public final class Player {
             }
         }
 
-//        if (config.loopDetectionEnabled) {
-//            State next = new State(nextSequenceIndex, nextRowIndex, nextLoopPending, nextLoopRowIndex, nextLoopCounter);
-//            boolean added = visited.add(next);
-//
-//            System.out.println("next: " + next);
-//
-//            if (added) {
-//                sequenceIndex = nextSequenceIndex;
-//                rowIndex = nextRowIndex;
-//            } else {
-//                if (config.loggingEnabled) {
-//                    System.err.println("Warning: infinite loop detected at row " + rowIndex + " of pattern " + mod.getPatternIndex(sequenceIndex));
-//                }
-//
-//                // break the loop by advancing outside of pattern sequences
-//                sequenceIndex = mod.getPatternSequenceCount() + 1;
-//                rowIndex = 0;
-//            }
-//        }
+        if (config.loopDetectionEnabled) {
+            State next = new State(nextSequenceIndex, nextRowIndex, nextLoopPending, nextLoopRowIndex, nextLoopCounter);
+            boolean added = visited.add(next);
+
+            if (!added) {
+                if (config.loggingEnabled) {
+                    System.err.println("Warning: infinite loop detected at row " + rowIndex + " of pattern " + mod.getPatternIndex(sequenceIndex));
+                }
+
+                // break the infinite loop by advancing outside of pattern sequences
+                nextSequenceIndex = mod.getPatternSequenceCount() + 1;
+                nextRowIndex = 0;
+
+                // TODO we can also try to play to the end of the song
+            }
+        }
 
         sequenceIndex = nextSequenceIndex;
         rowIndex = nextRowIndex;
@@ -547,7 +544,7 @@ public final class Player {
         context.breakRowIndex = 0;
         context.loopPending = false;
         context.loopRowIndex = 0;
-        context.loopCounter = 0;
+        // we explicitly do not want to clear loop counter
     }
 
     private void handleNewRow() {

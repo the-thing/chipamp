@@ -106,8 +106,10 @@ public enum ExtendedEffectType implements Effect {
             } else {
                 if (channel.loopCounter == 0) {
                     channel.loopCounter = loopCounter;
+                    context.loopCounter = loopCounter;
                 } else {
                     channel.loopCounter--;
+                    context.loopCounter = channel.loopCounter;
                 }
 
                 if (channel.loopCounter != 0) {
@@ -115,8 +117,6 @@ public enum ExtendedEffectType implements Effect {
                     context.loopRowIndex = channel.loopRowIndex;
                 }
             }
-
-            context.loopCounter = channel.loopCounter;
         }
 
         @Override
