@@ -5,11 +5,11 @@ import java.util.Arrays;
 final class Config {
 
     private static final boolean DEFAULT_LOGGING_ENABLED = false;
+    private static final boolean DEFAULT_LOOP_DETECTION_ENABLED = true;
     private static final int DEFAULT_SAMPLING_RATE = 48_000;
     private static final boolean DEFAULT_STEREO_ENABLED = true;
     private static final boolean DEFAULT_STEREO_FOLD_DOWN_ENABLED = true;
     private static final boolean DEFAULT_VOLUME_SLIDE_DELTA_ENABLED = false;
-    private static final boolean DEFAULT_IGNORE_LAST_SEQUENCE_JUMP_STATEMENT_ENABLED = true;
     private static final boolean DEFAULT_EFFECT_ENABLED = true;
     private static final int DEFAULT_MIN_PERIOD = 108; // minimum standard octave with fine tune +7
     private static final int DEFAULT_MAX_PERIOD = 907; // maximum standard octave with fine tune -8
@@ -27,7 +27,7 @@ final class Config {
     boolean stereoEnabled;
     boolean stereoFoldDownEnabled;
     boolean volumeSlideDeltaEnabled;
-    boolean ignoreLastSequenceJumpStatementEnabled;
+    boolean loopDetectionEnabled;
     boolean loggingEnabled;
 
     Config(int channelCount) {
@@ -51,7 +51,7 @@ final class Config {
         this.stereoEnabled = DEFAULT_STEREO_ENABLED;
         this.stereoFoldDownEnabled = DEFAULT_STEREO_FOLD_DOWN_ENABLED;
         this.volumeSlideDeltaEnabled = DEFAULT_VOLUME_SLIDE_DELTA_ENABLED;
-        this.ignoreLastSequenceJumpStatementEnabled = DEFAULT_IGNORE_LAST_SEQUENCE_JUMP_STATEMENT_ENABLED;
+        this.loopDetectionEnabled = DEFAULT_LOOP_DETECTION_ENABLED;
         this.loggingEnabled = DEFAULT_LOGGING_ENABLED;
     }
 }

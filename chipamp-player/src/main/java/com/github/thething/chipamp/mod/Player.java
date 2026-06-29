@@ -10,8 +10,10 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.github.thething.chipamp.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
@@ -23,6 +25,7 @@ import static java.util.Objects.requireNonNull;
 // TODO fix end conditions for skips (for reads seems to be ok)
 public final class Player {
 
+    private static final State INITIAL_STATE = new State(0, 0, false, 0, 0);
     private static final int DEFAULT_BUFFER_SIZE = 4096;
     private static final byte[] EMPTY_BUFFER = new byte[0];
     private static final byte[] TMP_BUFFER = new byte[4];
@@ -30,6 +33,7 @@ public final class Player {
     private final Channel[] channels;
     private final Config config;
     private final Context context;
+    private final Set<State> visited;
 
     private Mod mod;
 
@@ -48,10 +52,14 @@ public final class Player {
 
         this.config = new Config(channels.length);
         this.context = new Context(config.samplingRate);
+        this.visited = new HashSet<>();
     }
 
     private void reset() {
         context.reset(config.samplingRate);
+
+        visited.clear();
+        visited.add(INITIAL_STATE);
 
         for (int i = 0; i < channels.length; i++) {
             channels[i].reset();
@@ -482,37 +490,54 @@ public final class Player {
     }
 
     private void advanceRow() {
-        // TODO this has to be replaced by better loop detection
-        // make sure we don't loop forever and stop the song at any jump statement in the last pattern
-        if (config.ignoreLastSequenceJumpStatementEnabled && context.jumpPending && sequenceIndex == mod.getLength() - 1) {
-            context.jumpPending = false;
-            context.jumpSequenceIndex = 0;
-
-            return;
-        }
+        int nextSequenceIndex = sequenceIndex;
+        int nextRowIndex;
+        boolean nextLoopPending = context.loopPending;
+        int nextLoopRowIndex = context.loopRowIndex;
+        int nextLoopCounter = context.loopCounter;
 
         if (context.loopPending) {
             // looping takes priority above jumps and breaks
-            rowIndex = context.loopRowIndex;
+            nextRowIndex = context.loopRowIndex;
         } else if (context.jumpPending && context.breakPending) {
             // both position jump and pattern break effects are pending
-            sequenceIndex = context.jumpSequenceIndex;
-            rowIndex = context.breakRowIndex;
+            nextSequenceIndex = context.jumpSequenceIndex;
+            nextRowIndex = context.breakRowIndex;
+
         } else if (context.jumpPending) {
             // jump to row 0 of specific pattern
-            sequenceIndex = context.jumpSequenceIndex;
-            rowIndex = 0;
+            nextSequenceIndex = context.jumpSequenceIndex;
+            nextRowIndex = 0;
+
         } else if (context.breakPending) {
             // jump to next pattern's specific row
-            sequenceIndex = sequenceIndex + 1;
-            rowIndex = context.breakRowIndex;
+            nextSequenceIndex = sequenceIndex + 1;
+            nextRowIndex = context.breakRowIndex;
         } else {
             // advance single row
-            rowIndex++;
+            nextRowIndex = rowIndex + 1;
 
-            if (rowIndex >= 64) {
+            if (nextRowIndex >= 64) {
+                nextRowIndex = 0;
+                nextSequenceIndex = sequenceIndex + 1;
+            }
+        }
+
+        if (config.loopDetectionEnabled) {
+            State next = new State(nextSequenceIndex, nextRowIndex, nextLoopPending, nextLoopRowIndex, nextLoopCounter);
+            boolean added = visited.add(next);
+
+            if (added) {
+                sequenceIndex = nextSequenceIndex;
+                rowIndex = nextRowIndex;
+            } else {
+                if (config.loggingEnabled) {
+                    System.err.println("Warning: loop detected at row " + rowIndex + " of pattern " + mod.getPatternIndex(sequenceIndex));
+                }
+
+                // break the loop by advancing outside of pattern sequences
+                sequenceIndex = mod.getPatternSequenceCount() + 1;
                 rowIndex = 0;
-                sequenceIndex++;
             }
         }
 
@@ -522,6 +547,7 @@ public final class Player {
         context.breakRowIndex = 0;
         context.loopPending = false;
         context.loopRowIndex = 0;
+        context.loopCounter = 0;
     }
 
     private void handleNewRow() {
@@ -661,8 +687,8 @@ public final class Player {
         this.config.volumeSlideDeltaEnabled = volumeSlideDeltaEnabled;
     }
 
-    public void setIgnoreLastSequenceJumpStatementEnabled(boolean ignoreLastSequenceJumpStatementEnabled) {
-        this.config.ignoreLastSequenceJumpStatementEnabled = ignoreLastSequenceJumpStatementEnabled;
+    public void setLoopDetectionEnabled(boolean loopDetectionEnabled) {
+        this.config.loopDetectionEnabled = loopDetectionEnabled;
     }
 
     public void setLoggingEnabled(boolean enabled) {
@@ -676,7 +702,7 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load(new File("C:\\Users\\Marcin\\Downloads\\mods\\space_debris.mod"));
+        Mod mod = modLoader.load(new File("C:\\Users\\Marcin\\Downloads\\mods\\Allister Brimble - Superfrog Intro.mod"));
 
         Player player = new Player();
         player.setLoggingEnabled(true);
@@ -686,6 +712,7 @@ public final class Player {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
+        player.seekPattern(13);
         player.play();
 
 //        byte[] audio = player.read();
@@ -693,4 +720,6 @@ public final class Player {
 //        Resources.saveAudio(new File("Chipamp - H0ffman - Eon.mod.wav"), format, audio);
     }
 
+    private record State(int patternIndex, int rowIndex, boolean loopPending, int loopRowIndex, int loopCounter) {
+    }
 }

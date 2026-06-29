@@ -14,6 +14,7 @@ final class Context {
     int breakRowIndex;
     boolean loopPending;
     int loopRowIndex;
+    int loopCounter;
 
     Context(int samplingRate) {
         reset(samplingRate);
@@ -28,6 +29,7 @@ final class Context {
         breakRowIndex = 0;
         loopPending = false;
         loopRowIndex = 0;
+        loopCounter = 0;
     }
 
     void updateTempoAndSamplesPerTick(int tempo, int samplingRate) {

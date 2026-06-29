@@ -28,6 +28,10 @@ public final class ModLoader {
         this(DefaultTrackerDetector.INSTANCE, DefaultChannelDetector.INSTANCE, OpenMPTSampleFactory.INSTANCE, DEFAULT_LOGGING_ENABLED);
     }
 
+    public ModLoader(boolean loggingEnabled) {
+        this(DefaultTrackerDetector.INSTANCE, DefaultChannelDetector.INSTANCE, OpenMPTSampleFactory.INSTANCE, loggingEnabled);
+    }
+
     public ModLoader(Predicate<String> trackerDetector, ToIntFunction<String> channelDetector, SampleFactory sampleFactory, boolean loggingEnabled) {
         this.trackerDetector = requireNonNull(trackerDetector);
         this.channelDetector = requireNonNull(channelDetector);
@@ -138,7 +142,7 @@ public final class ModLoader {
             }
 
             if (loggingEnabled && actualLength != expectedLength) {
-                System.err.println("Warning: sample " + sampleHeaders[i].name() + " has length " + actualLength + " instead of " + expectedLength);
+                System.err.println("Warning: sample \'" + sampleHeaders[i].name() + "\' / " + (i + 1) + " has length " + actualLength + " instead of " + expectedLength);
             }
 
             // it is possible that actual and expected length are different

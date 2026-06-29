@@ -390,4 +390,36 @@ public final class Mods {
 
         return false;
     }
+
+    public static boolean isEffectPresent(Mod mod, EffectType effectType) {
+        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+            for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
+                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+                    Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+
+                    if (instrument.effectType() == effectType) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isExtendedEffectPresent(Mod mod, ExtendedEffectType effectType) {
+        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+            for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
+                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+                    Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+
+                    if (instrument.extendedEffectType() == effectType) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 }

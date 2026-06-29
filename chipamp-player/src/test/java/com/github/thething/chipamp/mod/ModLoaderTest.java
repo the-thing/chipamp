@@ -15,11 +15,11 @@ class ModLoaderTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new ModLoader();
+        underTest = new ModLoader(true);
     }
 
     @Test
-    void shouldLoadModFile() throws IOException {
+    void shouldLoadModFiles() throws IOException {
         Mod mod;
 
         mod = underTest.load("chip/DJ Metune - Axel F.mod");
@@ -48,7 +48,7 @@ class ModLoaderTest {
     }
 
     @Test
-    void shouldLoadEmptyAmigaModule() throws IOException {
+    void shouldLoadEmptyMod() throws IOException {
         Mod mod = underTest.load("chip/empty.mod");
         assertThat(mod.getTitle()).isEqualTo("");
         assertThat(mod.getLength()).isEqualTo(1);
@@ -59,13 +59,24 @@ class ModLoaderTest {
     }
 
     @Test
+    public void shouldLoadAllModules() throws IOException {
+        for (File file : Resources.listFiles("chip")) {
+            if (!file.getName().endsWith(".mod")) {
+                continue;
+            }
+
+            Mod mod = underTest.load(file);
+            assertThat(mod).isNotNull();
+        }
+    }
+
+    @Test
     void shouldLoadBrokenModules() throws IOException {
         for (File file : Resources.listFiles("chip/broken")) {
             if (!file.getName().endsWith(".mod")) {
                 continue;
             }
 
-            System.out.println("Loading broken MOD: " + file.getName());
             Mod mod = underTest.load(file);
             assertThat(mod).isNotNull();
         }
@@ -115,4 +126,6 @@ class ModLoaderTest {
         assertThat(sample.getLoopLength()).isEqualTo(0);
         assertThat(sample.getVolume()).isEqualTo(64);
     }
+
+    // TODO load mods with custom number of channels
 }
