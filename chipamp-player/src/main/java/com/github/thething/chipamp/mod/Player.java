@@ -2,6 +2,7 @@ package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.common.Formatters;
 import com.github.thething.chipamp.common.Maths;
+import com.github.thething.chipamp.common.Requirements;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -41,7 +42,7 @@ public final class Player {
         this.channels = new Channel[Mod.MAX_CHANNEL_COUNT];
 
         for (int i = 0; i < channels.length; i++) {
-            boolean right = (i & 3) == 1 || (i & 3) == 2;
+            boolean right = (i & 3) == 1 || (i & 3) == 2; // (LRRL) repeating pattern
             this.channels[i] = new Channel(right);
         }
 
@@ -297,7 +298,7 @@ public final class Player {
         requireNonNull(mod);
 
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-        
+
         int offset = 0;
         int readCount;
 
@@ -587,6 +588,16 @@ public final class Player {
 
         this.mod = mod;
         reset();
+    }
+
+    public void setPanning(int channelIndex, float right) {
+        channels[channelIndex].setPanning(requireInRange(right, 0.0f, 1.0f));
+    }
+
+    public void setOpenMPTPanning() {
+        for (int i = 0; i < channels.length; i++) {
+            channels[i].setPanning(channels[i].right ? Mods.MPT_PAN_RIGHT : Mods.MPT_PAN_LEFT);
+        }
     }
 
     public void setMuted(int channelIndex, boolean muted) {

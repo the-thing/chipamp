@@ -16,11 +16,8 @@ public class EndToEndTest {
         Player player = new Player();
         player.setClockHz(Mods.PAL_CLOCK_HZ);
         player.setSamplingRate(48_000);
-//        player.setMinPeriod(Mods.MIN_PERIOD);
-//        player.setMaxPeriod(Mods.MAX_PERIOD);
-
-        player.setMinPeriod(113);
-        player.setMaxPeriod(856);
+        player.setMinPeriod(Mods.MIN_PERIOD);
+        player.setMaxPeriod(Mods.MAX_PERIOD);
         player.setVolumeMultiplier(1.0f);
         player.setStereoEnabled(true);
         player.setStereoFoldDownEnabled(true);
@@ -29,13 +26,15 @@ public class EndToEndTest {
         player.setLoggingEnabled(true);
         player.setMod(mod);
 
-        player.setMuted(0, true);
+        // player.setMuted(0, true);
         // player.setMuted(1, true);
-        player.setMuted(2, true);
-        player.setMuted(3, true);
+        // player.setMuted(2, true);
+        // player.setMuted(3, true);
 
 //        player.seekPattern(1);
 //        player.playPatterns(1);
+
+        player.setOpenMPTPanning();
 
         player.seekPattern(1);
         player.playPatterns(1);

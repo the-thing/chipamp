@@ -80,7 +80,7 @@ final class Channel {
         periodTriggered = false;
         samplePosition = 0.0f;
         sampleIncrement = 0.0f;
-        volume = 0;
+        volume = 64;
         leftPanning = right ? 0.0f : 1.0f;
         rightPanning = right ? 1.0f : 0.0f;
 

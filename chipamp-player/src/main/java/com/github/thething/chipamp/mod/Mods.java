@@ -13,12 +13,11 @@ import static com.github.thething.chipamp.common.Requirements.requireInRange;
 public final class Mods {
 
     public static final int PAL_CLOCK_HZ = 3_546_895;
-
     public static final int NTSC_CLOCK_HZ = 3_579_545;
-
     public static final int MIN_PERIOD = 57;
-
     public static final int MAX_PERIOD = 1712;
+    public static final float MPT_PAN_LEFT = 92.0f / 255.0f;
+    public static final float MPT_PAN_RIGHT = 192.0f / 255.0f;
 
     /**
      * ProTracker period table. Octaves 0 and 4 are non-standard.

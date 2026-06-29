@@ -42,14 +42,19 @@ public class PlayerTest {
     public void should() throws IOException {
         underTest.setClockHz(Mods.PAL_CLOCK_HZ);
         underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(113);
-        underTest.setMaxPeriod(856);
-        underTest.setVolumeMultiplier(1.0f);
+        underTest.setMinPeriod(Mods.MIN_PERIOD);
+        underTest.setMaxPeriod(Mods.MAX_PERIOD);
+        underTest.setVolumeMultiplier(0.5f);
         underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
+        underTest.setStereoFoldDownEnabled(false);
         underTest.setVolumeSlideDeltaEnabled(false);
         underTest.setLoopDetectionEnabled(true);
         underTest.setLoggingEnabled(false);
+
+        underTest.setPanning(0, 92.0f / 255.0f);
+        underTest.setPanning(1, 192.0f / 255.0f);
+        underTest.setPanning(2, 192.0f / 255.0f);
+        underTest.setPanning(3, 92.0f / 255.0f);
 
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.setMod(mod);
