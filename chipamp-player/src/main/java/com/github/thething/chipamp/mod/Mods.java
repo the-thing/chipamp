@@ -16,6 +16,10 @@ public final class Mods {
 
     public static final int NTSC_CLOCK_HZ = 3_579_545;
 
+    public static final int MIN_PERIOD = 57;
+
+    public static final int MAX_PERIOD = 1712;
+
     /**
      * ProTracker period table. Octaves 0 and 4 are non-standard.
      *
@@ -30,11 +34,11 @@ public final class Mods {
      */
     private static final String[] NOTES = new String[1713];
 
+    private static final int[] PERIODS;
+
     private static final String[] CUSTOM_NOTES = new String[]{
             "A-X", "B-X", "C-X", "D-X", "E-X", "F-X", "G-X"
     };
-
-    private static final int[] PERIODS;
 
     public static final int[] SINE_TABLE = {
             0, 24, 49, 74, 97, 120, 141, 161, 180,

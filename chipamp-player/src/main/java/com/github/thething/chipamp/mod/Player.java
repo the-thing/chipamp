@@ -65,15 +65,6 @@ public final class Player {
         sampleIndex = context.samplesPerTick;
     }
 
-    public void setMod(Mod mod) {
-        if (mod.getChannelCount() > channels.length) {
-            throw new IllegalArgumentException("Mod has more channels than the player supports");
-        }
-
-        this.mod = mod;
-        reset();
-    }
-
     public void seekPosition(int sequenceIndex) {
         requireNonNull(mod);
         checkIndex(sequenceIndex, mod.getLength());
@@ -304,8 +295,9 @@ public final class Player {
 
     public byte[] read() {
         requireNonNull(mod);
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        
         int offset = 0;
         int readCount;
 
@@ -530,8 +522,6 @@ public final class Player {
                 // break the infinite loop by advancing outside of pattern sequences
                 nextSequenceIndex = mod.getPatternSequenceCount() + 1;
                 nextRowIndex = 0;
-
-                // TODO we can also try to play to the end of the song
             }
         }
 
@@ -588,6 +578,15 @@ public final class Player {
             Channel channel = channels[channelIndex];
             channel.effectType.onMidRow(channel, context, config);
         }
+    }
+
+    public void setMod(Mod mod) {
+        if (mod.getChannelCount() > channels.length) {
+            throw new IllegalArgumentException("Mod has more channels than the player supports");
+        }
+
+        this.mod = mod;
+        reset();
     }
 
     public void setMuted(int channelIndex, boolean muted) {

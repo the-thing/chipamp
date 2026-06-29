@@ -1,9 +1,10 @@
 package com.github.thething.chipamp.mod;
 
+import com.github.thething.chipamp.io.Resources;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.sound.sampled.LineUnavailableException;
+import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,29 +18,6 @@ public class PlayerTest {
     void setUp() {
         underTest = new Player();
         modLoader = new ModLoader(true);
-    }
-
-    // TODO remove later
-    @Test
-    public void foo() throws IOException, LineUnavailableException {
-        underTest = new Player();
-        underTest.setLoggingEnabled(true);
-        Mod mod = modLoader.load("chip/Jogeir Liljedahl - Nearly There.mod");
-
-        Player player = new Player();
-        player.setLoggingEnabled(true);
-        player.setMod(mod);
-        // player.setMuted(0, true);
-        // player.setMuted(1, true);
-        // player.setMuted(2, true);
-        // player.setMuted(3, true);
-
-        // player.seekPattern(13);
-        player.play();
-
-//        byte[] audio = player.read();
-//        AudioFormat format = player.getCompatibleAudioFormat();
-//        Resources.saveAudio(new File("Chipamp - H0ffman - Eon.mod.wav"), format, audio);
     }
 
     @Test
@@ -60,4 +38,23 @@ public class PlayerTest {
         assertThat(audio.length).isEqualTo(25_743_360);
     }
 
+    @Test
+    public void should() throws IOException {
+        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
+        underTest.setSamplingRate(48_000);
+        underTest.setMinPeriod(113);
+        underTest.setMaxPeriod(856);
+        underTest.setVolumeMultiplier(1.0f);
+        underTest.setStereoEnabled(true);
+        underTest.setStereoFoldDownEnabled(true);
+        underTest.setVolumeSlideDeltaEnabled(false);
+        underTest.setLoopDetectionEnabled(true);
+        underTest.setLoggingEnabled(false);
+
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.setMod(mod);
+
+        byte[] audio = underTest.read();
+        Resources.saveAudio(new File("axel-stereo-48kHz-pal.wav"), underTest.getCompatibleAudioFormat(), audio);
+    }
 }

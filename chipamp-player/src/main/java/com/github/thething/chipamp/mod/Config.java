@@ -11,8 +11,8 @@ final class Config {
     private static final boolean DEFAULT_STEREO_FOLD_DOWN_ENABLED = true;
     private static final boolean DEFAULT_VOLUME_SLIDE_DELTA_ENABLED = false;
     private static final boolean DEFAULT_EFFECT_ENABLED = true;
-    private static final int DEFAULT_MIN_PERIOD = 108; // minimum standard octave with fine tune +7
-    private static final int DEFAULT_MAX_PERIOD = 907; // maximum standard octave with fine tune -8
+    private static final int DEFAULT_MIN_PERIOD = Mods.MIN_PERIOD;
+    private static final int DEFAULT_MAX_PERIOD = Mods.MAX_PERIOD;
     private static final int DEFAULT_CLOCK_HZ = Mods.PAL_CLOCK_HZ;
     private static final float DEFAULT_VOLUME_MULTIPLIER = 1.0f;
 
