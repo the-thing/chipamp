@@ -8,10 +8,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,8 +18,6 @@ import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.checkIndex;
 import static java.util.Objects.requireNonNull;
 
-// TODO add infinite loop state detection (requires adding loop counter)
-// TODO fix end conditions for skips (for reads seems to be ok)
 public final class Player {
 
     private static final State INITIAL_STATE = new State(0, 0, false, 0, 0);
@@ -698,26 +693,6 @@ public final class Player {
     public AudioFormat getCompatibleAudioFormat() {
         return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, config.samplingRate, 16,
                 config.stereoEnabled ? 2 : 1, config.stereoEnabled ? 4 : 2, config.samplingRate, false);
-    }
-
-    public static void main(String[] args) throws IOException, LineUnavailableException {
-        ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load(new File("C:\\Users\\Marcin\\Downloads\\mods\\Allister Brimble - Superfrog Intro.mod"));
-
-        Player player = new Player();
-        player.setLoggingEnabled(true);
-        player.setMod(mod);
-        // player.setMuted(0, true);
-        // player.setMuted(1, true);
-        // player.setMuted(2, true);
-        // player.setMuted(3, true);
-
-        player.seekPattern(13);
-        player.play();
-
-//        byte[] audio = player.read();
-//        AudioFormat format = player.getCompatibleAudioFormat();
-//        Resources.saveAudio(new File("Chipamp - H0ffman - Eon.mod.wav"), format, audio);
     }
 
     private record State(int patternIndex, int rowIndex, boolean loopPending, int loopRowIndex, int loopCounter) {
