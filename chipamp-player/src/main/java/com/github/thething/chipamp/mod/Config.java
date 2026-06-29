@@ -1,13 +1,10 @@
 package com.github.thething.chipamp.mod;
 
-import java.io.PrintStream;
 import java.util.Arrays;
 
 final class Config {
 
-    private static final PrintStream DEFAULT_LOG_STREAM = System.out;
-    private static final boolean DEFAULT_LOG_ENABLED = false;
-    private static final boolean DEFAULT_LOG_ROW_ENABLED = false;
+    private static final boolean DEFAULT_LOGGING_ENABLED = false;
     private static final int DEFAULT_SAMPLING_RATE = 48_000;
     private static final boolean DEFAULT_STEREO_ENABLED = true;
     private static final boolean DEFAULT_STEREO_FOLD_DOWN_ENABLED = true;
@@ -31,9 +28,7 @@ final class Config {
     boolean stereoFoldDownEnabled;
     boolean volumeSlideDeltaEnabled;
     boolean ignoreLastSequenceJumpStatementEnabled;
-    PrintStream logger;
-    boolean logInfoEnabled;
-    boolean logErrorEnabled;
+    boolean loggingEnabled;
 
     Config(int channelCount) {
         this.muted = new boolean[channelCount];
@@ -57,8 +52,6 @@ final class Config {
         this.stereoFoldDownEnabled = DEFAULT_STEREO_FOLD_DOWN_ENABLED;
         this.volumeSlideDeltaEnabled = DEFAULT_VOLUME_SLIDE_DELTA_ENABLED;
         this.ignoreLastSequenceJumpStatementEnabled = DEFAULT_IGNORE_LAST_SEQUENCE_JUMP_STATEMENT_ENABLED;
-        this.logger = DEFAULT_LOG_STREAM;
-        this.logInfoEnabled = DEFAULT_LOG_ENABLED;
-        this.logErrorEnabled = DEFAULT_LOG_ROW_ENABLED;
+        this.loggingEnabled = DEFAULT_LOGGING_ENABLED;
     }
 }

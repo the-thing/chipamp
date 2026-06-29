@@ -10,8 +10,8 @@ public enum ExtendedEffectType implements Effect {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             // TODO implement
-            if (config.logErrorEnabled) {
-                config.logger.println("SET_FILTER not supported");
+            if (config.loggingEnabled) {
+                System.err.println("SET_FILTER not supported");
             }
         }
 

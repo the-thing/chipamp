@@ -17,19 +17,22 @@ public final class ModLoader {
 
     private static final int INSTRUMENT_LENGTH = 4;
     private static final int SAMPLE_HEADER_LENGTH = 30;
+    private static final boolean DEFAULT_LOGGING_ENABLED = false;
 
     private final Predicate<String> trackerDetector;
     private final ToIntFunction<String> channelDetector;
     private final SampleFactory sampleFactory;
+    private final boolean loggingEnabled;
 
     public ModLoader() {
-        this(DefaultTrackerDetector.INSTANCE, DefaultChannelDetector.INSTANCE, OpenMPTSampleFactory.INSTANCE);
+        this(DefaultTrackerDetector.INSTANCE, DefaultChannelDetector.INSTANCE, OpenMPTSampleFactory.INSTANCE, DEFAULT_LOGGING_ENABLED);
     }
 
-    public ModLoader(Predicate<String> trackerDetector, ToIntFunction<String> channelDetector, SampleFactory sampleFactory) {
+    public ModLoader(Predicate<String> trackerDetector, ToIntFunction<String> channelDetector, SampleFactory sampleFactory, boolean loggingEnabled) {
         this.trackerDetector = requireNonNull(trackerDetector);
         this.channelDetector = requireNonNull(channelDetector);
         this.sampleFactory = requireNonNull(sampleFactory);
+        this.loggingEnabled = loggingEnabled;
     }
 
     public Mod load(File file) throws IOException {
@@ -94,7 +97,7 @@ public final class ModLoader {
 
         int remaining = data.length - offset;
 
-        if (remaining > 0) {
+        if (loggingEnabled && remaining > 0) {
             System.err.println("Warning: " + remaining + " bytes are not used");
         }
 
@@ -132,6 +135,10 @@ public final class ModLoader {
                 // sample of length 2 is still empty
                 actualLength = 0;
                 expectedLength = 0;
+            }
+
+            if (loggingEnabled && actualLength != expectedLength) {
+                System.err.println("Warning: sample " + sampleHeaders[i].name() + " has length " + actualLength + " instead of " + expectedLength);
             }
 
             // it is possible that actual and expected length are different

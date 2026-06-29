@@ -16,16 +16,13 @@ public final class OpenMPTSampleFactory implements SampleFactory {
 
         if (loopStart + loopLength > sampleLength) {
             if (sampleLength == 0) {
-                System.err.println("Sample " + header.name() + " has zero length");
                 // disable loop if length is zero
                 loopStart = 0;
                 loopLength = 0;
             } else if (loopStart == 0) {
-                System.err.println("dupa");
                 // expand to loop length if start is zero
                 sampleData = Arrays.copyOf(sampleData, loopLength);
             } else if (Strings.equals(trackerId, "M.K.")) {
-                System.err.println("kupa");
                 // for M.K. tracker decrease loop start by half
                 loopStart >>= 1;
 
@@ -35,7 +32,6 @@ public final class OpenMPTSampleFactory implements SampleFactory {
                     loopLength -= loopStart;
                 }
             } else {
-                System.err.println("abc");
                 // truncate sample length to loopStart / 2 and set loopStart to zero
                 sampleLength -= loopStart >> 1;
                 sampleData = Arrays.copyOf(sampleData, sampleLength);

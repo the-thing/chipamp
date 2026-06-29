@@ -2,7 +2,6 @@ package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.common.Formatters;
 import com.github.thething.chipamp.common.Maths;
-import com.github.thething.chipamp.io.Resources;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -79,8 +78,8 @@ public final class Player {
         reset();
 
         // disable logging regardless of config setting, we don't want to log skipped patterns
-        boolean logInfoEnabled = config.logInfoEnabled;
-        config.logInfoEnabled = false;
+        boolean loggingEnabled = config.loggingEnabled;
+        config.loggingEnabled = false;
 
         try {
             while (this.sequenceIndex < sequenceIndex) {
@@ -91,7 +90,7 @@ public final class Player {
                 }
             }
         } finally {
-            config.logInfoEnabled = logInfoEnabled;
+            config.loggingEnabled = loggingEnabled;
         }
     }
 
@@ -254,8 +253,8 @@ public final class Player {
         int skippedPatternCount = 0;
         int lastSequenceIndex = sequenceIndex;
 
-        boolean logInfoEnabled = config.logInfoEnabled;
-        config.logInfoEnabled = false;
+        boolean logInfoEnabled = config.loggingEnabled;
+        config.loggingEnabled = false;
 
         try {
             while (sequenceIndex < mod.getLength() && skippedPatternCount < patternCount) {
@@ -267,7 +266,7 @@ public final class Player {
                 }
             }
         } finally {
-            config.logInfoEnabled = logInfoEnabled;
+            config.loggingEnabled = logInfoEnabled;
         }
 
         return skippedPatternCount;
@@ -280,8 +279,8 @@ public final class Player {
         int lastSequenceIndex = sequenceIndex;
         int lastRowIndex = rowIndex;
 
-        boolean logInfoEnabled = config.logInfoEnabled;
-        config.logInfoEnabled = false;
+        boolean logInfoEnabled = config.loggingEnabled;
+        config.loggingEnabled = false;
 
         try {
             while (sequenceIndex < mod.getLength() && skippedRowCount < rowCount) {
@@ -294,7 +293,7 @@ public final class Player {
                 }
             }
         } finally {
-            config.logInfoEnabled = logInfoEnabled;
+            config.loggingEnabled = logInfoEnabled;
         }
 
         return skippedRowCount;
@@ -417,11 +416,11 @@ public final class Player {
             if (tickIndex == 0) {
                 int patternIndex = mod.getPatternIndex(sequenceIndex);
 
-                if (config.logInfoEnabled) {
-                    config.logger.print(Formatters.formatRow(mod, patternIndex, rowIndex));
-                    config.logger.print(" {");
-                    config.logger.print(Formatters.formatEffects(mod, patternIndex, rowIndex));
-                    config.logger.println("}");
+                if (config.loggingEnabled) {
+                    System.out.print(Formatters.formatRow(mod, patternIndex, rowIndex));
+                    System.out.print(" {");
+                    System.out.print(Formatters.formatEffects(mod, patternIndex, rowIndex));
+                    System.out.println("}");
                 }
 
                 handleNewRow();
@@ -666,16 +665,8 @@ public final class Player {
         this.config.ignoreLastSequenceJumpStatementEnabled = ignoreLastSequenceJumpStatementEnabled;
     }
 
-    public void setLogger(PrintStream logger) {
-        this.config.logger = requireNonNull(logger);
-    }
-
-    public void setLogInfoEnabled(boolean enabled) {
-        this.config.logInfoEnabled = enabled;
-    }
-
-    public void setLogErrorEnabled(boolean enabled) {
-        this.config.logErrorEnabled = enabled;
+    public void setLoggingEnabled(boolean enabled) {
+        this.config.loggingEnabled = enabled;
     }
 
     public AudioFormat getCompatibleAudioFormat() {
@@ -685,11 +676,10 @@ public final class Player {
 
     public static void main(String[] args) throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader();
-        Mod mod = modLoader.load(new File("C:\\Users\\Marcin\\Downloads\\mods\\Slawomir Mrozek - Franko End.mod"));
+        Mod mod = modLoader.load(new File("C:\\Users\\Marcin\\Downloads\\mods\\space_debris.mod"));
 
         Player player = new Player();
-        player.setLogInfoEnabled(true);
-        player.setLogErrorEnabled(true);
+        player.setLoggingEnabled(true);
         player.setMod(mod);
         // player.setMuted(0, true);
         // player.setMuted(1, true);
