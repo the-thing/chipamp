@@ -228,6 +228,13 @@ public enum EffectType implements Effect {
 
     SET_SAMPLE_OFFSET(0x09) {
         @Override
+        public void onPreEffect(Channel channel, Config config, int period, Sample sample) {
+            super.onPreEffect(channel, config, period, sample);
+
+            channel.periodTriggered = period > 0;
+        }
+
+        @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             if (!channel.periodTriggered) {
                 return;

@@ -14,8 +14,6 @@ interface Effect {
             activeSample = channel.sample;
         }
 
-        channel.periodTriggered = period > 0;
-
         if (period > 0) {
             if (activeSample != null && activeSample.getFineTune() != 0) {
                 period = Mods.getFineTunePeriod(period, activeSample.getFineTune());

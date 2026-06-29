@@ -8,8 +8,6 @@ final class Channel {
 
     Sample sample;
     int period;
-    // TODO this is used by a single effect so probably should part of effects
-    boolean periodTriggered; // indicates if period was set for the row
     float samplePosition;
     float sampleIncrement;
     int volume;
@@ -39,6 +37,13 @@ final class Channel {
     int retriggerTickIndex;
 
     boolean glissandoEnabled;
+
+    /**
+     * Indicates if a period was set for the row.
+     *
+     * @see com.github.thething.chipamp.mod.EffectType#SET_SAMPLE_OFFSET
+     */
+    boolean periodTriggered;
 
     int volumeSlide; // volume recorded when hitting first row with volume slide or vibrato / tremolo with volume side
 
