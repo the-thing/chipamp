@@ -22,7 +22,7 @@ class FormattersTest {
     @Test
     void shouldReturnFormattedPatterns() throws IOException {
         String expected = Resources.readText("axel-patterns.txt");
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         String formatted = Formatters.formatPatterns(mod);
 
         assertThat(formatted).isEqualTo(expected);
@@ -31,7 +31,7 @@ class FormattersTest {
     @Test
     void shouldReturnFormattedPattern() throws IOException {
         String expected = Resources.readText("axel-pattern-2.txt");
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         String formatted = Formatters.formatPattern(mod, 2);
 
         assertThat(formatted).isEqualTo(expected);
@@ -39,7 +39,7 @@ class FormattersTest {
 
     @Test
     void shouldReturnFormattedRow() throws IOException {
-        Mod mod = modLoader.load("DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         String formatted = Formatters.formatRow(mod, 5, 10);
 
         assertThat(formatted).isEqualTo("0005 | 10 | A-3 12 --- | F-3 05 A01 | --- -- --- | --- -- EB1 |");
