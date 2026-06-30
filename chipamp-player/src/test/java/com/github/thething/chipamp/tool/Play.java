@@ -1,6 +1,16 @@
-package com.github.thething.chipamp.mod;
+package com.github.thething.chipamp.tool;
 
+import com.github.thething.chipamp.mod.Mod;
+import com.github.thething.chipamp.mod.ModLoader;
+import com.github.thething.chipamp.mod.Mods;
+import com.github.thething.chipamp.mod.Player;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.engine.discovery.DiscoverySelectors;
+import org.junit.platform.launcher.Launcher;
+import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
+import org.junit.platform.launcher.core.LauncherFactory;
 
 import javax.sound.sampled.LineUnavailableException;
 import java.io.File;
@@ -9,10 +19,9 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 // TODO remove later
-public class EndToEndTest {
+public class Play {
 
     @Test
-    // @Disabled
     public void play() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/Popcorn.mod");
@@ -41,6 +50,7 @@ public class EndToEndTest {
     }
 
     @Test
+    @Disabled
     public void dupa() throws IOException {
         for (File file : new File("C:\\Users\\Marcin\\Downloads\\mod").listFiles()) {
             if (!file.getName().endsWith(".mod")) {
@@ -52,10 +62,15 @@ public class EndToEndTest {
             System.out.println("Loading module: " + file.getName());
             Mod mod = modLoader.load(file);
             assertThat(mod).isNotNull();
-
-            if (mod.getChannelCount() > 4) {
-                System.out.println("Channel count: " + mod.getChannelCount());
-            }
         }
+    }
+
+    public static void main(String[] args) {
+        LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
+                .selectors(DiscoverySelectors.selectClass(Play.class))
+                .build();
+
+        Launcher launcher = LauncherFactory.create();
+        launcher.execute(request);
     }
 }

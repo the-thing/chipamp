@@ -1,5 +1,7 @@
 package com.github.thething.chipamp.io;
 
+import org.junit.platform.commons.io.Resource;
+
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -11,9 +13,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static java.util.Objects.checkFromIndexSize;
@@ -34,6 +39,24 @@ public final class Resources {
         }
 
         return in;
+    }
+
+    public static String getFileName(String resourceName) throws IOException {
+        URL resource = Resources.class.getClassLoader().getResource(resourceName);
+
+        if (resource == null) {
+            throw new IOException("Resource not found: " + resourceName);
+        }
+
+        URI uri;
+
+        try {
+            uri = resource.toURI();
+        } catch (URISyntaxException e) {
+            throw new IOException("Failed to convert resource to URI: " + resourceName, e);
+        }
+
+        return Paths.get(uri).getFileName().toString();
     }
 
     public static File[] listFiles(String name) {
