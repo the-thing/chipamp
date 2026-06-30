@@ -142,4 +142,11 @@ class ModLoaderTest {
         assertThat(sample.getLoopLength()).isEqualTo(0);
         assertThat(sample.getVolume()).isEqualTo(64);
     }
+
+    @Test
+    void shouldLoadModWith16Channels() throws IOException {
+        Mod mod = underTest.load("chip/di_-_demo.mod");
+        assertThat(mod.getChannelCount()).isEqualTo(16);
+        assertThat(mod.getSampleCount()).isEqualTo(31);
+    }
 }
