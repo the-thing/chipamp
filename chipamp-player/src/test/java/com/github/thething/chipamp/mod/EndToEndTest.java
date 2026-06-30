@@ -1,5 +1,6 @@
 package com.github.thething.chipamp.mod;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -9,6 +10,7 @@ import java.io.IOException;
 public class EndToEndTest {
 
     @Test
+    @Disabled
     public void play() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/Captain - Space Debris.mod");

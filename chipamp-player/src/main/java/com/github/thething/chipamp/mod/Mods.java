@@ -378,10 +378,10 @@ public final class Mods {
     }
 
     public static boolean containsCustomNotes(Mod mod) {
-        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
-            for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                    Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+                for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
+                    Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
                     int period = instrument.period();
 
                     if (getNote(period) == null) {
@@ -395,9 +395,9 @@ public final class Mods {
     }
 
     public static boolean isEffectPresent(Mod mod, EffectType effectType) {
-        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
-            for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+                for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
                     Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
 
                     if (instrument.effectType() == effectType) {
@@ -411,9 +411,9 @@ public final class Mods {
     }
 
     public static boolean isExtendedEffectPresent(Mod mod, ExtendedEffectType effectType) {
-        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
-            for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+                for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
                     Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
 
                     if (instrument.extendedEffectType() == effectType) {

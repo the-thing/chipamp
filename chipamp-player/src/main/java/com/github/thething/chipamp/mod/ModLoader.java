@@ -93,8 +93,8 @@ public final class ModLoader {
         int patternCount = ExtraArrays.max(patternSequences) + 1;
         int channelCount = channelDetector.applyAsInt(probeTrackerId);
 
-        Instrument[][][] patterns = loadPatterns(data, offset, patternCount, channelCount);
-        offset += patterns.length * Mod.ROW_COUNT * channelCount * INSTRUMENT_LENGTH;
+        Instrument[][][] patterns = loadPatterns(data, offset, channelCount, patternCount);
+        offset += patternCount * Mod.ROW_COUNT * channelCount * INSTRUMENT_LENGTH;
 
         Sample[] samples = new Sample[sampleCount];
         offset = loadSamples(data, offset, sampleHeaders, trackerId, samples);
@@ -206,13 +206,13 @@ public final class ModLoader {
         }
     }
 
-    private static Instrument[][][] loadPatterns(byte[] data, int offset, int patternCount, int channelCount) {
-        Instrument[][][] patterns = new Instrument[patternCount][Mod.ROW_COUNT][channelCount];
+    private static Instrument[][][] loadPatterns(byte[] data, int offset, int channelCount, int patternCount) {
+        Instrument[][][] patterns = new Instrument[channelCount][patternCount][Mod.ROW_COUNT];
 
-        for (int i = 0; i < patternCount; i++) {
-            for (int j = 0; j < Mod.ROW_COUNT; j++) {
-                for (int k = 0; k < channelCount; k++) {
-                    patterns[i][j][k] = loadPattern(data, offset);
+        for (int patternIndex = 0; patternIndex < patternCount; patternIndex++) {
+            for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
+                for (int channelIndex = 0; channelIndex < channelCount; channelIndex++) {
+                    patterns[channelIndex][patternIndex][rowIndex] = loadPattern(data, offset);
                     offset += INSTRUMENT_LENGTH;
                 }
             }

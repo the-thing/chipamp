@@ -562,7 +562,7 @@ public final class Player {
     private void handleNewRow() {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             int patternIndex = mod.getPatternIndex(sequenceIndex);
-            Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+            Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
             Channel channel = channels[channelIndex];
 
             Sample sample = instrument.sampleNumber() > 0 ? mod.getSample(instrument.sampleNumber() - 1) : null;

@@ -92,7 +92,7 @@ public final class Formatters {
         out.append(" |");
 
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-            Instrument pattern = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+            Instrument pattern = mod.getInstrument(channelIndex, patternIndex, rowIndex);
             String note;
 
             if (pattern.period() > 0) {
@@ -169,7 +169,7 @@ public final class Formatters {
 
     public static void formatEffects(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-            Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+            Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
 
             if (channelIndex != 0) {
                 out.append(",");

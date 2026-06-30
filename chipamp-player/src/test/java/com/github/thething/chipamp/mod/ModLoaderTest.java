@@ -77,6 +77,7 @@ class ModLoaderTest {
                 continue;
             }
 
+            System.out.println("Loading module: " + file.getName());
             Mod mod = underTest.load(file);
             assertThat(mod).isNotNull();
         }
@@ -127,5 +128,18 @@ class ModLoaderTest {
         assertThat(sample.getVolume()).isEqualTo(64);
     }
 
-    // TODO load mods with custom number of channels
+    @Test
+    public void shouldLoadShorterSample() throws IOException {
+        Mod mod = underTest.load("chip/broken/janes.mod");
+        assertThat(mod.getChannelCount()).isEqualTo(4);
+        assertThat(mod.getSampleCount()).isEqualTo(31);
+
+        Sample sample = mod.getSample(14);
+        assertThat(sample.getName()).isEqualTo("st-01:FunBass");
+        assertThat(sample.getDataLength()).isEqualTo(6500);
+        assertThat(sample.getLoopStart()).isEqualTo(0);
+        assertThat(sample.getLoopEnd()).isEqualTo(0);
+        assertThat(sample.getLoopLength()).isEqualTo(0);
+        assertThat(sample.getVolume()).isEqualTo(64);
+    }
 }

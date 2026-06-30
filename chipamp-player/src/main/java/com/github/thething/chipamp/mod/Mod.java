@@ -10,7 +10,7 @@ public final class Mod {
     public static final int MIN_LENGTH = 1;
     public static final int MAX_LENGTH = 128;
     public static final int MIN_CHANNEL_COUNT = 1;
-    public static final int MAX_CHANNEL_COUNT = 16;
+    public static final int MAX_CHANNEL_COUNT = 32;
     public static final int SAMPLE_COUNT_1 = 31;
     public static final int SAMPLE_COUNT_2 = 15;
     public static final int MIN_PATTERN_COUNT = 1;
@@ -47,9 +47,8 @@ public final class Mod {
     private final String trackerId;
 
     /**
-     * Pattern sheet. [patternCount][rowCount][channelCount]
+     * Pattern sheet. [channel][pattern][row]
      */
-    // TODO this should probably be channel / pattern / row
     private final Instrument[][][] patterns;
 
     public Mod(String title, int length, Sample[] samples, int[] patternSequences, String trackerId, Instrument[][][] patterns) {
@@ -86,8 +85,12 @@ public final class Mod {
     }
 
     private Instrument[][][] checkPatterns(Instrument[][][] patterns) {
-        requireInRange(patterns.length, MIN_PATTERN_COUNT, MAX_PATTERN_COUNT);
-        requireInRange(patterns[0][0].length, MIN_CHANNEL_COUNT, MAX_CHANNEL_COUNT);
+        requireInRange(patterns.length, MIN_CHANNEL_COUNT, MAX_CHANNEL_COUNT);
+        requireInRange(patterns[0].length, MIN_PATTERN_COUNT, MAX_PATTERN_COUNT);
+
+        if (patterns[0][0].length != ROW_COUNT) {
+            throw new IllegalArgumentException("Invalid row count: " + patterns[0][0].length);
+        }
 
         return patterns;
     }
@@ -101,7 +104,7 @@ public final class Mod {
     }
 
     public int getChannelCount() {
-        return patterns[0][0].length;
+        return patterns.length;
     }
 
     public int getSampleCount() {
@@ -125,10 +128,10 @@ public final class Mod {
     }
 
     public int getPatternCount() {
-        return patterns.length;
+        return patterns[0].length;
     }
 
-    public Instrument getInstrument(int patternIndex, int rowIndex, int channelIndex) {
-        return patterns[patternIndex][rowIndex][channelIndex];
+    public Instrument getInstrument(int channelIndex, int patternIndex, int rowIndex) {
+        return patterns[channelIndex][patternIndex][rowIndex];
     }
 }
