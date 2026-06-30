@@ -4,6 +4,7 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -105,6 +106,12 @@ public final class Resources {
 
         try (AudioInputStream in = new AudioInputStream(new ByteArrayInputStream(audio, offset, length), format, length)) {
             AudioSystem.write(in, AudioFileFormat.Type.WAVE, file);
+        }
+    }
+
+    public static byte[] readAudio(String name) throws IOException, UnsupportedAudioFileException {
+        try (AudioInputStream in = AudioSystem.getAudioInputStream(getResourceAsStream(name))) {
+            return readBytes(in);
         }
     }
 }

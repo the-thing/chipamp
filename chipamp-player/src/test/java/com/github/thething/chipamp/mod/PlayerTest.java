@@ -1,6 +1,7 @@
 package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.io.Resources;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,27 +40,29 @@ public class PlayerTest {
     }
 
     @Test
-    public void should() throws IOException {
+    public void shouldRead() throws IOException {
         underTest.setClockHz(Mods.PAL_CLOCK_HZ);
         underTest.setSamplingRate(48_000);
         underTest.setMinPeriod(Mods.MIN_PERIOD);
         underTest.setMaxPeriod(Mods.MAX_PERIOD);
         underTest.setVolumeMultiplier(0.5f);
         underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(false);
+        underTest.setStereoFoldDownEnabled(true);
         underTest.setVolumeSlideDeltaEnabled(false);
         underTest.setLoopDetectionEnabled(true);
         underTest.setLoggingEnabled(false);
 
-        underTest.setPanning(0, 92.0f / 255.0f);
-        underTest.setPanning(1, 192.0f / 255.0f);
-        underTest.setPanning(2, 192.0f / 255.0f);
-        underTest.setPanning(3, 92.0f / 255.0f);
-
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.setMod(mod);
 
+        byte[] expectedAudio = Resources.readBytes("wav/axel-stereo-48kHz-pal.wav");
         byte[] audio = underTest.read();
-        Resources.saveAudio(new File("axel-stereo-48kHz-pal.wav"), underTest.getCompatibleAudioFormat(), audio);
+
+        System.out.println(audio.length);
+        System.out.println(expectedAudio.length);
+
+         assertThat(audio).containsExactly(expectedAudio);
+
+        // Resources.saveAudio(new File("axel-stereo-48kHz-pal.wav"), underTest.getCompatibleAudioFormat(), audio);
     }
 }

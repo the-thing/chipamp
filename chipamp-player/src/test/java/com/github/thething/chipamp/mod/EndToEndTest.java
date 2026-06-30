@@ -15,7 +15,7 @@ public class EndToEndTest {
     // @Disabled
     public void play() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/broken/janes.mod");
+        Mod mod = modLoader.load("chip/Popcorn.mod");
 
         Player player = new Player();
         player.setClockHz(Mods.PAL_CLOCK_HZ);
