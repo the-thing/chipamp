@@ -2,7 +2,6 @@ package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.common.Formatters;
 import com.github.thething.chipamp.common.Maths;
-import com.github.thething.chipamp.common.Requirements;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -96,10 +95,32 @@ public final class Player {
         int sequenceIndex = findSequenceIndex(patternIndex);
 
         if (sequenceIndex < 0) {
-            return sequenceIndex;
+            return -1;
         }
 
         seekPosition(sequenceIndex);
+
+        return sequenceIndex;
+    }
+
+    public void setPosition(int sequenceIndex) {
+        requireNonNull(mod);
+        checkIndex(sequenceIndex, mod.getLength());
+
+        this.sequenceIndex = sequenceIndex;
+    }
+
+    public int setPattern(int patternIndex) {
+        requireNonNull(mod);
+        requireInRange(patternIndex, 0, mod.getLength());
+
+        int sequenceIndex = findSequenceIndex(patternIndex);
+
+        if (sequenceIndex < 0) {
+            return -1;
+        }
+
+        this.sequenceIndex = sequenceIndex;
 
         return sequenceIndex;
     }
