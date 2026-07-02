@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.checkFromIndexSize;
 
+// TODO add support for breaking buffer in half
 public final class SpScByteCircularBuffer {
 
     private final byte[] buffer;
