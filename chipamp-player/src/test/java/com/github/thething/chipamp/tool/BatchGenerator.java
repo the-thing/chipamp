@@ -62,7 +62,7 @@ public class BatchGenerator {
                 '-' +
                 "sampling" + samplingRate + "Hz" +
                 '-' +
-                "volume" + volumeMultiplier +
+                "volumeMultiplier" + volumeMultiplier +
                 '-' +
                 (stereoEnabled ? "stereo" : "mono") +
                 '-' +

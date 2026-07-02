@@ -135,10 +135,6 @@ public final class Player {
         return -1;
     }
 
-    public int getBytesPerTick() {
-        return config.stereoEnabled ? 4 : 2;
-    }
-
     public void play() throws LineUnavailableException {
         play(mod.getLength());
     }
@@ -247,6 +243,7 @@ public final class Player {
                 throw new RuntimeException("Unexpected end of audio");
             }
 
+            // TODO handle return value
             line.write(buffer, 0, readCount);
 
             if (rowIndex != lastRow || lastSequenceIndex != sequenceIndex) {
@@ -341,7 +338,7 @@ public final class Player {
             return EMPTY_BUFFER;
         }
 
-        int bytesPerTick = getBytesPerTick();
+        int bytesPerTick = getBytesPerSample();
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         int offset = 0;
@@ -372,7 +369,7 @@ public final class Player {
             return EMPTY_BUFFER;
         }
 
-        int bytesPerTick = getBytesPerTick();
+        int bytesPerTick = getBytesPerSample();
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         int offset = 0;
@@ -410,10 +407,10 @@ public final class Player {
         checkFromIndexSize(offset, length, output.length);
         checkFromToIndex(0, endSequenceIndex, mod.getLength());
 
-        int bytesPerTick = getBytesPerTick();
+        int bytesPerTick = getBytesPerSample();
 
         if (length < bytesPerTick) {
-            throw new IllegalArgumentException("Buffer too small: " + length + " < " + bytesPerTick);
+            return 0;
         }
 
         int end = offset + length;
@@ -726,6 +723,38 @@ public final class Player {
     public AudioFormat getCompatibleAudioFormat() {
         return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, config.samplingRate, 16,
                 config.stereoEnabled ? 2 : 1, config.stereoEnabled ? 4 : 2, config.samplingRate, false);
+    }
+
+    public int getSequenceIndex() {
+        return sequenceIndex;
+    }
+
+    public int getRowIndex() {
+        return rowIndex;
+    }
+
+    public int getSpeed() {
+        return context.speed;
+    }
+
+    public int getBytesPerSample() {
+        return config.stereoEnabled ? 4 : 2;
+    }
+
+    public int getBytesPerTick() {
+        return getBytesPerSample() * context.samplesPerTick;
+    }
+
+    public int getBytesPerRow() {
+        return getBytesPerTick() * context.speed;
+    }
+
+    public int getSamplesPerTick() {
+        return context.samplesPerTick;
+    }
+
+    public int getSamplesPerRow() {
+        return context.speed * context.samplesPerTick;
     }
 
     private record State(int patternIndex, int rowIndex, boolean loopPending, int loopRowIndex, int loopCounter) {
