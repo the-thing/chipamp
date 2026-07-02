@@ -599,6 +599,8 @@ public final class Player {
         }
     }
 
+    // TODO estemiate song length
+
     public void setMod(Mod mod) {
         if (mod.getChannelCount() > channels.length) {
             throw new IllegalArgumentException("Mod has more channels than the player supports");

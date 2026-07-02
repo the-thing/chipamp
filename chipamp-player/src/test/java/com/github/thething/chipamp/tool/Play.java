@@ -52,9 +52,42 @@ public class Play {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
+//        AudioFormat format = player.getCompatibleAudioFormat();
+//        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+//        ThreadFactory factory = (runnable) -> new Thread(runnable, "AsyncSourceDataLine");
+//
+//        try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info)) {
+//            line.open(format);
+//            line.start();
+//
+//            try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, 4096, factory)) {
+//                while (player.getSequenceIndex() < mod.getLength()) {
+//                    int bytesPerRow = player.getBytesPerRow();
+//                    int bytesPerSample = player.getBytesPerSample();
+//                    int writeLength = bytesPerRow - bytesPerSample; // read less than a row sample
+//
+//                    if (asyncLine.size() < writeLength) {
+//                        byte[] writeBuffer = new byte[writeLength];
+//                        int readCount = player.read(writeBuffer);
+//
+//                        if (writeLength != readCount) {
+//                            System.out.println("readCount: " + readCount + ", writeLength = " + writeLength);
+//                        }
+//
+//                        int dupa = asyncLine.write(writeBuffer, 0, readCount);
+//
+//                        if (dupa != readCount) {
+//                            System.out.println("dupa: " + dupa + ", readCount = " + readCount);
+//                        }
+//                    } else {
+//                        Thread.sleep(5);
+//                    }
+//                }
+//            }
+//        }
+
         AudioFormat format = player.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-
         ThreadFactory factory = (runnable) -> new Thread(runnable, "AsyncSourceDataLine");
 
         try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info)) {
