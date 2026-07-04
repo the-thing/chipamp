@@ -153,4 +153,42 @@ public class SpScByteCircularBufferTest {
         assertThat(underTest.getReadIndexAcquire()).isEqualTo(12);
         assertThat(underTest.size()).isEqualTo(4);
     }
+
+    @Test
+    void shouldWriteNoBytesWhenFull() {
+        int writeCount;
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.size()).isEqualTo(0);
+
+        writeCount = underTest.write(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+        assertThat(writeCount).isEqualTo(8);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(8);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(8);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.size()).isEqualTo(8);
+
+        writeCount = underTest.write(new byte[]{1});
+        assertThat(writeCount).isEqualTo(0);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(8);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(8);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.size()).isEqualTo(8);
+
+        writeCount = underTest.write(new byte[]{1});
+        assertThat(writeCount).isEqualTo(0);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(8);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(8);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.size()).isEqualTo(8);
+    }
 }

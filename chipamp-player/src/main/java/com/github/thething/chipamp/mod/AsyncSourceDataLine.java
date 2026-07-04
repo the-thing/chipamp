@@ -91,7 +91,7 @@ public class AsyncSourceDataLine implements Closeable {
                         throw new RuntimeException("Unexpected end of audio");
                     }
 
-                    buffer.addReadIndex(written);
+                    buffer.skipBytes(written);
                 } else {
                     maxBufferUnderFlow++;
 

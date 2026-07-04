@@ -118,7 +118,7 @@ public final class SpScByteCircularBuffer {
         return writeIndex.getAcquire();
     }
 
-    public void addReadIndex(int delta) {
-        readIndex.setRelease(readIndex.getPlain() + delta);
+    public void skipBytes(int count) {
+        readIndex.setRelease(readIndex.getPlain() + count);
     }
 }
