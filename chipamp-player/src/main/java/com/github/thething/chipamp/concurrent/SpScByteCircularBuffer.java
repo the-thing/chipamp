@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.checkFromIndexSize;
 
-// TODO add support for breaking buffer in half
 public final class SpScByteCircularBuffer {
 
     private final byte[] buffer;
@@ -38,7 +37,17 @@ public final class SpScByteCircularBuffer {
             return 0;
         }
 
-        System.arraycopy(data, offset, buffer, writeIndex & bufferMask, length);
+        int startIndex = readIndex & bufferMask;
+        int delta = buffer.length - startIndex;
+
+        if (delta < length) {
+            // buffer will be broken in half so we have to do it in two chunks
+            System.arraycopy(data, offset, buffer, startIndex, delta);
+            System.arraycopy(data, offset + delta, buffer, 0, length - delta);
+        } else {
+            System.arraycopy(data, offset, buffer, startIndex, length);
+        }
+
         this.writeIndex.setRelease(writeIndex + length);
 
         return length;
@@ -71,7 +80,16 @@ public final class SpScByteCircularBuffer {
             return 0;
         }
 
-        System.arraycopy(buffer, readIndex & bufferMask, output, offset, length);
+        int startIndex = readIndex & bufferMask;
+        int delta = buffer.length - startIndex;
+
+        if (delta < length) {
+            // buffer will be broken in half so we have to do it in two chunks
+            System.arraycopy(buffer, startIndex, output, offset, delta);
+            System.arraycopy(buffer, 0, output, offset + delta, length - delta);
+        } else {
+            System.arraycopy(buffer, startIndex, output, offset, length);
+        }
 
         return length;
     }
@@ -84,43 +102,23 @@ public final class SpScByteCircularBuffer {
         this.readIndex.setRelease(this.writeIndex.getPlain());
     }
 
-    public int getReadIndexPlain() {
+    int getReadIndexPlain() {
         return readIndex.getPlain();
     }
 
-    public int getReadIndexAcquire() {
+    int getReadIndexAcquire() {
         return readIndex.getAcquire();
     }
 
-    public int getWriteIndexPlain() {
+    int getWriteIndexPlain() {
         return writeIndex.getPlain();
     }
 
-    public int getWriteIndexAcquire() {
+    int getWriteIndexAcquire() {
         return writeIndex.getAcquire();
-    }
-
-    public void setReadIndexPlain(int index) {
-        readIndex.setPlain(index);
-    }
-
-    public void setReadIndexRelease(int index) {
-        readIndex.setRelease(index);
     }
 
     public void addReadIndex(int delta) {
         readIndex.setRelease(readIndex.getPlain() + delta);
-    }
-
-    public void setWriteIndexPlain(int index) {
-        writeIndex.setPlain(index);
-    }
-
-    public void setWriteIndexRelease(int index) {
-        writeIndex.setRelease(index);
-    }
-
-    public int getCapacity() {
-        return buffer.length;
     }
 }

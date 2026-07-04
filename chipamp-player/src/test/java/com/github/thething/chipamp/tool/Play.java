@@ -18,7 +18,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.applet.AppletStub;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ThreadFactory;
@@ -52,39 +51,8 @@ public class Play {
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-//        AudioFormat format = player.getCompatibleAudioFormat();
-//        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-//        ThreadFactory factory = (runnable) -> new Thread(runnable, "AsyncSourceDataLine");
-//
-//        try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info)) {
-//            line.open(format);
-//            line.start();
-//
-//            try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, 4096, factory)) {
-//                while (player.getSequenceIndex() < mod.getLength()) {
-//                    int bytesPerRow = player.getBytesPerRow();
-//                    int bytesPerSample = player.getBytesPerSample();
-//                    int writeLength = bytesPerRow - bytesPerSample; // read less than a row sample
-//
-//                    if (asyncLine.size() < writeLength) {
-//                        byte[] writeBuffer = new byte[writeLength];
-//                        int readCount = player.read(writeBuffer);
-//
-//                        if (writeLength != readCount) {
-//                            System.out.println("readCount: " + readCount + ", writeLength = " + writeLength);
-//                        }
-//
-//                        int dupa = asyncLine.write(writeBuffer, 0, readCount);
-//
-//                        if (dupa != readCount) {
-//                            System.out.println("dupa: " + dupa + ", readCount = " + readCount);
-//                        }
-//                    } else {
-//                        Thread.sleep(5);
-//                    }
-//                }
-//            }
-//        }
+        System.out.println("getBytesPerTick: " + player.getBytesPerTick());
+        System.out.println("getBytesPerRow: " + player.getBytesPerRow());
 
         AudioFormat format = player.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -94,28 +62,35 @@ public class Play {
             line.open(format);
             line.start();
 
-            try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, 4096, factory)) {
+            byte[] writeBuffer = new byte[1024 * 64];
+
+            try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, 4096 * 4, factory)) {
                 while (player.getSequenceIndex() < mod.getLength()) {
                     int bytesPerRow = player.getBytesPerRow();
                     int bytesPerSample = player.getBytesPerSample();
-                    int writeLength = bytesPerRow - bytesPerSample; // read less than a row sample
+                    // int writeLength = bytesPerRow - player.getBytesPerSample(); // read less than a row sample
+                    // int writeLength = player.getBytesPerTick();
+                    int writeLength = 1024;
 
                     if (asyncLine.size() < writeLength) {
-                        byte[] writeBuffer = new byte[writeLength];
+
                         int readCount = player.read(writeBuffer);
 
-                        if (writeLength != readCount) {
-                            System.out.println("readCount: " + readCount + ", writeLength = " + writeLength);
-                        }
+//                        if (writeLength != readCount) {
+//                            System.out.println("readCount: " + readCount + ", writeLength = " + writeLength);
+//                        }
 
                         int dupa = asyncLine.write(writeBuffer, 0, readCount);
 
                         if (dupa != readCount) {
                             System.out.println("dupa: " + dupa + ", readCount = " + readCount);
                         }
+
                     } else {
-                        Thread.sleep(5);
+                        Thread.sleep(1);
                     }
+
+
                 }
             }
         }

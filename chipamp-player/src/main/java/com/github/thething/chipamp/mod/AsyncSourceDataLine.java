@@ -33,8 +33,8 @@ public class AsyncSourceDataLine implements Closeable {
 
         int readLength = Math.min(chunkLength, line.getBufferSize());
 
-        SpScByteCircularBuffer buffer = new SpScByteCircularBuffer(1024 * 1024 * 1024);
-        Task task = new Task(line, buffer, readLength);
+        SpScByteCircularBuffer buffer = new SpScByteCircularBuffer(1024 * 1024 * 10);
+        Task task = new Task(line, buffer, 1024);
         Thread thread = threadFactory.newThread(task);
         thread.start();
 
@@ -72,19 +72,46 @@ public class AsyncSourceDataLine implements Closeable {
 
         @Override
         public void run() {
+
+            int maxBufferUnderFlow = 0;
+
             while (!Thread.currentThread().isInterrupted()) {
-                int readLength = buffer.readNoAdvance(readBuffer);
+                int size = buffer.size();
+
+                // System.out.println("size: " + size);
+
+                // int min = Math.min(size / 2, readBuffer.length);
+                int readLength = buffer.readNoAdvance(readBuffer, 0, 4);
 
                 if (readLength > 0) {
+                    maxBufferUnderFlow = 0;
                     int written = sourceDataLine.write(readBuffer, 0, readLength);
+
+                    if (written != readLength) {
+                        throw new RuntimeException("Unexpected end of audio");
+                    }
+
                     buffer.addReadIndex(written);
                 } else {
+                    maxBufferUnderFlow++;
+
+                    System.out.println("maxBufferUnderFlow: " + maxBufferUnderFlow);
+
+
+                      // System.out.println("buffer underflow: " + readLength);
+//                    try {
+//                        Thread.sleep(1L);
+//                    } catch (InterruptedException e) {
+//                        Thread.currentThread().interrupt();
+//                        return;
+//                    }
+
                     try {
-                        Thread.sleep(1L);
+                        Thread.sleep(10L);
                     } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        return;
+                        throw new RuntimeException(e);
                     }
+
                 }
             }
         }
