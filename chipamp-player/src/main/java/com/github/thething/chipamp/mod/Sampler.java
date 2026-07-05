@@ -599,7 +599,19 @@ public final class Sampler {
         }
     }
 
+    // TODO snapshot take / recover snapshot
+
+
     // TODO estemiate song length
+    public long getSongLengthMillis() {
+
+
+
+
+        return -1L;
+    }
+
+
 
     public Mod getMod() {
         return mod;
@@ -612,6 +624,8 @@ public final class Sampler {
 
         this.mod = mod;
         reset();
+
+        // TODO calculate time for pattern / row
     }
 
     public void setPanning(int channelIndex, float right) {
