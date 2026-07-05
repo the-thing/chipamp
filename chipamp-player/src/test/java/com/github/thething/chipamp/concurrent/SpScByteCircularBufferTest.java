@@ -277,32 +277,4 @@ public class SpScByteCircularBufferTest {
         assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
         assertThat(underTest.size()).isEqualTo(8);
     }
-
-    @Test
-    void shouldClearBuffer() {
-        int writeCount;
-
-        assertThat(underTest.getWriteIndexPlain()).isEqualTo(0);
-        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(0);
-        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
-        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
-        assertThat(underTest.size()).isEqualTo(0);
-
-        writeCount = underTest.write(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
-        assertThat(writeCount).isEqualTo(8);
-
-        assertThat(underTest.getWriteIndexPlain()).isEqualTo(8);
-        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(8);
-        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
-        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
-        assertThat(underTest.size()).isEqualTo(8);
-
-        underTest.clear();
-
-        assertThat(underTest.getWriteIndexPlain()).isEqualTo(8);
-        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(8);
-        assertThat(underTest.getReadIndexPlain()).isEqualTo(8);
-        assertThat(underTest.getReadIndexAcquire()).isEqualTo(8);
-        assertThat(underTest.size()).isEqualTo(0);
-    }
 }

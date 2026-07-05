@@ -187,11 +187,6 @@ public final class SpScByteCircularBuffer {
         return writeIndex.getAcquire() - readIndex.getAcquire();
     }
 
-    // TODO
-    public void clear() {
-        this.readIndex.setRelease(this.writeIndex.getPlain());
-    }
-
     /**
      * Advances the read position by skipping the specified number of bytes.
      * <p>
