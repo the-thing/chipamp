@@ -18,6 +18,7 @@ import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.checkIndex;
 import static java.util.Objects.requireNonNull;
 
+// TODO take / recover snapshot
 public final class Sampler {
 
     private static final State INITIAL_STATE = new State(0, 0, false, 0, 0);
@@ -31,7 +32,6 @@ public final class Sampler {
     private final Set<State> visited;
 
     private Mod mod;
-
     private int sequenceIndex;
     private int rowIndex;
     private int tickIndex;

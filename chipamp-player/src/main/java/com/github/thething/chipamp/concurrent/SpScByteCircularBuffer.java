@@ -1,6 +1,7 @@
 package com.github.thething.chipamp.concurrent;
 
 import com.github.thething.chipamp.common.Maths;
+import com.github.thething.chipamp.common.VisibleForTesting;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -59,11 +60,7 @@ public final class SpScByteCircularBuffer {
 
     public int read(byte[] output, int offset, int length) {
         length = peek(output, offset, length);
-
-        if (length > 0) {
-            skipBytes(length);
-        }
-
+        skipBytes(length);
         return length;
     }
 
@@ -106,23 +103,36 @@ public final class SpScByteCircularBuffer {
         this.readIndex.setRelease(this.writeIndex.getPlain());
     }
 
+    public int skipBytes(int count) {
+        int readIndex = this.readIndex.getPlain();
+        int size = writeIndex.getAcquire() - readIndex;
+
+        count = Math.min(count, size);
+
+        if (count > 0) {
+            this.readIndex.setRelease(readIndex + count);
+        }
+
+        return count;
+    }
+
+    @VisibleForTesting
     int getReadIndexPlain() {
         return readIndex.getPlain();
     }
 
+    @VisibleForTesting
     int getReadIndexAcquire() {
         return readIndex.getAcquire();
     }
 
+    @VisibleForTesting
     int getWriteIndexPlain() {
         return writeIndex.getPlain();
     }
 
+    @VisibleForTesting
     int getWriteIndexAcquire() {
         return writeIndex.getAcquire();
-    }
-
-    public void skipBytes(int count) {
-        readIndex.setRelease(readIndex.getPlain() + count);
     }
 }

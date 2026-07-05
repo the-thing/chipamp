@@ -86,6 +86,92 @@ public class SpScByteCircularBufferTest {
     }
 
     @Test
+    void shouldPeek() {
+        byte[] buffer = new byte[8];
+        int readCount, writeCount;
+
+        readCount = underTest.peek(buffer);
+        assertThat(readCount).isEqualTo(0);
+        assertThat(Arrays.copyOf(buffer, 0)).containsExactly();
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.size()).isEqualTo(0);
+
+        writeCount = underTest.write(new byte[]{1, 2, 3, 4});
+        assertThat(writeCount).isEqualTo(4);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(4);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(4);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.size()).isEqualTo(4);
+
+        readCount = underTest.peek(buffer);
+        assertThat(readCount).isEqualTo(4);
+        assertThat(Arrays.copyOf(buffer, 4)).containsExactly(1, 2, 3, 4);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(4);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(4);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.size()).isEqualTo(4);
+
+        readCount = underTest.read(buffer);
+        assertThat(readCount).isEqualTo(4);
+        assertThat(Arrays.copyOf(buffer, 4)).containsExactly(1, 2, 3, 4);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(4);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(4);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(4);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(4);
+        assertThat(underTest.size()).isEqualTo(0);
+    }
+
+    @Test
+    void shouldSkipAvailableBytes() {
+        int skipCount, writeCount;
+
+        writeCount = underTest.write(new byte[]{1, 2, 3, 4});
+        assertThat(writeCount).isEqualTo(4);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(4);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(4);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.size()).isEqualTo(4);
+
+        skipCount = underTest.skipBytes(1);
+        assertThat(skipCount).isEqualTo(1);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(4);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(4);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(1);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(1);
+        assertThat(underTest.size()).isEqualTo(3);
+
+        skipCount = underTest.skipBytes(10);
+        assertThat(skipCount).isEqualTo(3);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(4);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(4);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(4);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(4);
+        assertThat(underTest.size()).isEqualTo(0);
+
+        skipCount = underTest.skipBytes(1);
+        assertThat(skipCount).isEqualTo(0);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(4);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(4);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(4);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(4);
+        assertThat(underTest.size()).isEqualTo(0);
+    }
+
+    @Test
     void shouldWriteAndReadAtBoundary() {
         byte[] buffer = new byte[8];
         int readCount, writeCount;
@@ -190,5 +276,33 @@ public class SpScByteCircularBufferTest {
         assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
         assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
         assertThat(underTest.size()).isEqualTo(8);
+    }
+
+    @Test
+    void shouldClearBuffer() {
+        int writeCount;
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.size()).isEqualTo(0);
+
+        writeCount = underTest.write(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+        assertThat(writeCount).isEqualTo(8);
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(8);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(8);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(0);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(0);
+        assertThat(underTest.size()).isEqualTo(8);
+
+        underTest.clear();
+
+        assertThat(underTest.getWriteIndexPlain()).isEqualTo(8);
+        assertThat(underTest.getWriteIndexAcquire()).isEqualTo(8);
+        assertThat(underTest.getReadIndexPlain()).isEqualTo(8);
+        assertThat(underTest.getReadIndexAcquire()).isEqualTo(8);
+        assertThat(underTest.size()).isEqualTo(0);
     }
 }
