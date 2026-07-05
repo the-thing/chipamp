@@ -4,7 +4,7 @@ import com.github.thething.chipamp.mod.AsyncSourceDataLine;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
 import com.github.thething.chipamp.mod.Mods;
-import com.github.thething.chipamp.mod.Player;
+import com.github.thething.chipamp.mod.Sampler;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
@@ -32,29 +32,29 @@ public class Play {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
 
-        Player player = new Player();
-        player.setClockHz(Mods.PAL_CLOCK_HZ);
-        player.setSamplingRate(48_000);
-        player.setMinPeriod(Mods.MIN_PERIOD);
-        player.setMaxPeriod(Mods.MAX_PERIOD);
-        player.setVolumeMultiplier(0.5f);
-        player.setStereoEnabled(true);
-        player.setStereoFoldDownEnabled(false);
-        player.setVolumeSlideDeltaEnabled(false);
-        player.setLoopDetectionEnabled(true);
-        player.setLoggingEnabled(true);
-        player.setMod(mod);
-        player.setOpenMPTPanning();
+        Sampler sampler = new Sampler();
+        sampler.setClockHz(Mods.PAL_CLOCK_HZ);
+        sampler.setSamplingRate(48_000);
+        sampler.setMinPeriod(Mods.MIN_PERIOD);
+        sampler.setMaxPeriod(Mods.MAX_PERIOD);
+        sampler.setVolumeMultiplier(0.5f);
+        sampler.setStereoEnabled(true);
+        sampler.setStereoFoldDownEnabled(false);
+        sampler.setVolumeSlideDeltaEnabled(false);
+        sampler.setLoopDetectionEnabled(true);
+        sampler.setLoggingEnabled(true);
+        sampler.setMod(mod);
+        sampler.setOpenMPTPanning();
 
         // player.setMuted(0, true);
         // player.setMuted(1, true);
         // player.setMuted(2, true);
         // player.setMuted(3, true);
 
-        System.out.println("getBytesPerTick: " + player.getBytesPerTick());
-        System.out.println("getBytesPerRow: " + player.getBytesPerRow());
+        System.out.println("getBytesPerTick: " + sampler.getBytesPerTick());
+        System.out.println("getBytesPerRow: " + sampler.getBytesPerRow());
 
-        AudioFormat format = player.getCompatibleAudioFormat();
+        AudioFormat format = sampler.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
         ThreadFactory factory = (runnable) -> new Thread(runnable, "AsyncSourceDataLine");
 
@@ -65,16 +65,16 @@ public class Play {
             byte[] writeBuffer = new byte[1024 * 64];
 
             try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, 4096 * 4, factory)) {
-                while (player.getSequenceIndex() < mod.getLength()) {
-                    int bytesPerRow = player.getBytesPerRow();
-                    int bytesPerSample = player.getBytesPerSample();
+                while (sampler.getSequenceIndex() < mod.getLength()) {
+                    int bytesPerRow = sampler.getBytesPerRow();
+                    int bytesPerSample = sampler.getBytesPerSample();
                     // int writeLength = bytesPerRow - player.getBytesPerSample(); // read less than a row sample
                     // int writeLength = player.getBytesPerTick();
                     int writeLength = 1024;
 
                     if (asyncLine.size() < writeLength) {
 
-                        int readCount = player.read(writeBuffer);
+                        int readCount = sampler.read(writeBuffer);
 
 //                        if (writeLength != readCount) {
 //                            System.out.println("readCount: " + readCount + ", writeLength = " + writeLength);

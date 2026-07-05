@@ -1,24 +1,22 @@
 package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.io.Resources;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PlayerTest {
+public class SamplerTest {
 
-    private Player underTest;
+    private Sampler underTest;
     private ModLoader modLoader;
 
     @BeforeEach
     void setUp() {
-        underTest = new Player();
+        underTest = new Sampler();
         modLoader = new ModLoader(true);
     }
 

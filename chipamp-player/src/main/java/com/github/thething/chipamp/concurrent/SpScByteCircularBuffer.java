@@ -58,16 +58,20 @@ public final class SpScByteCircularBuffer {
     }
 
     public int read(byte[] output, int offset, int length) {
-        length = readNoAdvance(output, offset, length);
-        this.readIndex.addAndGet(length);
+        length = peek(output, offset, length);
+
+        if (length > 0) {
+            skipBytes(length);
+        }
+
         return length;
     }
 
-    public int readNoAdvance(byte[] output) {
-        return readNoAdvance(output, 0, output.length);
+    public int peek(byte[] output) {
+        return peek(output, 0, output.length);
     }
 
-    public int readNoAdvance(byte[] output, int offset, int length) {
+    public int peek(byte[] output, int offset, int length) {
         checkFromIndexSize(offset, length, output.length);
 
         int writeIndex = this.writeIndex.getAcquire();

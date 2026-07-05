@@ -4,7 +4,7 @@ import com.github.thething.chipamp.io.Resources;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
 import com.github.thething.chipamp.mod.Mods;
-import com.github.thething.chipamp.mod.Player;
+import com.github.thething.chipamp.mod.Sampler;
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,12 +23,12 @@ import java.util.stream.Stream;
 @SuppressWarnings("NewClassNamingConvention")
 public class BatchGenerator {
 
-    private Player player;
+    private Sampler sampler;
     private ModLoader modLoader;
 
     @BeforeEach
     void setUp() {
-        player = new Player();
+        sampler = new Sampler();
         modLoader = new ModLoader();
     }
 
@@ -40,16 +40,16 @@ public class BatchGenerator {
             boolean stereoEnabled, boolean stereoFoldDownEnabled,
             boolean volumeSlideDeltaEnabled, boolean loopDetectionEnabled) throws IOException {
 
-        player.setClockHz(clockHz);
-        player.setSamplingRate(samplingRate);
-        player.setMinPeriod(minPeriod);
-        player.setMaxPeriod(maxPeriod);
-        player.setVolumeMultiplier(volumeMultiplier);
-        player.setStereoEnabled(stereoEnabled);
-        player.setStereoFoldDownEnabled(stereoFoldDownEnabled);
-        player.setVolumeSlideDeltaEnabled(volumeSlideDeltaEnabled);
-        player.setLoopDetectionEnabled(loopDetectionEnabled);
-        player.setLoggingEnabled(false);
+        sampler.setClockHz(clockHz);
+        sampler.setSamplingRate(samplingRate);
+        sampler.setMinPeriod(minPeriod);
+        sampler.setMaxPeriod(maxPeriod);
+        sampler.setVolumeMultiplier(volumeMultiplier);
+        sampler.setStereoEnabled(stereoEnabled);
+        sampler.setStereoFoldDownEnabled(stereoFoldDownEnabled);
+        sampler.setVolumeSlideDeltaEnabled(volumeSlideDeltaEnabled);
+        sampler.setLoopDetectionEnabled(loopDetectionEnabled);
+        sampler.setLoggingEnabled(false);
 
         String fileName = Resources.getFileName(resourceName);
         fileName = fileName.substring(0, fileName.length() - 4);
@@ -74,10 +74,10 @@ public class BatchGenerator {
                 ".wav";
 
         Mod mod = modLoader.load(resourceName);
-        player.setMod(mod);
+        sampler.setMod(mod);
 
-        byte[] audio = player.read();
-        Resources.saveAudio(new File(newFileName), player.getCompatibleAudioFormat(), audio);
+        byte[] audio = sampler.read();
+        Resources.saveAudio(new File(newFileName), sampler.getCompatibleAudioFormat(), audio);
     }
 
     public static void main(String[] args) {

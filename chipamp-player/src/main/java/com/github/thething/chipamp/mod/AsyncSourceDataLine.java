@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadFactory;
 
 import static java.util.Objects.requireNonNull;
 
-public class AsyncSourceDataLine implements Closeable {
+public final class AsyncSourceDataLine implements Closeable {
 
     private final SpScByteCircularBuffer buffer;
     private final Thread thread;
@@ -81,7 +81,7 @@ public class AsyncSourceDataLine implements Closeable {
                 // System.out.println("size: " + size);
 
                 // int min = Math.min(size / 2, readBuffer.length);
-                int readLength = buffer.readNoAdvance(readBuffer, 0, 4);
+                int readLength = buffer.peek(readBuffer, 0, 4);
 
                 if (readLength > 0) {
                     maxBufferUnderFlow = 0;
@@ -97,8 +97,7 @@ public class AsyncSourceDataLine implements Closeable {
 
                     System.out.println("maxBufferUnderFlow: " + maxBufferUnderFlow);
 
-
-                      // System.out.println("buffer underflow: " + readLength);
+                    // System.out.println("buffer underflow: " + readLength);
 //                    try {
 //                        Thread.sleep(1L);
 //                    } catch (InterruptedException e) {
