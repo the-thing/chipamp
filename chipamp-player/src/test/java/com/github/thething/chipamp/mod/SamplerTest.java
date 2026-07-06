@@ -1,11 +1,14 @@
 package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.io.Resources;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,7 +90,61 @@ public class SamplerTest {
     }
 
     @Test
-    void shouldGenerateSameAudioForSkipAndSeek() throws IOException, UnsupportedAudioFileException {
+    void shouldZeroStateAfterSequenceEnd() throws IOException {
+        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
+        underTest.setSamplingRate(48_000);
+        underTest.setMinPeriod(Mods.MIN_PERIOD);
+        underTest.setMaxPeriod(Mods.MAX_PERIOD);
+        underTest.setVolumeMultiplier(0.5f);
+        underTest.setStereoEnabled(true);
+        underTest.setStereoFoldDownEnabled(true);
+        underTest.setVolumeSlideDeltaEnabled(false);
+        underTest.setLoopDetectionEnabled(true);
+        underTest.setLoggingEnabled(false);
+
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.loadMod(mod);
+
+        byte[] sample = new byte[underTest.getBytesPerSample()];
+        int sampleCount = 0;
+
+        int sequenceIndex;
+        int rowIndex;
+        int tickIndex;
+        int sampleIndex;
+
+        while (true) {
+            sequenceIndex = underTest.getSequenceIndex();
+            rowIndex = underTest.getRowIndex();
+            tickIndex = underTest.getTickIndex();
+            sampleIndex = underTest.getSampleIndex();
+
+            if (sequenceIndex != 0) {
+                break;
+            }
+
+            int readCount = underTest.read(sample);
+            assertThat(readCount).isEqualTo(sample.length);
+
+            sampleCount++;
+        }
+
+        assertThat(sampleCount).isEqualTo(396_023);
+        assertThat(sequenceIndex).isEqualTo(1);
+        assertThat(rowIndex).isEqualTo(0);
+        assertThat(tickIndex).isEqualTo(0);
+        assertThat(sampleIndex).isEqualTo(1);
+    }
+
+    @Test
+    void shouldSeekSequence() throws IOException {
+        // TODO
+    }
+
+    // TODO more sequence tests
+
+    @Test
+    void shouldMatchStateWhenSkippingAndReading() throws IOException {
         underTest.setClockHz(Mods.PAL_CLOCK_HZ);
         underTest.setSamplingRate(48_000);
         underTest.setMinPeriod(Mods.MIN_PERIOD);
@@ -102,12 +159,112 @@ public class SamplerTest {
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
         underTest.loadMod(mod);
 
-//        for (int i = 0; i < ) {
-//
-//        }
+        underTest.reset();
+        underTest.skipPatterns(1);
 
-        byte[] audio1 = underTest.readPatterns(1);
-        // TODO
+        int sequenceIndex = underTest.getSequenceIndex();
+        int rowIndex = underTest.getRowIndex();
+        int tickIndex = underTest.getTickIndex();
+        int sampleIndex = underTest.getSampleIndex();
+
+        underTest.reset();
+        underTest.readPatterns(1);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(sequenceIndex);
+        assertThat(underTest.getRowIndex()).isEqualTo(rowIndex);
+        assertThat(underTest.getTickIndex()).isEqualTo(tickIndex);
+        assertThat(underTest.getSampleIndex()).isEqualTo(sampleIndex);
+    }
+
+    @Test
+    void shouldMatchStateWhenSkippingAndSeeking() throws IOException {
+        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
+        underTest.setSamplingRate(48_000);
+        underTest.setMinPeriod(Mods.MIN_PERIOD);
+        underTest.setMaxPeriod(Mods.MAX_PERIOD);
+        underTest.setVolumeMultiplier(0.5f);
+        underTest.setStereoEnabled(true);
+        underTest.setStereoFoldDownEnabled(true);
+        underTest.setVolumeSlideDeltaEnabled(false);
+        underTest.setLoopDetectionEnabled(true);
+        underTest.setLoggingEnabled(false);
+
+        Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
+        underTest.loadMod(mod);
+
+        underTest.reset();
+        underTest.skipPatterns(1);
+
+        int sequenceIndex = underTest.getSequenceIndex();
+        int rowIndex = underTest.getRowIndex();
+        int tickIndex = underTest.getTickIndex();
+        int sampleIndex = underTest.getSampleIndex();
+
+        underTest.reset();
+        underTest.seek(1);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(sequenceIndex);
+        assertThat(underTest.getRowIndex()).isEqualTo(rowIndex);
+        assertThat(underTest.getTickIndex()).isEqualTo(tickIndex);
+        assertThat(underTest.getSampleIndex()).isEqualTo(sampleIndex);
+    }
+
+    @Test
+    void shouldReadSameAudionWhenReadingAndSkippingPatterns() throws IOException {
+        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
+        underTest.setSamplingRate(48_000);
+        underTest.setMinPeriod(Mods.MIN_PERIOD);
+        underTest.setMaxPeriod(Mods.MAX_PERIOD);
+        underTest.setVolumeMultiplier(0.5f);
+        underTest.setStereoEnabled(true);
+        underTest.setStereoFoldDownEnabled(true);
+        underTest.setVolumeSlideDeltaEnabled(false);
+        underTest.setLoopDetectionEnabled(true);
+        underTest.setLoggingEnabled(false);
+
+        Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
+        underTest.loadMod(mod);
+
+        for (int sequenceIndex = 0; sequenceIndex < mod.getLength(); sequenceIndex++) {
+            underTest.reset();
+            underTest.skipPatterns(sequenceIndex);
+            byte[] audio1 = underTest.readPatterns(1);
+
+            underTest.reset();
+            underTest.readPatterns(sequenceIndex);
+            byte[] audio2 = underTest.readPatterns(1);
+
+            assertThat(audio1).containsExactly(audio2);
+        }
+    }
+
+    @Test
+    void shouldGenerateSameAudioForSkipAndSeek() throws IOException {
+        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
+        underTest.setSamplingRate(48_000);
+        underTest.setMinPeriod(Mods.MIN_PERIOD);
+        underTest.setMaxPeriod(Mods.MAX_PERIOD);
+        underTest.setVolumeMultiplier(0.5f);
+        underTest.setStereoEnabled(true);
+        underTest.setStereoFoldDownEnabled(true);
+        underTest.setVolumeSlideDeltaEnabled(false);
+        underTest.setLoopDetectionEnabled(true);
+        underTest.setLoggingEnabled(false);
+
+        Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
+        underTest.loadMod(mod);
+
+        for (int sequenceIndex = 1; sequenceIndex < 2; sequenceIndex++) {
+            underTest.reset();
+            underTest.skipPatterns(sequenceIndex);
+            byte[] audio1 = underTest.readPatterns(1);
+
+            underTest.reset();
+            underTest.seek(sequenceIndex);
+            byte[] audio2 = underTest.readPatterns(1);
+
+            assertThat(audio1).containsExactly(audio2);
+        }
     }
 
     @Test

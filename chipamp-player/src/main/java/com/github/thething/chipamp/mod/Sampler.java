@@ -62,7 +62,10 @@ public final class Sampler {
         }
 
         this.contextBySequenceRow = new Context[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
-        Arrays.fill(contextBySequenceRow, new Context(config.samplingRate));
+
+        for (int i = 0; i < contextBySequenceRow.length; i++) {
+            contextBySequenceRow[i] = new Context(config.samplingRate);
+        }
     }
 
     public void reset() {
@@ -77,6 +80,7 @@ public final class Sampler {
 
         sequenceIndex = 0;
         rowIndex = 0;
+        tickIndex = 0;
         sampleIndex = context.samplesPerTick;
     }
 
@@ -89,8 +93,6 @@ public final class Sampler {
         checkIndex(sequenceIndex, mod.getLength());
         checkIndex(rowIndex, Mod.ROW_COUNT);
 
-        reset();
-
         int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
         this.context.copyFrom(contextBySequenceRow[index]);
 
@@ -98,10 +100,14 @@ public final class Sampler {
             this.channels[channelIndex].copyFrom(channelsBySequenceRow[index][channelIndex]);
         }
 
-        this.sequenceIndex = sequenceIndex;
-        this.rowIndex = rowIndex;
-        this.tickIndex = 0;
-        this.sampleIndex = 0;
+        if (sequenceIndex == 0 && rowIndex == 0) {
+            reset();
+        } else {
+            this.sequenceIndex = sequenceIndex;
+            this.rowIndex = rowIndex;
+            this.tickIndex = 0;
+            this.sampleIndex = 1;
+        }
     }
 
     public int seekPattern(int patternIndex) {
@@ -246,7 +252,7 @@ public final class Sampler {
     public int skipPatterns(int patternCount) {
         requireNonNull(mod);
 
-        if (patternCount < 0) {
+        if (patternCount <= 0) {
             return 0;
         }
 
@@ -332,17 +338,6 @@ public final class Sampler {
         int lastSequenceIndex = sequenceIndex;
         int readPatternCount = 0;
 
-        // TODO remove
-        System.out.println("state: " + sequenceIndex + " / " + rowIndex + " / " + tickIndex + " / " + sampleIndex);
-
-        // TODO remove
-        System.out.println(context);
-
-        // TODO remove
-        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-            System.out.println(channels[channelIndex]);
-        }
-
         while (sequenceIndex < mod.getLength() && readPatternCount < patternCount) {
             tick(buffer, offset);
             offset += bytesPerTick;
@@ -359,6 +354,26 @@ public final class Sampler {
 
         return Arrays.copyOf(buffer, offset);
     }
+
+    /**
+     * public int skipPatterns(int patternCount) { requireNonNull(mod);
+     * <p>
+     * if (patternCount <= 0) { return 0; }
+     * <p>
+     * int skippedPatternCount = 0; int lastSequenceIndex = sequenceIndex;
+     * <p>
+     * boolean logInfoEnabled = config.loggingEnabled; config.loggingEnabled = false;
+     * <p>
+     * try { while (sequenceIndex < mod.getLength() && skippedPatternCount < patternCount) { tick(TMP_BUFFER, 0);
+     * <p>
+     * if (lastSequenceIndex != sequenceIndex) { skippedPatternCount++; lastSequenceIndex = sequenceIndex; } } } finally
+     * { config.loggingEnabled = logInfoEnabled; }
+     * <p>
+     * return skippedPatternCount; }
+     *
+     * @param rowCount
+     * @return
+     */
 
     public byte[] readRows(int rowCount) {
         requireNonNull(mod);
@@ -634,46 +649,8 @@ public final class Sampler {
         this.mod = mod;
 
         reset();
-        buildMeta();
+        recalculateMeta();
         reset();
-    }
-
-    /**
-     * Builds context and channel data for each sequence and row for fast traversal. Also calculates total amount of
-     * samples. It always detects infinite loops.
-     */
-    private void buildMeta() {
-        boolean loopDetectionEnabled = config.loopDetectionEnabled;
-        boolean loggingEnabled = config.loggingEnabled;
-
-        config.loopDetectionEnabled = true;
-        config.loggingEnabled = false;
-
-        try {
-            int sampleCount = 0;
-            boolean[] visited = new boolean[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
-
-            while (sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick) {
-                int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
-
-                if (!visited[index]) {
-                    visited[index] = true;
-                    contextBySequenceRow[index].copyFrom(context);
-
-                    for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                        channelsBySequenceRow[index][channelIndex].copyFrom(channels[channelIndex]);
-                    }
-                }
-
-                tick(TMP_BUFFER, 0);
-                sampleCount++;
-            }
-
-            this.sampleCount = sampleCount;
-        } finally {
-            config.loopDetectionEnabled = loopDetectionEnabled;
-            config.loggingEnabled = loggingEnabled;
-        }
     }
 
     public void setPanning(int channelIndex, float right) {
@@ -724,7 +701,10 @@ public final class Sampler {
         }
 
         this.config.clockHz = clockHz;
-        recalculatePeriods();
+
+        if (mod != null) {
+            recalculatePeriods();
+        }
     }
 
     public void setSamplingRate(int samplingRate) {
@@ -734,21 +714,74 @@ public final class Sampler {
 
         config.samplingRate = samplingRate;
 
+        // TODO do we want to rebuild metadata when changing sampling rate
+
         if (mod != null) {
             recalculatePeriods();
             recalculateHardwareFilter();
+            recalculateMeta();
         }
     }
 
     private void recalculatePeriods() {
-        for (int i = 0; i < mod.getChannelCount(); i++) {
-            channels[i].updatePeriodAndIncrement(channels[i].period, config.clockHz, config.samplingRate);
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            channels[channelIndex].updatePeriodAndIncrement(channels[channelIndex].period, config.clockHz, config.samplingRate);
         }
     }
 
     private void recalculateHardwareFilter() {
         if (context.hardwareFilterEnabled) {
             context.updateHardwareFilterDelta(config.samplingRate);
+        }
+    }
+
+    /**
+     * Builds context and channel data for each sequence and row for fast traversal. Also calculates total amount of
+     * samples. It always detects infinite loops.
+     */
+    private void recalculateMeta() {
+        boolean loopDetectionEnabled = config.loopDetectionEnabled;
+        boolean loggingEnabled = config.loggingEnabled;
+
+        config.loopDetectionEnabled = true;
+        config.loggingEnabled = false;
+
+        try {
+            int sampleCount = 0;
+
+            boolean[] visited = new boolean[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
+            visited[0] = true;
+
+            contextBySequenceRow[0].copyFrom(context);
+
+            for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+                channelsBySequenceRow[0][channelIndex].copyFrom(channels[channelIndex]);
+            }
+
+            while (sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick) {
+                tick(TMP_BUFFER, 0);
+                sampleCount++;
+
+                int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
+
+                if (index < visited.length && !visited[index]) {
+                    if (tickIndex != 0 || sampleIndex != 1) {
+                        throw new RuntimeException("invalid state, tickIndex = " + tickIndex + ", sampleIndex = " + sampleIndex);
+                    }
+
+                    visited[index] = true;
+                    contextBySequenceRow[index].copyFrom(context);
+
+                    for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+                        channelsBySequenceRow[index][channelIndex].copyFrom(channels[channelIndex]);
+                    }
+                }
+            }
+
+            this.sampleCount = sampleCount;
+        } finally {
+            config.loopDetectionEnabled = loopDetectionEnabled;
+            config.loggingEnabled = loggingEnabled;
         }
     }
 
@@ -807,6 +840,14 @@ public final class Sampler {
 
     public int getRowIndex() {
         return rowIndex;
+    }
+
+    public int getTickIndex() {
+        return tickIndex;
+    }
+
+    public int getSampleIndex() {
+        return sampleIndex;
     }
 
     public int getSpeed() {

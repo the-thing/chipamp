@@ -93,4 +93,24 @@ final class Context {
     private static int samplesPerTick(int tempo, int samplingRate) {
         return (int) Math.round((double) samplingRate * 2_500_000.0 / (tempo * 1_000_000.0));
     }
+
+    @Override
+    public String toString() {
+        return "Context{" +
+                "speed=" + speed +
+                ", tempo=" + tempo +
+                ", samplesPerTick=" + samplesPerTick +
+                ", jumpPending=" + jumpPending +
+                ", jumpSequenceIndex=" + jumpSequenceIndex +
+                ", breakPending=" + breakPending +
+                ", breakRowIndex=" + breakRowIndex +
+                ", loopPending=" + loopPending +
+                ", loopRowIndex=" + loopRowIndex +
+                ", loopCounter=" + loopCounter +
+                ", hardwareFilterEnabled=" + hardwareFilterEnabled +
+                ", hardwareFilterDelta=" + hardwareFilterDelta +
+                ", hardwareFilterLeft=" + hardwareFilterLeft +
+                ", hardwareFilterRight=" + hardwareFilterRight +
+                '}';
+    }
 }
