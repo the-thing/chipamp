@@ -12,8 +12,14 @@ public enum ExtendedEffectType implements Effect {
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
             // filter is enabled only when argument is even (this is not clear)
             context.hardwareFilterEnabled = (channel.effectArgumentY & 1) == 0 ? true : false;
-            context.updateHardwareFilterDelta(config.samplingRate);
 
+            if (context.hardwareFilterEnabled) {
+                context.updateHardwareFilterDelta(config.samplingRate);
+            } else {
+                context.hardwareFilterDelta = 0.0f;
+                context.hardwareFilterLeft = 0.0f;
+                context.hardwareFilterRight = 0.0f;
+            }
         }
 
         @Override

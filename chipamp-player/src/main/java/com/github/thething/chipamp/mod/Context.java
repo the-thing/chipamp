@@ -75,7 +75,7 @@ final class Context {
     }
 
     void updateHardwareFilterDelta(int samplingRate) {
-        float cutoffHz = 4900.0f; // approximate — pick a value matching your reference player
+        float cutoffHz = 4900.0f;
         float rc = 1.0f / (2.0f * (float) Math.PI * cutoffHz);
         float dt = 1.0f / samplingRate;
         hardwareFilterDelta = dt / (rc + dt);
