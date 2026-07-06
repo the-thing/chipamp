@@ -74,8 +74,8 @@ public final class Sampler {
         visited.clear();
         visited.add(INITIAL_STATE);
 
-        for (int i = 0; i < channels.length; i++) {
-            channels[i].reset();
+        for (Channel channel : channels) {
+            channel.reset();
         }
 
         sequenceIndex = 0;
@@ -355,26 +355,6 @@ public final class Sampler {
         return Arrays.copyOf(buffer, offset);
     }
 
-    /**
-     * public int skipPatterns(int patternCount) { requireNonNull(mod);
-     * <p>
-     * if (patternCount <= 0) { return 0; }
-     * <p>
-     * int skippedPatternCount = 0; int lastSequenceIndex = sequenceIndex;
-     * <p>
-     * boolean logInfoEnabled = config.loggingEnabled; config.loggingEnabled = false;
-     * <p>
-     * try { while (sequenceIndex < mod.getLength() && skippedPatternCount < patternCount) { tick(TMP_BUFFER, 0);
-     * <p>
-     * if (lastSequenceIndex != sequenceIndex) { skippedPatternCount++; lastSequenceIndex = sequenceIndex; } } } finally
-     * { config.loggingEnabled = logInfoEnabled; }
-     * <p>
-     * return skippedPatternCount; }
-     *
-     * @param rowCount
-     * @return
-     */
-
     public byte[] readRows(int rowCount) {
         requireNonNull(mod);
 
@@ -652,8 +632,8 @@ public final class Sampler {
     }
 
     public void setOpenMPTPanning() {
-        for (int i = 0; i < channels.length; i++) {
-            channels[i].setPanning(channels[i].right ? Mods.MPT_PAN_RIGHT : Mods.MPT_PAN_LEFT);
+        for (Channel channel : channels) {
+            channel.setPanning(channel.right ? Mods.MPT_PAN_RIGHT : Mods.MPT_PAN_LEFT);
         }
     }
 
@@ -836,10 +816,6 @@ public final class Sampler {
 
     public int getSampleIndex() {
         return sampleIndex;
-    }
-
-    public int getSpeed() {
-        return context.speed;
     }
 
     public int getBytesPerSample() {

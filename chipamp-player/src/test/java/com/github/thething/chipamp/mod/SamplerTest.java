@@ -18,6 +18,17 @@ public class SamplerTest {
     @BeforeEach
     void setUp() {
         underTest = new Sampler();
+        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
+        underTest.setSamplingRate(48_000);
+        underTest.setMinPeriod(Mods.MIN_PERIOD);
+        underTest.setMaxPeriod(Mods.MAX_PERIOD);
+        underTest.setVolumeMultiplier(0.5f);
+        underTest.setStereoEnabled(true);
+        underTest.setStereoFoldDownEnabled(true);
+        underTest.setVolumeSlideDeltaEnabled(false);
+        underTest.setLoopDetectionEnabled(true);
+        underTest.setLoggingEnabled(false);
+
         modLoader = new ModLoader(true);
     }
 
@@ -41,17 +52,6 @@ public class SamplerTest {
 
     @Test
     void shouldGenerateAudioFile() throws IOException, UnsupportedAudioFileException {
-        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
-        underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(Mods.MIN_PERIOD);
-        underTest.setMaxPeriod(Mods.MAX_PERIOD);
-        underTest.setVolumeMultiplier(0.5f);
-        underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
-        underTest.setVolumeSlideDeltaEnabled(false);
-        underTest.setLoopDetectionEnabled(true);
-        underTest.setLoggingEnabled(false);
-
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.loadMod(mod);
 
@@ -63,17 +63,6 @@ public class SamplerTest {
 
     @Test
     void shouldGenerateSinglePattern() throws IOException, UnsupportedAudioFileException {
-        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
-        underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(Mods.MIN_PERIOD);
-        underTest.setMaxPeriod(Mods.MAX_PERIOD);
-        underTest.setVolumeMultiplier(0.5f);
-        underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
-        underTest.setVolumeSlideDeltaEnabled(false);
-        underTest.setLoopDetectionEnabled(true);
-        underTest.setLoggingEnabled(false);
-
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.loadMod(mod);
 
@@ -88,17 +77,6 @@ public class SamplerTest {
 
     @Test
     void shouldZeroStateAfterSequenceEnd() throws IOException {
-        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
-        underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(Mods.MIN_PERIOD);
-        underTest.setMaxPeriod(Mods.MAX_PERIOD);
-        underTest.setVolumeMultiplier(0.5f);
-        underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
-        underTest.setVolumeSlideDeltaEnabled(false);
-        underTest.setLoopDetectionEnabled(true);
-        underTest.setLoggingEnabled(false);
-
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.loadMod(mod);
 
@@ -135,17 +113,6 @@ public class SamplerTest {
 
     @Test
     void shouldSeekSequence() throws IOException {
-        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
-        underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(Mods.MIN_PERIOD);
-        underTest.setMaxPeriod(Mods.MAX_PERIOD);
-        underTest.setVolumeMultiplier(0.5f);
-        underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
-        underTest.setVolumeSlideDeltaEnabled(false);
-        underTest.setLoopDetectionEnabled(true);
-        underTest.setLoggingEnabled(false);
-
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.loadMod(mod);
 
@@ -173,17 +140,6 @@ public class SamplerTest {
 
     @Test
     void shouldSeekPattern() throws IOException {
-        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
-        underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(Mods.MIN_PERIOD);
-        underTest.setMaxPeriod(Mods.MAX_PERIOD);
-        underTest.setVolumeMultiplier(0.5f);
-        underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
-        underTest.setVolumeSlideDeltaEnabled(false);
-        underTest.setLoopDetectionEnabled(true);
-        underTest.setLoggingEnabled(false);
-
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.loadMod(mod);
 
@@ -206,17 +162,6 @@ public class SamplerTest {
 
     @Test
     void shouldMatchStateWhenSkippingAndReading() throws IOException {
-        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
-        underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(Mods.MIN_PERIOD);
-        underTest.setMaxPeriod(Mods.MAX_PERIOD);
-        underTest.setVolumeMultiplier(0.5f);
-        underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
-        underTest.setVolumeSlideDeltaEnabled(false);
-        underTest.setLoopDetectionEnabled(true);
-        underTest.setLoggingEnabled(false);
-
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
         underTest.loadMod(mod);
 
@@ -239,17 +184,6 @@ public class SamplerTest {
 
     @Test
     void shouldMatchStateWhenSkippingAndSeeking() throws IOException {
-        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
-        underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(Mods.MIN_PERIOD);
-        underTest.setMaxPeriod(Mods.MAX_PERIOD);
-        underTest.setVolumeMultiplier(0.5f);
-        underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
-        underTest.setVolumeSlideDeltaEnabled(false);
-        underTest.setLoopDetectionEnabled(true);
-        underTest.setLoggingEnabled(false);
-
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
         underTest.loadMod(mod);
 
@@ -272,17 +206,6 @@ public class SamplerTest {
 
     @Test
     void shouldReadSameAudionWhenReadingAndSkippingPatterns() throws IOException {
-        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
-        underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(Mods.MIN_PERIOD);
-        underTest.setMaxPeriod(Mods.MAX_PERIOD);
-        underTest.setVolumeMultiplier(0.5f);
-        underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
-        underTest.setVolumeSlideDeltaEnabled(false);
-        underTest.setLoopDetectionEnabled(true);
-        underTest.setLoggingEnabled(false);
-
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
         underTest.loadMod(mod);
 
@@ -301,17 +224,6 @@ public class SamplerTest {
 
     @Test
     void shouldGenerateSameAudioForSkipAndSeek() throws IOException {
-        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
-        underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(Mods.MIN_PERIOD);
-        underTest.setMaxPeriod(Mods.MAX_PERIOD);
-        underTest.setVolumeMultiplier(0.5f);
-        underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
-        underTest.setVolumeSlideDeltaEnabled(false);
-        underTest.setLoopDetectionEnabled(true);
-        underTest.setLoggingEnabled(false);
-
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
         underTest.loadMod(mod);
 
@@ -330,22 +242,51 @@ public class SamplerTest {
 
     @Test
     void shouldReturnSongLengthInMillis() throws IOException {
-        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
-        underTest.setSamplingRate(48_000);
-        underTest.setMinPeriod(Mods.MIN_PERIOD);
-        underTest.setMaxPeriod(Mods.MAX_PERIOD);
-        underTest.setVolumeMultiplier(0.5f);
-        underTest.setStereoEnabled(true);
-        underTest.setStereoFoldDownEnabled(true);
-        underTest.setVolumeSlideDeltaEnabled(false);
-        underTest.setLoopDetectionEnabled(true);
-        underTest.setLoggingEnabled(false);
-
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.loadMod(mod);
 
         assertThat(underTest.getSampleCount()).isEqualTo(8_834_496);
         assertThat(underTest.getModLength(TimeUnit.SECONDS)).isEqualTo(184L);
         assertThat(underTest.getModLength(TimeUnit.MILLISECONDS)).isEqualTo(184_052L);
+    }
+
+    @Test
+    void shouldReturnBytesPerSample() throws IOException {
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.loadMod(mod);
+
+        assertThat(underTest.getBytesPerSample()).isEqualTo(4);
+
+        underTest.setStereoEnabled(false);
+
+        assertThat(underTest.getBytesPerSample()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldReturnBytesPerTick() throws IOException {
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.loadMod(mod);
+
+        assertThat(underTest.getBytesPerTick()).isEqualTo(3840);
+
+        underTest.setStereoEnabled(false);
+
+        assertThat(underTest.getBytesPerTick()).isEqualTo(1920);
+    }
+
+    @Test
+    void shouldReturnSamplesPerTick() throws IOException {
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.loadMod(mod);
+
+        assertThat(underTest.getSamplesPerTick()).isEqualTo(960);
+    }
+
+    @Test
+    void shouldReturnSamplesPerRow() throws IOException {
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.loadMod(mod);
+
+        assertThat(underTest.getSamplesPerRow()).isEqualTo(5760);
     }
 }
