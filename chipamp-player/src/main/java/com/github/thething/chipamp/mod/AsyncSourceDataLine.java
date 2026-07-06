@@ -72,7 +72,6 @@ public final class AsyncSourceDataLine implements Closeable {
 
         @Override
         public void run() {
-
             int maxBufferUnderFlow = 0;
 
             while (!Thread.currentThread().isInterrupted()) {
