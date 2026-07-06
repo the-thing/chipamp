@@ -4,6 +4,9 @@ import static com.github.thething.chipamp.common.Requirements.requireInRange;
 
 final class Channel {
 
+    /**
+     * Hardware panning left or right.
+     */
     final boolean right;
 
     Sample sample;
@@ -74,6 +77,7 @@ final class Channel {
         extendedEffectType = ExtendedEffectType.NONE;
         effectArgumentX = 0;
         effectArgumentY = 0;
+
         arpeggioTickIndex = 0;
         arpeggioPeriod = 0;
         portamentoTargetPeriod = 0;

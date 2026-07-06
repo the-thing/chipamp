@@ -425,4 +425,14 @@ public final class Mods {
 
         return false;
     }
+
+    public static int findSequenceIndex(Mod mod, int patternIndex) {
+        for (int sequenceIndex = 0; sequenceIndex < mod.getLength(); sequenceIndex++) {
+            if (mod.getPatternIndex(sequenceIndex) == patternIndex) {
+                return sequenceIndex;
+            }
+        }
+
+        return -1;
+    }
 }

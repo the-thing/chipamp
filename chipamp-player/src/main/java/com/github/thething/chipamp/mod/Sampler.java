@@ -19,7 +19,6 @@ import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.checkIndex;
 import static java.util.Objects.requireNonNull;
 
-// TODO take / recover snapshot
 public final class Sampler {
 
     private static final State INITIAL_STATE = new State(0, 0, false, 0, 0);
@@ -81,26 +80,23 @@ public final class Sampler {
         sampleIndex = context.samplesPerTick;
     }
 
-    public void seekPosition(int sequenceIndex) {
+    public void seek(int sequenceIndex) {
+        seek(sequenceIndex, 0);
+    }
+
+    public void seek(int sequenceIndex, int rowIndex) {
         requireNonNull(mod);
         checkIndex(sequenceIndex, mod.getLength());
+        checkIndex(rowIndex, Mod.ROW_COUNT);
 
         reset();
 
-        // disable logging regardless of config setting, we don't want to log skipped patterns
-        boolean loggingEnabled = config.loggingEnabled;
-        config.loggingEnabled = false;
+        int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
 
-        try {
-            while (this.sequenceIndex < sequenceIndex) {
-                int readCount = read(TMP_BUFFER);
+        this.context.copyFrom(contextBySequenceRow[index]);
 
-                if (readCount <= 0) {
-                    throw new RuntimeException("Unexpected end of audio");
-                }
-            }
-        } finally {
-            config.loggingEnabled = loggingEnabled;
+        for (int channelIndex = 0; channelIndex < Mod.MAX_CHANNEL_COUNT; channelIndex++) {
+            this.channels[channelIndex].copyFrom(channelsBySequenceRow[index][channelIndex]);
         }
     }
 
@@ -108,47 +104,15 @@ public final class Sampler {
         requireNonNull(mod);
         requireInRange(patternIndex, 0, mod.getLength());
 
-        int sequenceIndex = findSequenceIndex(patternIndex);
+        int sequenceIndex = Mods.findSequenceIndex(mod, patternIndex);
 
         if (sequenceIndex < 0) {
             return -1;
         }
 
-        seekPosition(sequenceIndex);
+        seek(sequenceIndex);
 
         return sequenceIndex;
-    }
-
-    public void setPosition(int sequenceIndex) {
-        requireNonNull(mod);
-        checkIndex(sequenceIndex, mod.getLength());
-
-        this.sequenceIndex = sequenceIndex;
-    }
-
-    public int setPattern(int patternIndex) {
-        requireNonNull(mod);
-        requireInRange(patternIndex, 0, mod.getLength());
-
-        int sequenceIndex = findSequenceIndex(patternIndex);
-
-        if (sequenceIndex < 0) {
-            return -1;
-        }
-
-        this.sequenceIndex = sequenceIndex;
-
-        return sequenceIndex;
-    }
-
-    private int findSequenceIndex(int patternIndex) {
-        for (int sequenceIndex = 0; sequenceIndex < mod.getLength(); sequenceIndex++) {
-            if (mod.getPatternIndex(sequenceIndex) == patternIndex) {
-                return sequenceIndex;
-            }
-        }
-
-        return -1;
     }
 
     public void play() throws LineUnavailableException {
@@ -259,8 +223,11 @@ public final class Sampler {
                 throw new RuntimeException("Unexpected end of audio");
             }
 
-            // TODO handle return value
-            line.write(buffer, 0, readCount);
+            int writeCount = line.write(buffer, 0, readCount);
+
+            if (writeCount != readCount) {
+                throw new RuntimeException("Written less audio data than expected");
+            }
 
             if (rowIndex != lastRow || lastSequenceIndex != sequenceIndex) {
                 playedRowCount++;
@@ -641,8 +608,8 @@ public final class Sampler {
     }
 
     /**
-     * Builds context and channel data for each sequence and row for fast traversal. Also calculates time of song in
-     * seconds
+     * Builds context and channel data for each sequence and row for fast traversal. Also calculates total amount of
+     * samples. It always detects infinite loops.
      */
     private void buildMeta() {
         boolean loopDetectionEnabled = config.loopDetectionEnabled;
@@ -652,11 +619,13 @@ public final class Sampler {
             int sampleCount = 0;
             boolean[] visited = new boolean[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
 
-            while ((sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick)) {
+            while (sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick) {
                 tick(TMP_BUFFER, 0);
+
+
                 sampleCount++;
 
-                int index = sequenceIndex * rowIndex;
+                int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
 
                 if (visited[index]) {
                     continue;

@@ -1,12 +1,10 @@
 package com.github.thething.chipamp.common;
 
+import com.github.thething.chipamp.mod.EffectType;
+import com.github.thething.chipamp.mod.Instrument;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.Mods;
-import com.github.thething.chipamp.mod.Instrument;
-import com.github.thething.chipamp.mod.EffectType;
-import com.github.thething.chipamp.mod.Sample;
 
-// TODO add new column (sound) for volume and compare with MPT (not sure yet)
 public final class Formatters {
 
     private static final char[] HEX_NIBBLES = new char[]{

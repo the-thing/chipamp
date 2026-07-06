@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -78,11 +79,13 @@ public class SamplerTest {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.setMod(mod);
 
-        int sequenceIndex = underTest.setPattern(1);
+        int sequenceIndex = underTest.seekPattern(1);
         assertThat(sequenceIndex).isEqualTo(4);
 
-        byte[] expectedAudio = Resources.readAudio("wav/axel-stereo-48kHz-pal-pattern-1.wav");
         byte[] audio = underTest.readPatterns(1);
+        // TODO remove
+        // Resources.saveAudio(new File("axel-stereo-48kHz-pal-pattern-1.wav"), underTest.getCompatibleAudioFormat(), audio);
+        byte[] expectedAudio = Resources.readAudio("wav/axel-stereo-48kHz-pal-pattern-1.wav");
 
         assertThat(audio).containsExactly(expectedAudio);
     }
