@@ -4,6 +4,7 @@ import com.github.thething.chipamp.mod.AsyncSourceDataLine;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
 import com.github.thething.chipamp.mod.Mods;
+import com.github.thething.chipamp.mod.Player;
 import com.github.thething.chipamp.mod.Sampler;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -118,19 +119,16 @@ public class Play {
     }
 
     @Test
-    @Disabled
-    public void dupa() throws IOException {
-        for (File file : new File("C:\\Users\\Marcin\\Downloads\\mod").listFiles()) {
-            if (!file.getName().endsWith(".mod")) {
-                continue;
-            }
+    public void playWithPlayer() throws IOException, LineUnavailableException {
+        ModLoader modLoader = new ModLoader(false);
+        Mod mod = modLoader.load("chip/Tip - Stardust Memories.mod");
 
-            ModLoader modLoader = new ModLoader(true);
+        Sampler sampler = new Sampler();
+        sampler.setLoggingEnabled(true);
+        sampler.loadMod(mod);
 
-            System.out.println("Loading module: " + file.getName());
-            Mod mod = modLoader.load(file);
-            assertThat(mod).isNotNull();
-        }
+        Player player = new Player(sampler);
+        player.play();
     }
 
     public static void main(String[] args) {

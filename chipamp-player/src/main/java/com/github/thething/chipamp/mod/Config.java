@@ -8,7 +8,7 @@ final class Config {
     private static final boolean DEFAULT_LOOP_DETECTION_ENABLED = true;
     private static final int DEFAULT_SAMPLING_RATE = 48_000;
     private static final boolean DEFAULT_STEREO_ENABLED = true;
-    private static final boolean DEFAULT_STEREO_FOLD_DOWN_ENABLED = true;
+    private static final boolean DEFAULT_STEREO_FOLD_DOWN_ENABLED = false;
     private static final boolean DEFAULT_VOLUME_SLIDE_DELTA_ENABLED = false;
     private static final boolean DEFAULT_EFFECT_ENABLED = true;
     private static final int DEFAULT_MIN_PERIOD = Mods.MIN_PERIOD;

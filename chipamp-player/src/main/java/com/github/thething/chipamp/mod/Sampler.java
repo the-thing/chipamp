@@ -66,6 +66,8 @@ public final class Sampler {
         for (int i = 0; i < contextBySequenceRow.length; i++) {
             contextBySequenceRow[i] = new Context(config.samplingRate);
         }
+
+        setOpenMPTPanning();
     }
 
     public void reset() {
@@ -629,6 +631,12 @@ public final class Sampler {
 
     public void setPanning(int channelIndex, float right) {
         channels[channelIndex].setPanning(requireInRange(right, 0.0f, 1.0f));
+    }
+
+    public void setDefaultPanning() {
+        for (Channel channel : channels) {
+            channel.setPanning(channel.right ? 1.0f : 0.0f);
+        }
     }
 
     public void setOpenMPTPanning() {
