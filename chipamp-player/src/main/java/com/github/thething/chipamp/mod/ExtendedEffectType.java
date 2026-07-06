@@ -6,11 +6,14 @@ import java.util.Arrays;
 
 public enum ExtendedEffectType implements Effect {
 
+    // TODO test this filter
     SET_FILTER(0x00) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            // filter is enabled only when argument is even
+            // filter is enabled only when argument is even (this is not clear)
             context.hardwareFilterEnabled = (channel.effectArgumentY & 1) == 0 ? true : false;
+            context.updateHardwareFilterDelta(config.samplingRate);
+
         }
 
         @Override

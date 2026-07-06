@@ -8,13 +8,20 @@ final class Context {
     int speed; // ticks per row
     int tempo; // beats per minute
     int samplesPerTick;
+
     boolean jumpPending;
     int jumpSequenceIndex;
+
     boolean breakPending;
     int breakRowIndex;
+
     boolean loopPending;
     int loopRowIndex;
     int loopCounter;
+
+    float hardwareFilterDelta;
+    float hardwareFilterLeft;
+    float hardwareFilterRight;
     boolean hardwareFilterEnabled;
 
     Context(int samplingRate) {
@@ -24,19 +31,33 @@ final class Context {
     void reset(int samplingRate) {
         speed = DEFAULT_SPEED;
         updateTempoAndSamplesPerTick(DEFAULT_TEMPO, samplingRate);
+
         jumpPending = false;
         jumpSequenceIndex = 0;
+
         breakPending = false;
         breakRowIndex = 0;
+
         loopPending = false;
         loopRowIndex = 0;
         loopCounter = 0;
+
+        hardwareFilterDelta = 0.0f;
+        hardwareFilterLeft = 0.0f;
+        hardwareFilterRight = 0.0f;
         hardwareFilterEnabled = false;
     }
 
     void updateTempoAndSamplesPerTick(int tempo, int samplingRate) {
         this.tempo = tempo;
         this.samplesPerTick = samplesPerTick(tempo, samplingRate);
+    }
+
+    void updateHardwareFilterDelta(int samplingRate) {
+        float cutoffHz = 4900.0f; // approximate — pick a value matching your reference player
+        float rc = 1.0f / (2.0f * (float) Math.PI * cutoffHz);
+        float dt = 1.0f / samplingRate;
+        hardwareFilterDelta = dt / (rc + dt);
     }
 
     /**

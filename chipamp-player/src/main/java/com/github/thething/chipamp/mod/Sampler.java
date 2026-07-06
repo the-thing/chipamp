@@ -468,6 +468,13 @@ public final class Sampler {
         left *= config.volumeMultiplier;
         right *= config.volumeMultiplier;
 
+        if (context.hardwareFilterEnabled) {
+            context.hardwareFilterLeft += context.hardwareFilterDelta * (left - context.hardwareFilterLeft);
+            context.hardwareFilterRight += context.hardwareFilterDelta * (right - context.hardwareFilterRight);
+            left = context.hardwareFilterLeft;
+            right = context.hardwareFilterRight;
+        }
+
         if (config.stereoFoldDownEnabled) {
             left = (left + right) * 0.5f;
             right = left;
@@ -491,6 +498,13 @@ public final class Sampler {
         }
 
         sampleIndex++;
+    }
+
+    private static float computeFilterAlpha(int samplingRate) {
+        float cutoffHz = 4900.0f; // approximate — pick a value matching your reference player
+        float rc = 1.0f / (2.0f * (float) Math.PI * cutoffHz);
+        float dt = 1.0f / samplingRate;
+        return dt / (rc + dt);
     }
 
     private void advanceRow() {
@@ -719,14 +733,22 @@ public final class Sampler {
         }
 
         config.samplingRate = samplingRate;
-        recalculatePeriods();
+
+        if (mod != null) {
+            recalculatePeriods();
+            recalculateHardwareFilter();
+        }
     }
 
     private void recalculatePeriods() {
-        if (mod != null) {
-            for (int i = 0; i < mod.getChannelCount(); i++) {
-                channels[i].updatePeriodAndIncrement(channels[i].period, config.clockHz, config.samplingRate);
-            }
+        for (int i = 0; i < mod.getChannelCount(); i++) {
+            channels[i].updatePeriodAndIncrement(channels[i].period, config.clockHz, config.samplingRate);
+        }
+    }
+
+    private void recalculateHardwareFilter() {
+        if (context.hardwareFilterEnabled) {
+            context.updateHardwareFilterDelta(config.samplingRate);
         }
     }
 
