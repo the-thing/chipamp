@@ -91,7 +91,8 @@ public class BatchGenerator {
 
     private static Stream<Arguments> modSource() {
         return Stream.of(
-                new PlayerConfig("chip/DJ Metune - Axel F.mod", Mods.PAL_CLOCK_HZ, 48_000, Mods.MIN_PERIOD, Mods.MAX_PERIOD, 0.5f, true, true, false, true)
+                new PlayerConfig("chip/DJ Metune - Axel F.mod", Mods.PAL_CLOCK_HZ, 48_000, Mods.MIN_PERIOD, Mods.MAX_PERIOD, 0.5f, true, true, false, true),
+                new PlayerConfig("chip/Allister Brimble - Superfrog Intro.mod", Mods.PAL_CLOCK_HZ, 48_000, Mods.MIN_PERIOD, Mods.MAX_PERIOD, 0.5f, true, true, false, true)
         );
     }
 

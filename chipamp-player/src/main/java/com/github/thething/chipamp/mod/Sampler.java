@@ -84,11 +84,11 @@ public final class Sampler {
         sampleIndex = context.samplesPerTick;
     }
 
-    public void seek(int sequenceIndex) {
-        seek(sequenceIndex, 0);
+    public void seekSequence(int sequenceIndex) {
+        seekSequence(sequenceIndex, 0);
     }
 
-    public void seek(int sequenceIndex, int rowIndex) {
+    public void seekSequence(int sequenceIndex, int rowIndex) {
         requireNonNull(mod);
         checkIndex(sequenceIndex, mod.getLength());
         checkIndex(rowIndex, Mod.ROW_COUNT);
@@ -120,7 +120,7 @@ public final class Sampler {
             return -1;
         }
 
-        seek(sequenceIndex);
+        seekSequence(sequenceIndex);
 
         return sequenceIndex;
     }
@@ -515,13 +515,6 @@ public final class Sampler {
         sampleIndex++;
     }
 
-    private static float computeFilterAlpha(int samplingRate) {
-        float cutoffHz = 4900.0f; // approximate — pick a value matching your reference player
-        float rc = 1.0f / (2.0f * (float) Math.PI * cutoffHz);
-        float dt = 1.0f / samplingRate;
-        return dt / (rc + dt);
-    }
-
     private void advanceRow() {
         int nextSequenceIndex = sequenceIndex;
         int nextRowIndex;
@@ -566,10 +559,10 @@ public final class Sampler {
                 }
 
                 // break the infinite loop by advancing outside of pattern sequences
+                // in theory we could possibly continue util the end of the current pattern (especially if this is the
+                // last pattern in mod), but it seems that open MPT doesn't do it either
                 nextSequenceIndex = mod.getPatternSequenceCount() + 1;
                 nextRowIndex = 0;
-
-                // TODO do we want to continue till the end on the past pattern when the loop is ignored?
             }
         }
 
@@ -583,6 +576,7 @@ public final class Sampler {
         context.loopPending = false;
         context.loopRowIndex = 0;
         // we explicitly do not want to clear the loop counter
+        // we also do not want to clear hardware filter data
     }
 
     private void handleNewRow() {
@@ -714,8 +708,6 @@ public final class Sampler {
 
         config.samplingRate = samplingRate;
 
-        // TODO do we want to rebuild metadata when changing sampling rate
-
         if (mod != null) {
             recalculatePeriods();
             recalculateHardwareFilter();
@@ -765,10 +757,6 @@ public final class Sampler {
                 int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
 
                 if (index < visited.length && !visited[index]) {
-                    if (tickIndex != 0 || sampleIndex != 1) {
-                        throw new RuntimeException("invalid state, tickIndex = " + tickIndex + ", sampleIndex = " + sampleIndex);
-                    }
-
                     visited[index] = true;
                     contextBySequenceRow[index].copyFrom(context);
 

@@ -1,14 +1,11 @@
 package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.io.Resources;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -138,10 +135,74 @@ public class SamplerTest {
 
     @Test
     void shouldSeekSequence() throws IOException {
-        // TODO
+        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
+        underTest.setSamplingRate(48_000);
+        underTest.setMinPeriod(Mods.MIN_PERIOD);
+        underTest.setMaxPeriod(Mods.MAX_PERIOD);
+        underTest.setVolumeMultiplier(0.5f);
+        underTest.setStereoEnabled(true);
+        underTest.setStereoFoldDownEnabled(true);
+        underTest.setVolumeSlideDeltaEnabled(false);
+        underTest.setLoopDetectionEnabled(true);
+        underTest.setLoggingEnabled(false);
+
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.loadMod(mod);
+
+        underTest.seekSequence(11);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(11);
+        assertThat(underTest.getRowIndex()).isEqualTo(0);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(1);
+
+        underTest.seekSequence(11, 33);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(11);
+        assertThat(underTest.getRowIndex()).isEqualTo(33);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(1);
+
+        underTest.seekSequence(0);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(0);
+        assertThat(underTest.getRowIndex()).isEqualTo(0);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(960);
     }
 
-    // TODO more sequence tests
+    @Test
+    void shouldSeekPattern() throws IOException {
+        underTest.setClockHz(Mods.PAL_CLOCK_HZ);
+        underTest.setSamplingRate(48_000);
+        underTest.setMinPeriod(Mods.MIN_PERIOD);
+        underTest.setMaxPeriod(Mods.MAX_PERIOD);
+        underTest.setVolumeMultiplier(0.5f);
+        underTest.setStereoEnabled(true);
+        underTest.setStereoFoldDownEnabled(true);
+        underTest.setVolumeSlideDeltaEnabled(false);
+        underTest.setLoopDetectionEnabled(true);
+        underTest.setLoggingEnabled(false);
+
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.loadMod(mod);
+
+        int sequenceIndex = underTest.seekPattern(11);
+        assertThat(sequenceIndex).isEqualTo(11);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(11);
+        assertThat(underTest.getRowIndex()).isEqualTo(0);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(1);
+
+        sequenceIndex = underTest.seekPattern(2);
+        assertThat(sequenceIndex).isEqualTo(0);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(0);
+        assertThat(underTest.getRowIndex()).isEqualTo(0);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(960);
+    }
 
     @Test
     void shouldMatchStateWhenSkippingAndReading() throws IOException {
@@ -201,7 +262,7 @@ public class SamplerTest {
         int sampleIndex = underTest.getSampleIndex();
 
         underTest.reset();
-        underTest.seek(1);
+        underTest.seekSequence(1);
 
         assertThat(underTest.getSequenceIndex()).isEqualTo(sequenceIndex);
         assertThat(underTest.getRowIndex()).isEqualTo(rowIndex);
@@ -260,7 +321,7 @@ public class SamplerTest {
             byte[] audio1 = underTest.readPatterns(1);
 
             underTest.reset();
-            underTest.seek(sequenceIndex);
+            underTest.seekSequence(sequenceIndex);
             byte[] audio2 = underTest.readPatterns(1);
 
             assertThat(audio1).containsExactly(audio2);

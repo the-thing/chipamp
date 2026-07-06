@@ -67,7 +67,7 @@ public final class Sample {
         requireInRange(data.length, MIN_DATA_LENGTH, MAX_DATA_LENGTH);
         this.data = data;
     }
-    
+
     public boolean isLoopEnabled() {
         return loopLength > 0;
     }
@@ -110,19 +110,5 @@ public final class Sample {
 
     public int getLoopEnd() {
         return loopEnd;
-    }
-
-    // TODO remove later
-    @Override
-    public String toString() {
-        return "Sample{" +
-                "name='" + name + '\'' +
-                ", fineTune=" + fineTune +
-                ", volume=" + volume +
-                ", loopStart=" + loopStart +
-                ", loopLength=" + loopLength +
-                ", loopEnd=" + loopEnd +
-                ", dataLength=" + getDataLength() +
-                '}';
     }
 }
