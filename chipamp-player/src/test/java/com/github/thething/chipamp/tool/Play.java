@@ -113,9 +113,10 @@ public class Play {
         sampler.setLoopDetectionEnabled(true);
         sampler.setLoggingEnabled(true);
         sampler.setOpenMPTPanning();
-
         sampler.loadMod(mod);
-        sampler.play();
+
+        Player player = new Player(sampler);
+        player.play();
     }
 
     @Test
