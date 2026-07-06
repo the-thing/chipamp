@@ -49,4 +49,17 @@ final class Context {
     private static int samplesPerTick(int tempo, int samplingRate) {
         return (int) Math.round((double) samplingRate * 2_500_000.0 / (tempo * 1_000_000.0));
     }
+
+    void copyFrom(Context other) {
+        speed = other.speed;
+        tempo = other.tempo;
+        samplesPerTick = other.samplesPerTick;
+        jumpPending = other.jumpPending;
+        jumpSequenceIndex = other.jumpSequenceIndex;
+        breakPending = other.breakPending;
+        breakRowIndex = other.breakRowIndex;
+        loopPending = other.loopPending;
+        loopRowIndex = other.loopRowIndex;
+        loopCounter = other.loopCounter;
+    }
 }

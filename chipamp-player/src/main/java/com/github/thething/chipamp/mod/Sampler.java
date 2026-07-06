@@ -31,7 +31,11 @@ public final class Sampler {
     private final Context context;
     private final Set<State> visited;
 
+    // private Channel[][] channels;
+
     private Mod mod;
+    private long songLengthMillis;
+
     private int sequenceIndex;
     private int rowIndex;
     private int tickIndex;
@@ -602,7 +606,7 @@ public final class Sampler {
     // TODO snapshot take / recover snapshot
 
 
-    // TODO estemiate song length
+    // TODO esteimated song length
     public long getSongLengthMillis() {
 
 
@@ -625,7 +629,17 @@ public final class Sampler {
         this.mod = mod;
         reset();
 
+
+
         // TODO calculate time for pattern / row
+    }
+
+    private void buildIndices() {
+
+        // Channel[][] channels = new Channel[][]
+
+        // config.loggingEnabled
+
     }
 
     public void setPanning(int channelIndex, float right) {

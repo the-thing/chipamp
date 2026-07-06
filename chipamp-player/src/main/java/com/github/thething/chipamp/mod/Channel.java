@@ -30,42 +30,28 @@ final class Channel {
 
     int arpeggioTickIndex;
     int arpeggioPeriod;
-
     int portamentoTargetPeriod;
     int portamentoSpeed;
-
     int retriggerTickIndex;
-
     boolean glissandoEnabled;
-
-    /**
-     * Indicates if a period was set for the row.
-     *
-     * @see com.github.thething.chipamp.mod.EffectType#SET_SAMPLE_OFFSET
-     */
     boolean periodTriggered;
-
-    int volumeSlide; // volume recorded when hitting first row with volume slide or vibrato / tremolo with volume side
-
+    int volumeSlide;
     int vibratoPosition;
     int vibratoSpeed;
     int vibratoAmplitude;
-    int vibratoPeriod; // period recorded when hitting first row in vibrato
+    int vibratoPeriod;
     boolean vibratoRetrigger;
     WaveformType vibratoWaveformType;
-
     int tremoloPosition;
     int tremoloSpeed;
     int tremoloAmplitude;
-    int tremoloVolume; // volume recorded when hitting first row with tremolo
+    int tremoloVolume;
     boolean tremoloRetrigger;
     WaveformType tremoloWaveformType;
-
     int delayedTickIndex;
     int delayedTriggerTickIndex;
     int delayedPeriod;
     Sample delayedSample;
-
     int loopRowIndex;
     int loopCounter;
 
@@ -88,33 +74,25 @@ final class Channel {
         extendedEffectType = ExtendedEffectType.NONE;
         effectArgumentX = 0;
         effectArgumentY = 0;
-
         arpeggioTickIndex = 0;
         arpeggioPeriod = 0;
-
         portamentoTargetPeriod = 0;
         portamentoSpeed = 0;
-
         retriggerTickIndex = 0;
-
         glissandoEnabled = false;
-
         volumeSlide = 0;
-
         vibratoPosition = 0;
         vibratoSpeed = 0;
         vibratoAmplitude = 0;
         vibratoPeriod = 0;
         vibratoRetrigger = true;
         vibratoWaveformType = WaveformType.SINE;
-
         tremoloPosition = 0;
         tremoloSpeed = 0;
         tremoloAmplitude = 0;
         tremoloVolume = 0;
         tremoloRetrigger = true;
         tremoloWaveformType = WaveformType.SINE;
-
         loopRowIndex = 0;
         loopCounter = 0;
     }
@@ -174,5 +152,72 @@ final class Channel {
     void setPanning(float right) {
         this.rightPanning = requireInRange(right, 0.0f, 1.0f);
         this.leftPanning = 1.0f - right;
+    }
+
+    void copyFrom(Channel other) {
+        sample = other.sample;
+        period = other.period;
+        periodTriggered = other.periodTriggered;
+        samplePosition = other.samplePosition;
+        sampleIncrement = other.sampleIncrement;
+        volume = other.volume;
+        leftPanning = other.leftPanning;
+        rightPanning = other.rightPanning;
+
+        effectType = other.effectType;
+        extendedEffectType = other.extendedEffectType;
+        effectArgumentX = other.effectArgumentX;
+        effectArgumentY = other.effectArgumentY;
+
+        arpeggioTickIndex = other.arpeggioTickIndex;
+        arpeggioPeriod = other.arpeggioPeriod;
+        portamentoTargetPeriod = other.portamentoTargetPeriod;
+        portamentoSpeed = other.portamentoSpeed;
+        retriggerTickIndex = other.retriggerTickIndex;
+        glissandoEnabled = other.glissandoEnabled;
+        periodTriggered = other.periodTriggered;
+        volumeSlide = other.volumeSlide;
+        vibratoPosition = other.vibratoPosition;
+        vibratoSpeed = other.vibratoSpeed;
+        vibratoAmplitude = other.vibratoAmplitude;
+        vibratoPeriod = other.vibratoPeriod;
+        vibratoRetrigger = other.vibratoRetrigger;
+        vibratoWaveformType = other.vibratoWaveformType;
+        tremoloPosition = other.tremoloPosition;
+        tremoloSpeed = other.tremoloSpeed;
+        tremoloAmplitude = other.tremoloAmplitude;
+        tremoloVolume = other.tremoloVolume;
+        loopRowIndex = other.loopRowIndex;
+        loopCounter = other.loopCounter;
+
+        /**
+
+         int arpeggioTickIndex;
+         int arpeggioPeriod;
+         int portamentoTargetPeriod;
+         int portamentoSpeed;
+         int retriggerTickIndex;
+         boolean glissandoEnabled;
+         boolean periodTriggered;
+         int volumeSlide;
+         int vibratoPosition;
+         int vibratoSpeed;
+         int vibratoAmplitude;
+         int vibratoPeriod;
+         boolean vibratoRetrigger;
+         WaveformType vibratoWaveformType;
+         int tremoloPosition;
+         int tremoloSpeed;
+         int tremoloAmplitude;
+         int tremoloVolume;
+         boolean tremoloRetrigger;
+         WaveformType tremoloWaveformType;
+         int delayedTickIndex;
+         int delayedTriggerTickIndex;
+         int delayedPeriod;
+         Sample delayedSample;
+         int loopRowIndex;
+         int loopCounter;
+         */
     }
 }
