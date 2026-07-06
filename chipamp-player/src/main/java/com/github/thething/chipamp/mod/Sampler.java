@@ -11,6 +11,7 @@ import javax.sound.sampled.SourceDataLine;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static com.github.thething.chipamp.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
@@ -34,8 +35,7 @@ public final class Sampler {
     private final Context[] contextBySequenceRow;
 
     private Mod mod;
-    private long songLengthMillis;
-
+    private int sampleCount;
     private int sequenceIndex;
     private int rowIndex;
     private int tickIndex;
@@ -615,12 +615,13 @@ public final class Sampler {
         }
     }
 
-    // TODO snapshot take / recover snapshot
+    public long getModLength(TimeUnit unit) {
+        long milliseconds = sampleCount * 1_000L / config.samplingRate * 1_000L;
+        return unit.convert(milliseconds, TimeUnit.MICROSECONDS);
+    }
 
-    // TODO esteimated song length
-    public long getSongLengthMillis() {
-
-        return -1L;
+    public int getSampleCount() {
+        return sampleCount;
     }
 
     public Mod getMod() {
@@ -639,13 +640,17 @@ public final class Sampler {
         reset();
     }
 
+    /**
+     * Builds context and channel data for each sequence and row for fast traversal. Also calculates time of song in
+     * seconds
+     */
     private void buildMeta() {
         boolean loopDetectionEnabled = config.loopDetectionEnabled;
         config.loopDetectionEnabled = true;
 
         try {
             int sampleCount = 0;
-            boolean[] visited = new boolean[Mod.PATTERN_SEQUENCE_COUNT * Mod.MAX_CHANNEL_COUNT];
+            boolean[] visited = new boolean[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
 
             while ((sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick)) {
                 tick(TMP_BUFFER, 0);
@@ -661,11 +666,11 @@ public final class Sampler {
                 contextBySequenceRow[index].copyFrom(context);
 
                 for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                    channelsBySequenceRow[index * channelIndex][channelIndex].copyFrom(channels[channelIndex]);
+                    channelsBySequenceRow[index][channelIndex].copyFrom(channels[channelIndex]);
                 }
             }
 
-            System.out.println("sampleCOunt = " + sampleCount);
+            this.sampleCount = sampleCount;
         } finally {
             config.loopDetectionEnabled = loopDetectionEnabled;
         }
