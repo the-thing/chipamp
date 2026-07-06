@@ -84,4 +84,5 @@ public class SamplerTest {
 
         assertThat(audio).containsExactly(expectedAudio);
     }
+
 }

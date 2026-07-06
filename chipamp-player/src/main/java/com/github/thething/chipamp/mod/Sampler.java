@@ -30,8 +30,8 @@ public final class Sampler {
     private final Config config;
     private final Context context;
     private final Set<State> visited;
-
-    // private Channel[][] channels;
+    private final Channel[][] channelsBySequenceRow;
+    private final Context[] contextBySequenceRow;
 
     private Mod mod;
     private long songLengthMillis;
@@ -52,6 +52,18 @@ public final class Sampler {
         this.config = new Config(channels.length);
         this.context = new Context(config.samplingRate);
         this.visited = new HashSet<>();
+
+        this.channelsBySequenceRow = new Channel[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT][Mod.MAX_CHANNEL_COUNT];
+
+        for (int i = 0; i < channelsBySequenceRow.length; i++) {
+            for (int channelIndex = 0; channelIndex < channelsBySequenceRow[i].length; channelIndex++) {
+                boolean right = (i & 3) == 1 || (i & 3) == 2; // (LRRL) repeating pattern
+                this.channelsBySequenceRow[i][channelIndex] = new Channel(right);
+            }
+        }
+
+        this.contextBySequenceRow = new Context[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
+        Arrays.fill(contextBySequenceRow, new Context(config.samplingRate));
     }
 
     public void reset() {
@@ -605,17 +617,11 @@ public final class Sampler {
 
     // TODO snapshot take / recover snapshot
 
-
     // TODO esteimated song length
     public long getSongLengthMillis() {
 
-
-
-
         return -1L;
     }
-
-
 
     public Mod getMod() {
         return mod;
@@ -627,19 +633,42 @@ public final class Sampler {
         }
 
         this.mod = mod;
+
         reset();
-
-
-
-        // TODO calculate time for pattern / row
+        buildMeta();
+        reset();
     }
 
-    private void buildIndices() {
+    private void buildMeta() {
+        boolean loopDetectionEnabled = config.loopDetectionEnabled;
+        config.loopDetectionEnabled = true;
 
-        // Channel[][] channels = new Channel[][]
+        try {
+            int sampleCount = 0;
+            boolean[] visited = new boolean[Mod.PATTERN_SEQUENCE_COUNT * Mod.MAX_CHANNEL_COUNT];
 
-        // config.loggingEnabled
+            while ((sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick)) {
+                tick(TMP_BUFFER, 0);
+                sampleCount++;
 
+                int index = sequenceIndex * rowIndex;
+
+                if (visited[index]) {
+                    continue;
+                }
+
+                visited[index] = true;
+                contextBySequenceRow[index].copyFrom(context);
+
+                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+                    channelsBySequenceRow[index * channelIndex][channelIndex].copyFrom(channels[channelIndex]);
+                }
+            }
+
+            System.out.println("sampleCOunt = " + sampleCount);
+        } finally {
+            config.loopDetectionEnabled = loopDetectionEnabled;
+        }
     }
 
     public void setPanning(int channelIndex, float right) {

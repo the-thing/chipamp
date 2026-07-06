@@ -100,7 +100,7 @@ class ModLoaderTest {
 
     @Test
     public void shouldTrimSampleLengthOfTwoToZero() throws IOException {
-        Mod mod = underTest.load("chip/enjoy_the_happiness.mod");
+        Mod mod = underTest.load("chip/Enjoy the Happiness.mod");
         assertThat(mod.getChannelCount()).isEqualTo(4);
         assertThat(mod.getSampleCount()).isEqualTo(31);
 
