@@ -288,13 +288,11 @@ public enum ExtendedEffectType implements Effect {
     INVERT_LOOP(0x0F) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            // TODO
             System.out.println("INVERT_LOOP not supported");
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 
