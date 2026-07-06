@@ -15,6 +15,7 @@ final class Context {
     boolean loopPending;
     int loopRowIndex;
     int loopCounter;
+    boolean hardwareFilterEnabled;
 
     Context(int samplingRate) {
         reset(samplingRate);
@@ -30,6 +31,7 @@ final class Context {
         loopPending = false;
         loopRowIndex = 0;
         loopCounter = 0;
+        hardwareFilterEnabled = false;
     }
 
     void updateTempoAndSamplesPerTick(int tempo, int samplingRate) {
@@ -61,5 +63,6 @@ final class Context {
         loopPending = other.loopPending;
         loopRowIndex = other.loopRowIndex;
         loopCounter = other.loopCounter;
+        hardwareFilterEnabled = other.hardwareFilterEnabled;
     }
 }

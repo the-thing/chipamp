@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class Play {
 
     @Test
-    public void play() throws IOException, LineUnavailableException, InterruptedException {
+    public void playAsync() throws IOException, LineUnavailableException, InterruptedException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
 
@@ -43,7 +43,7 @@ public class Play {
         sampler.setVolumeSlideDeltaEnabled(false);
         sampler.setLoopDetectionEnabled(true);
         sampler.setLoggingEnabled(true);
-        sampler.setMod(mod);
+        sampler.loadMod(mod);
         sampler.setOpenMPTPanning();
 
         // player.setMuted(0, true);
@@ -90,10 +90,31 @@ public class Play {
                         Thread.sleep(1);
                     }
 
-
                 }
             }
         }
+    }
+
+    @Test
+    void playSync() throws IOException, LineUnavailableException {
+        ModLoader modLoader = new ModLoader(true);
+        Mod mod = modLoader.load("chip/elmstreet.mod");
+
+        Sampler sampler = new Sampler();
+        sampler.setClockHz(Mods.PAL_CLOCK_HZ);
+        sampler.setSamplingRate(48_000);
+        sampler.setMinPeriod(Mods.MIN_PERIOD);
+        sampler.setMaxPeriod(Mods.MAX_PERIOD);
+        sampler.setVolumeMultiplier(0.5f);
+        sampler.setStereoEnabled(true);
+        sampler.setStereoFoldDownEnabled(true);
+        sampler.setVolumeSlideDeltaEnabled(false);
+        sampler.setLoopDetectionEnabled(true);
+        sampler.setLoggingEnabled(true);
+        sampler.setOpenMPTPanning();
+
+        sampler.loadMod(mod);
+        sampler.play();
     }
 
     @Test

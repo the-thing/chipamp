@@ -92,12 +92,16 @@ public final class Sampler {
         reset();
 
         int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
-
         this.context.copyFrom(contextBySequenceRow[index]);
 
-        for (int channelIndex = 0; channelIndex < Mod.MAX_CHANNEL_COUNT; channelIndex++) {
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             this.channels[channelIndex].copyFrom(channelsBySequenceRow[index][channelIndex]);
         }
+
+        this.sequenceIndex = sequenceIndex;
+        this.rowIndex = rowIndex;
+        this.tickIndex = 0;
+        this.sampleIndex = 0;
     }
 
     public int seekPattern(int patternIndex) {
@@ -328,6 +332,17 @@ public final class Sampler {
         int lastSequenceIndex = sequenceIndex;
         int readPatternCount = 0;
 
+        // TODO remove
+        System.out.println("state: " + sequenceIndex + " / " + rowIndex + " / " + tickIndex + " / " + sampleIndex);
+
+        // TODO remove
+        System.out.println(context);
+
+        // TODO remove
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            System.out.println(channels[channelIndex]);
+        }
+
         while (sequenceIndex < mod.getLength() && readPatternCount < patternCount) {
             tick(buffer, offset);
             offset += bytesPerTick;
@@ -524,6 +539,8 @@ public final class Sampler {
                 // break the infinite loop by advancing outside of pattern sequences
                 nextSequenceIndex = mod.getPatternSequenceCount() + 1;
                 nextRowIndex = 0;
+
+                // TODO do we want to continue till the end on the past pattern when the loop is ignored?
             }
         }
 
@@ -536,7 +553,7 @@ public final class Sampler {
         context.breakRowIndex = 0;
         context.loopPending = false;
         context.loopRowIndex = 0;
-        // we explicitly do not want to clear loop counter
+        // we explicitly do not want to clear the loop counter
     }
 
     private void handleNewRow() {
@@ -595,7 +612,7 @@ public final class Sampler {
         return mod;
     }
 
-    public void setMod(Mod mod) {
+    public void loadMod(Mod mod) {
         if (mod.getChannelCount() > channels.length) {
             throw new IllegalArgumentException("Mod has more channels than the player supports");
         }
@@ -613,35 +630,35 @@ public final class Sampler {
      */
     private void buildMeta() {
         boolean loopDetectionEnabled = config.loopDetectionEnabled;
+        boolean loggingEnabled = config.loggingEnabled;
+
         config.loopDetectionEnabled = true;
+        config.loggingEnabled = false;
 
         try {
             int sampleCount = 0;
             boolean[] visited = new boolean[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
 
             while (sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick) {
-                tick(TMP_BUFFER, 0);
-
-
-                sampleCount++;
-
                 int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
 
-                if (visited[index]) {
-                    continue;
+                if (!visited[index]) {
+                    visited[index] = true;
+                    contextBySequenceRow[index].copyFrom(context);
+
+                    for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+                        channelsBySequenceRow[index][channelIndex].copyFrom(channels[channelIndex]);
+                    }
                 }
 
-                visited[index] = true;
-                contextBySequenceRow[index].copyFrom(context);
-
-                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                    channelsBySequenceRow[index][channelIndex].copyFrom(channels[channelIndex]);
-                }
+                tick(TMP_BUFFER, 0);
+                sampleCount++;
             }
 
             this.sampleCount = sampleCount;
         } finally {
             config.loopDetectionEnabled = loopDetectionEnabled;
+            config.loggingEnabled = loggingEnabled;
         }
     }
 

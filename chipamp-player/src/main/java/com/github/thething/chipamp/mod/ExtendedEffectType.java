@@ -9,10 +9,8 @@ public enum ExtendedEffectType implements Effect {
     SET_FILTER(0x00) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            // TODO implement
-            if (config.loggingEnabled) {
-                System.err.println("SET_FILTER not supported");
-            }
+            // filter is enabled only when argument is even
+            context.hardwareFilterEnabled = (channel.effectArgumentY & 1) == 0 ? true : false;
         }
 
         @Override
