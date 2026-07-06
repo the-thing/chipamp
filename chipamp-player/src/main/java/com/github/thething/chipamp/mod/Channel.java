@@ -187,37 +187,13 @@ final class Channel {
         tremoloSpeed = other.tremoloSpeed;
         tremoloAmplitude = other.tremoloAmplitude;
         tremoloVolume = other.tremoloVolume;
+        tremoloRetrigger = other.tremoloRetrigger;
+        tremoloWaveformType = other.tremoloWaveformType;
+        delayedTickIndex = other.delayedTickIndex;
+        delayedTriggerTickIndex = other.delayedTriggerTickIndex;
+        delayedPeriod = other.delayedPeriod;
+        delayedSample = other.delayedSample;
         loopRowIndex = other.loopRowIndex;
         loopCounter = other.loopCounter;
-
-        /**
-
-         int arpeggioTickIndex;
-         int arpeggioPeriod;
-         int portamentoTargetPeriod;
-         int portamentoSpeed;
-         int retriggerTickIndex;
-         boolean glissandoEnabled;
-         boolean periodTriggered;
-         int volumeSlide;
-         int vibratoPosition;
-         int vibratoSpeed;
-         int vibratoAmplitude;
-         int vibratoPeriod;
-         boolean vibratoRetrigger;
-         WaveformType vibratoWaveformType;
-         int tremoloPosition;
-         int tremoloSpeed;
-         int tremoloAmplitude;
-         int tremoloVolume;
-         boolean tremoloRetrigger;
-         WaveformType tremoloWaveformType;
-         int delayedTickIndex;
-         int delayedTriggerTickIndex;
-         int delayedPeriod;
-         Sample delayedSample;
-         int loopRowIndex;
-         int loopCounter;
-         */
     }
 }
