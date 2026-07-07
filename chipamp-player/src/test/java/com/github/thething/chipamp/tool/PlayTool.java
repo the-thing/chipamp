@@ -90,14 +90,10 @@ class PlayTool {
         sampler.seekSequence(2);
         sampler.setLoggingEnabled(true);
 
-        sampler.setMuted(1, true);
-        sampler.setMuted(2, true);
-        sampler.setMuted(3, true);
-
         // sequence 2 (pattern 0), row 50 it sounds strange
 
         Player player = new Player(sampler);
-        player.playPatterns(1);
+        player.playPatterns(3);
     }
 
     @Test
@@ -108,6 +104,7 @@ class PlayTool {
         Sampler sampler = new Sampler();
         sampler.loadMod(mod);
         sampler.seekSequence(2);
+        sampler.setLoggingEnabled(true);
 
         // sequence 2 (pattern 0), row 14
 
@@ -129,8 +126,8 @@ class PlayTool {
             // System.out.println("Loading file: " + file.getName());
             Mod mod = loader.load(file);
 
-            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.CUT_SAMPLE)) {
-                System.out.println("CUT SAMPLE present: " + file.getName());
+            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.DELAY_PATTERN)) {
+                System.out.println("DELAY_PATTERN present: " + file.getName());
 
 //                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
 //                    for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
