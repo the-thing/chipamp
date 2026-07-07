@@ -128,6 +128,22 @@ class PlayTool {
         player.playPatterns(1);
     }
 
+    @Test
+    void playInvertLoop() throws IOException, LineUnavailableException {
+        ModLoader modLoader = new ModLoader(true);
+        Mod mod = modLoader.load("chip/other/euroremix.mod");
+
+        Sampler sampler = new Sampler();
+        sampler.loadMod(mod);
+        sampler.seekSequence(3);
+        sampler.setLoggingEnabled(true);
+
+        // sequence 3 (pattern 0), row 1
+
+        Player player = new Player(sampler);
+        player.playPatterns(1);
+    }
+
     // TODO remove
     @Test
     void foo() throws IOException {
@@ -142,8 +158,8 @@ class PlayTool {
             // System.out.println("Loading file: " + file.getName());
             Mod mod = loader.load(file);
 
-            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.DELAY_PATTERN)) {
-                System.out.println("DELAY_PATTERN present: " + file.getName());
+            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.INVERT_LOOP)) {
+                System.out.println("INVERT_LOOP present: " + file.getName());
 
 //                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
 //                    for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
