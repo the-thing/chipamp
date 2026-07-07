@@ -211,7 +211,7 @@ final class Channel {
         this.fineTune = sample.getFineTune();
     }
 
-    // TODO refactor this to only single value
+    // TODO refactor this to only single value (required changes in confg as well)
     void updatePanning(float leftPan, float rightPan) {
         if (right) {
             this.leftPan = 1.0f - rightPan;
