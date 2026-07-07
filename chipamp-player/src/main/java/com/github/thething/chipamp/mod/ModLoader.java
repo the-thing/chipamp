@@ -142,7 +142,7 @@ public final class ModLoader {
             }
 
             if (loggingEnabled && actualLength != expectedLength) {
-                System.err.println("Warning: sample \'" + sampleHeaders[i].name() + "\' / " + (i + 1) + " has length " + actualLength + " instead of " + expectedLength);
+                System.err.println("Warning: sample '" + sampleHeaders[i].name() + "' / " + (i + 1) + " has length " + actualLength + " instead of " + expectedLength);
             }
 
             // it is possible that actual and expected length are different
