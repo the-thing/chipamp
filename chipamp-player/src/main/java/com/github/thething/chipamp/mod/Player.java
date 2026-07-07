@@ -25,7 +25,7 @@ public final class Player {
     }
 
     public void play(int endSequenceIndex) throws LineUnavailableException {
-        play(0, endSequenceIndex);
+        play(sampler.getSequenceIndex(), endSequenceIndex);
     }
 
     public void play(int startSequenceIndex, int endSequenceIndex) throws LineUnavailableException {

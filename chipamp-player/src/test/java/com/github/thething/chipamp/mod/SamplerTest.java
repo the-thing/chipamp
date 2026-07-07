@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SamplerTest {
+class SamplerTest {
 
     private Sampler underTest;
     private ModLoader modLoader;

@@ -134,7 +134,7 @@ final class Channel {
         } else {
             if (this.samplePosition >= sample.getDataLength()) {
                 this.samplePosition = sample.getDataLength();
-                sampleIncrement = 0.0f;
+                this.sampleIncrement = 0.0f;
             }
         }
 
@@ -198,49 +198,5 @@ final class Channel {
         delayedSample = other.delayedSample;
         loopRowIndex = other.loopRowIndex;
         loopCounter = other.loopCounter;
-    }
-
-    @Override
-    public String toString() {
-        return "Channel{" +
-                "right=" + right +
-                ", sample=" + sample +
-                ", period=" + period +
-                ", samplePosition=" + samplePosition +
-                ", sampleIncrement=" + sampleIncrement +
-                ", volume=" + volume +
-                ", leftPanning=" + leftPanning +
-                ", rightPanning=" + rightPanning +
-                ", effectType=" + effectType +
-                ", extendedEffectType=" + extendedEffectType +
-                ", effectArgumentX=" + effectArgumentX +
-                ", effectArgumentY=" + effectArgumentY +
-                ", arpeggioTickIndex=" + arpeggioTickIndex +
-                ", arpeggioPeriod=" + arpeggioPeriod +
-                ", portamentoTargetPeriod=" + portamentoTargetPeriod +
-                ", portamentoSpeed=" + portamentoSpeed +
-                ", retriggerTickIndex=" + retriggerTickIndex +
-                ", glissandoEnabled=" + glissandoEnabled +
-                ", periodTriggered=" + periodTriggered +
-                ", volumeSlide=" + volumeSlide +
-                ", vibratoPosition=" + vibratoPosition +
-                ", vibratoSpeed=" + vibratoSpeed +
-                ", vibratoAmplitude=" + vibratoAmplitude +
-                ", vibratoPeriod=" + vibratoPeriod +
-                ", vibratoRetrigger=" + vibratoRetrigger +
-                ", vibratoWaveformType=" + vibratoWaveformType +
-                ", tremoloPosition=" + tremoloPosition +
-                ", tremoloSpeed=" + tremoloSpeed +
-                ", tremoloAmplitude=" + tremoloAmplitude +
-                ", tremoloVolume=" + tremoloVolume +
-                ", tremoloRetrigger=" + tremoloRetrigger +
-                ", tremoloWaveformType=" + tremoloWaveformType +
-                ", delayedTickIndex=" + delayedTickIndex +
-                ", delayedTriggerTickIndex=" + delayedTriggerTickIndex +
-                ", delayedPeriod=" + delayedPeriod +
-                ", delayedSample=" + delayedSample +
-                ", loopRowIndex=" + loopRowIndex +
-                ", loopCounter=" + loopCounter +
-                '}';
     }
 }

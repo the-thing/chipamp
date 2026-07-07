@@ -398,7 +398,7 @@ public final class Mods {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
                 for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-                    Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+                    Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
 
                     if (instrument.effectType() == effectType) {
                         return true;
@@ -414,7 +414,7 @@ public final class Mods {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
                 for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-                    Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+                    Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
 
                     if (instrument.extendedEffectType() == effectType) {
                         return true;

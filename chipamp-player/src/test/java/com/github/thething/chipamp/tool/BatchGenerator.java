@@ -20,8 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-@SuppressWarnings("NewClassNamingConvention")
-public class BatchGenerator {
+class BatchGenerator {
 
     private Sampler sampler;
     private ModLoader modLoader;
