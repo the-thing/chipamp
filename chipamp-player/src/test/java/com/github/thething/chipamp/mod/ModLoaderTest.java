@@ -156,8 +156,6 @@ class ModLoaderTest {
         assertThat(mod.getChannelCount()).isEqualTo(4);
         assertThat(mod.getSampleCount()).isEqualTo(31);
 
-        System.out.println(Formatters.formatPatterns(mod));
-
         Instrument instrument = mod.getInstrument(0, 30, 60);
         assertThat(instrument.sampleNumber()).isEqualTo(20);
     }

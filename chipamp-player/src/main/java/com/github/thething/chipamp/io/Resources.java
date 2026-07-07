@@ -120,6 +120,10 @@ public final class Resources {
         return text.toString();
     }
 
+    public static void saveAudio(String fileName, AudioFormat format, byte[] audio) throws IOException {
+        saveAudio(new File(fileName), format, audio, 0, audio.length);
+    }
+
     public static void saveAudio(File file, AudioFormat format, byte[] audio) throws IOException {
         saveAudio(file, format, audio, 0, audio.length);
     }
