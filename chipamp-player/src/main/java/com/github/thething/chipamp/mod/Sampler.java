@@ -509,7 +509,7 @@ public final class Sampler {
         requireInRange(leftPan, 0.0f, 1.0f);
         config.leftPan = leftPan;
 
-        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+        for (int channelIndex = 0; channelIndex < channels.length; channelIndex++) {
             channels[channelIndex].updatePanning(leftPan, config.rightPan);
         }
     }
@@ -518,7 +518,7 @@ public final class Sampler {
         requireInRange(rightPan, 0.0f, 1.0f);
         config.rightPan = rightPan;
 
-        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+        for (int channelIndex = 0; channelIndex < channels.length; channelIndex++) {
             channels[channelIndex].updatePanning(config.leftPan, rightPan);
         }
     }

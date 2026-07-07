@@ -10,7 +10,7 @@ public record Instrument(int sampleNumber, int period,
     public Instrument(
             int sampleNumber, int period,
             EffectType effectType, ExtendedEffectType extendedEffectType, int effectArgumentX, int effectArgumentY) {
-        this.sampleNumber = requireInRange(sampleNumber, 0, 255);
+        this.sampleNumber = requireInRange(sampleNumber, 0, 31);
         this.period = requireInRange(period, 0, Short.MAX_VALUE);
         this.effectType = requireNonNull(effectType);
         this.extendedEffectType = requireNonNull(extendedEffectType);

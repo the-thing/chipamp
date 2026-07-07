@@ -23,9 +23,12 @@ class SamplerTest {
         underTest.setMinPeriod(Mods.MIN_PERIOD);
         underTest.setMaxPeriod(Mods.MAX_PERIOD);
         underTest.setVolumeMultiplier(0.5f);
+        underTest.setLeftPan(Mods.MPT_LEFT_PAN);
+        underTest.setRightPan(Mods.MPT_RIGHT_PAN);
         underTest.setStereoEnabled(true);
         underTest.setStereoFoldDownEnabled(true);
         underTest.setVolumeSlideDeltaEnabled(false);
+        underTest.setRoundNearestPeriodEnabled(true);
         underTest.setLoopDetectionEnabled(true);
         underTest.setLoggingEnabled(false);
 
@@ -50,6 +53,7 @@ class SamplerTest {
         assertThat(audio.length).isEqualTo(25_743_360);
     }
 
+    // TODO
     @Test
     void shouldGenerateAudioFile() throws IOException, UnsupportedAudioFileException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
@@ -61,6 +65,7 @@ class SamplerTest {
         assertThat(audio).containsExactly(expectedAudio);
     }
 
+    // TODO
     @Test
     void shouldGenerateSinglePattern() throws IOException, UnsupportedAudioFileException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");

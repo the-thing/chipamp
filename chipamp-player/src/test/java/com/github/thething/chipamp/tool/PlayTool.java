@@ -168,18 +168,14 @@ class PlayTool {
     @Test
     void test() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/other/90s_house_project.mod");
+        Mod mod = modLoader.load("chip/other/elgpasa.mod");
+
+        // System.out.println(Formatters.formatSamples(mod));
+        // System.out.println(Formatters.formatPatterns(mod));
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
-        sampler.setRoundNearestPeriodEnabled(false);
         sampler.setLoggingEnabled(true);
-
-        sampler.setMuted(0, true);
-        sampler.setMuted(1, true);
-        sampler.setMuted(2, true);
-
-        sampler.seekSequence(12);
 
         Player player = new Player(sampler);
         player.play();

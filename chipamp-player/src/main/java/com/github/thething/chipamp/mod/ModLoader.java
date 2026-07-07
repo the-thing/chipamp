@@ -93,7 +93,7 @@ public final class ModLoader {
         int patternCount = ExtraArrays.max(patternSequences) + 1;
         int channelCount = channelDetector.applyAsInt(probeTrackerId);
 
-        Instrument[][][] patterns = loadPatterns(data, offset, channelCount, patternCount);
+        Instrument[][][] patterns = loadPatterns(data, offset, channelCount, patternCount, sampleCount);
         offset += patternCount * Mod.ROW_COUNT * channelCount * INSTRUMENT_LENGTH;
 
         Sample[] samples = new Sample[sampleCount];
@@ -206,13 +206,13 @@ public final class ModLoader {
         }
     }
 
-    private static Instrument[][][] loadPatterns(byte[] data, int offset, int channelCount, int patternCount) {
+    private static Instrument[][][] loadPatterns(byte[] data, int offset, int channelCount, int patternCount, int sampleCount) {
         Instrument[][][] patterns = new Instrument[channelCount][patternCount][Mod.ROW_COUNT];
 
         for (int patternIndex = 0; patternIndex < patternCount; patternIndex++) {
             for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
                 for (int channelIndex = 0; channelIndex < channelCount; channelIndex++) {
-                    patterns[channelIndex][patternIndex][rowIndex] = loadPattern(data, offset);
+                    patterns[channelIndex][patternIndex][rowIndex] = loadPattern(data, offset, sampleCount);
                     offset += INSTRUMENT_LENGTH;
                 }
             }
@@ -221,7 +221,7 @@ public final class ModLoader {
         return patterns;
     }
 
-    public static Instrument loadPattern(byte[] data, int offset) {
+    public static Instrument loadPattern(byte[] data, int offset, int sampleCount) {
         int b0 = data[offset] & 0xFF;
         int b1 = data[offset + 1] & 0xFF;
         int b2 = data[offset + 2] & 0xFF;
@@ -247,6 +247,10 @@ public final class ModLoader {
             } else {
                 extendedEffectType = ExtendedEffectType.NONE;
             }
+        }
+
+        if (sampleNumber > sampleCount) {
+            sampleNumber %= sampleCount + 1;
         }
 
         return new Instrument(sampleNumber, period, effectType, extendedEffectType, effectArgumentX, effectArgumentY);

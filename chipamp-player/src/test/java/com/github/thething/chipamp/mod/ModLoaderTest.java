@@ -1,5 +1,6 @@
 package com.github.thething.chipamp.mod;
 
+import com.github.thething.chipamp.common.Formatters;
 import com.github.thething.chipamp.io.Resources;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -147,5 +148,17 @@ class ModLoaderTest {
         Mod mod = underTest.load("chip/other/di_-_demo.mod");
         assertThat(mod.getChannelCount()).isEqualTo(16);
         assertThat(mod.getSampleCount()).isEqualTo(31);
+    }
+
+    @Test
+    void shouldLoadModWithInvalidSampleNumbers() throws IOException {
+        Mod mod = underTest.load("chip/other/elgpasa.mod");
+        assertThat(mod.getChannelCount()).isEqualTo(4);
+        assertThat(mod.getSampleCount()).isEqualTo(31);
+
+        System.out.println(Formatters.formatPatterns(mod));
+
+        Instrument instrument = mod.getInstrument(0, 30, 60);
+        assertThat(instrument.sampleNumber()).isEqualTo(20);
     }
 }
