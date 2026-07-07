@@ -91,10 +91,12 @@ public enum ExtendedEffectType implements Effect {
             // convert (0-15) to signed range -8..7
             fineTune = (fineTune << 28) >> 28;
 
-            if (channel.sample != null && channel.period > 0) {
-                int newPeriod = Mods.getFineTunePeriod(channel.period, fineTune);
-                channel.updatePeriodAndIncrement(newPeriod, config.clockHz, config.samplingRate);
-            }
+            channel.fineTune = fineTune;
+
+//            if (channel.sample != null && channel.period > 0) {
+//                int newPeriod = Mods.getFineTunePeriod(channel.period, fineTune);
+//                channel.updatePeriodAndIncrement(newPeriod, config.clockHz, config.samplingRate);
+//            }
         }
 
         @Override
@@ -239,8 +241,7 @@ public enum ExtendedEffectType implements Effect {
 
             if (delay == 0) {
                 // trigger immediately
-                channel.sample = channel.delayedSample;
-                channel.volume = channel.delayedSample.getVolume();
+                channel.updateSample(channel.delayedSample);
                 channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
                 channel.samplePosition = 0.0f;
                 channel.resetOnNewSampleWithPeriod();
@@ -262,8 +263,7 @@ public enum ExtendedEffectType implements Effect {
 
             if (channel.delayedTriggerTickIndex == channel.delayedTickIndex) {
                 // trigger new period with sample
-                channel.sample = channel.delayedSample;
-                channel.volume = channel.delayedSample.getVolume();
+                channel.updateSample(channel.delayedSample);
                 channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
                 channel.samplePosition = 0.0f;
                 channel.resetOnNewSampleWithPeriod();

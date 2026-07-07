@@ -303,7 +303,15 @@ public final class Sampler {
                     System.out.println(Formatters.formatEffects(mod, patternIndex, rowIndex));
                 }
 
-                handleNewRow();
+                // TODO remove later
+                try {
+                    handleNewRow();
+                } catch (Exception e) {
+                    System.err.println("Error while handling new row: " + e.getMessage());
+                    System.err.println("sequenceIndex = " + sequenceIndex + ", rowIndex = " + rowIndex + ", pattern = " + mod.getPatternIndex(sequenceIndex));
+                    throw e;
+                }
+
             } else {
                 applyMidRowEffects();
             }

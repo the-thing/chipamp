@@ -17,19 +17,20 @@ interface Effect {
      */
     default void onPreEffect(Channel channel, Config config, int period, Sample sample) {
         if (sample != null) {
-            channel.sample = sample;
-            channel.volume = sample.getVolume();
-        }
-
-        Sample activeSample = sample;
-
-        if (activeSample == null) {
-            activeSample = channel.sample;
+            channel.updateSample(sample);
         }
 
         if (period > 0) {
-            if (activeSample != null && activeSample.getFineTune() != 0) {
-                period = Mods.getFineTunePeriod(period, activeSample.getFineTune());
+            Sample activeSample = sample;
+            int activeFineTune = sample != null ? sample.getFineTune() : 0;
+
+            if (activeSample == null) {
+                activeSample = channel.sample;
+                activeFineTune = channel.fineTune;
+            }
+
+            if (activeSample != null && activeFineTune != 0) {
+                period = Mods.getFineTunePeriod(period, activeFineTune);
             }
 
             if (activeSample != null) {

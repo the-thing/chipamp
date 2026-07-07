@@ -216,12 +216,6 @@ public final class Mods {
         requireInRange(fineTune, -8, 7);
 
         int periodIndex = getPeriodIndex(period);
-
-        if (periodIndex == -1) {
-            System.err.println("Invalid period: " + period);
-            return period;
-        }
-
         fineTune += 8;
 
         return FINE_TUNE_PERIODS[fineTune][periodIndex];

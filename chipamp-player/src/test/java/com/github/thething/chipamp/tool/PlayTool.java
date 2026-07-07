@@ -148,9 +148,10 @@ class PlayTool {
         sampler.setLoggingEnabled(true);
         sampler.updateMod(mod);
 
+        sampler.seekSequence(4);
 
         Player player = new Player(sampler);
-        player.play();
+        player.playPatterns(1);
 
 //        AudioFormat format = sampler.getCompatibleAudioFormat();
 //        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);

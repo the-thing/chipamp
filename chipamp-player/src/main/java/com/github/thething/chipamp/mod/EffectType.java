@@ -70,21 +70,22 @@ public enum EffectType implements Effect {
         @Override
         public void onPreEffect(Channel channel, Config config, int period, Sample sample) {
             if (sample != null) {
-                channel.sample = sample;
-                channel.volume = sample.getVolume();
+                channel.updateSample(sample);
             }
 
             // do not update period or sample position when note triggers for portamento
 
             if (period > 0) {
                 Sample activeSample = sample;
+                int activeFineTune = sample != null ? sample.getFineTune() : 0;
 
                 if (activeSample == null) {
                     activeSample = channel.sample;
+                    activeFineTune = channel.fineTune;
                 }
 
-                if (activeSample != null && activeSample.getFineTune() != 0) {
-                    period = Mods.getFineTunePeriod(period, activeSample.getFineTune());
+                if (activeSample != null && activeFineTune != 0) {
+                    period = Mods.getFineTunePeriod(period, activeFineTune);
                 }
 
                 channel.portamentoTargetPeriod = period;
@@ -133,21 +134,22 @@ public enum EffectType implements Effect {
         @Override
         public void onPreEffect(Channel channel, Config config, int period, Sample sample) {
             if (sample != null) {
-                channel.sample = sample;
-                channel.volume = sample.getVolume();
+                channel.updateSample(sample);
             }
 
             // do not update period or sample position when note triggers for portamento
 
             if (period > 0) {
                 Sample activeSample = sample;
+                int activeFineTune = sample != null ? sample.getFineTune() : 0;
 
                 if (activeSample == null) {
                     activeSample = channel.sample;
+                    activeFineTune = channel.fineTune;
                 }
 
-                if (activeSample != null && activeSample.getFineTune() != 0) {
-                    period = Mods.getFineTunePeriod(period, activeSample.getFineTune());
+                if (activeSample != null && activeFineTune != 0) {
+                    period = Mods.getFineTunePeriod(period, activeFineTune);
                 }
 
                 channel.portamentoTargetPeriod = period;

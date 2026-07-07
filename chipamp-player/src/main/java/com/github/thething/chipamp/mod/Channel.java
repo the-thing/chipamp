@@ -10,10 +10,11 @@ final class Channel {
     final boolean right;
 
     Sample sample;
+    int volume;
+    int fineTune;
     int period;
     float samplePosition;
     float sampleIncrement;
-    int volume;
     float leftPanning;
     float rightPanning;
 
@@ -68,11 +69,11 @@ final class Channel {
 
     void reset() {
         sample = null;
+        volume = 64;
+        fineTune = 0;
         period = 0;
-        periodTriggered = false;
         samplePosition = 0.0f;
         sampleIncrement = 0.0f;
-        volume = 64;
         leftPanning = right ? 0.0f : 1.0f;
         rightPanning = right ? 1.0f : 0.0f;
 
@@ -88,6 +89,7 @@ final class Channel {
         retriggerTickIndex = 0;
         cutSampleIndex = 0;
         glissandoEnabled = false;
+        periodTriggered = false;
         volumeSlide = 0;
         vibratoPosition = 0;
         vibratoSpeed = 0;
@@ -105,6 +107,52 @@ final class Channel {
         loopCounter = 0;
         invertLoopPosition = 0;
         invertLoopAccumulator = 0;
+    }
+
+    void copyFrom(Channel other) {
+        sample = other.sample;
+        volume = other.volume;
+        fineTune = other.fineTune;
+        period = other.period;
+        samplePosition = other.samplePosition;
+        sampleIncrement = other.sampleIncrement;
+        leftPanning = other.leftPanning;
+        rightPanning = other.rightPanning;
+
+        effectType = other.effectType;
+        extendedEffectType = other.extendedEffectType;
+        effectArgumentX = other.effectArgumentX;
+        effectArgumentY = other.effectArgumentY;
+
+        arpeggioTickIndex = other.arpeggioTickIndex;
+        arpeggioPeriod = other.arpeggioPeriod;
+        portamentoTargetPeriod = other.portamentoTargetPeriod;
+        portamentoSpeed = other.portamentoSpeed;
+        retriggerTickIndex = other.retriggerTickIndex;
+        cutSampleIndex = other.cutSampleIndex;
+        glissandoEnabled = other.glissandoEnabled;
+        periodTriggered = other.periodTriggered;
+        volumeSlide = other.volumeSlide;
+        vibratoPosition = other.vibratoPosition;
+        vibratoSpeed = other.vibratoSpeed;
+        vibratoAmplitude = other.vibratoAmplitude;
+        vibratoPeriod = other.vibratoPeriod;
+        vibratoRetrigger = other.vibratoRetrigger;
+        vibratoWaveformType = other.vibratoWaveformType;
+        tremoloPosition = other.tremoloPosition;
+        tremoloSpeed = other.tremoloSpeed;
+        tremoloAmplitude = other.tremoloAmplitude;
+        tremoloVolume = other.tremoloVolume;
+        tremoloRetrigger = other.tremoloRetrigger;
+        tremoloWaveformType = other.tremoloWaveformType;
+        delayedTickIndex = other.delayedTickIndex;
+        delayedTriggerTickIndex = other.delayedTriggerTickIndex;
+        delayedPeriod = other.delayedPeriod;
+        delayedSample = other.delayedSample;
+        loopRowIndex = other.loopRowIndex;
+        loopCounter = other.loopCounter;
+        invertLoopPosition = other.invertLoopPosition;
+        invertLoopAccumulator = other.invertLoopAccumulator;
     }
 
     void resetOnNewSampleWithPeriod() {
@@ -159,53 +207,14 @@ final class Channel {
         this.sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0.0f;
     }
 
+    void updateSample(Sample sample) {
+        this.sample = sample;
+        this.volume = sample.getVolume();
+        this.fineTune = sample.getFineTune();
+    }
+
     void setPanning(float right) {
         this.rightPanning = requireInRange(right, 0.0f, 1.0f);
         this.leftPanning = 1.0f - right;
-    }
-
-    void copyFrom(Channel other) {
-        sample = other.sample;
-        period = other.period;
-        samplePosition = other.samplePosition;
-        sampleIncrement = other.sampleIncrement;
-        volume = other.volume;
-        leftPanning = other.leftPanning;
-        rightPanning = other.rightPanning;
-
-        effectType = other.effectType;
-        extendedEffectType = other.extendedEffectType;
-        effectArgumentX = other.effectArgumentX;
-        effectArgumentY = other.effectArgumentY;
-
-        arpeggioTickIndex = other.arpeggioTickIndex;
-        arpeggioPeriod = other.arpeggioPeriod;
-        portamentoTargetPeriod = other.portamentoTargetPeriod;
-        portamentoSpeed = other.portamentoSpeed;
-        retriggerTickIndex = other.retriggerTickIndex;
-        cutSampleIndex = other.cutSampleIndex;
-        glissandoEnabled = other.glissandoEnabled;
-        periodTriggered = other.periodTriggered;
-        volumeSlide = other.volumeSlide;
-        vibratoPosition = other.vibratoPosition;
-        vibratoSpeed = other.vibratoSpeed;
-        vibratoAmplitude = other.vibratoAmplitude;
-        vibratoPeriod = other.vibratoPeriod;
-        vibratoRetrigger = other.vibratoRetrigger;
-        vibratoWaveformType = other.vibratoWaveformType;
-        tremoloPosition = other.tremoloPosition;
-        tremoloSpeed = other.tremoloSpeed;
-        tremoloAmplitude = other.tremoloAmplitude;
-        tremoloVolume = other.tremoloVolume;
-        tremoloRetrigger = other.tremoloRetrigger;
-        tremoloWaveformType = other.tremoloWaveformType;
-        delayedTickIndex = other.delayedTickIndex;
-        delayedTriggerTickIndex = other.delayedTriggerTickIndex;
-        delayedPeriod = other.delayedPeriod;
-        delayedSample = other.delayedSample;
-        loopRowIndex = other.loopRowIndex;
-        loopCounter = other.loopCounter;
-        invertLoopPosition = other.invertLoopPosition;
-        invertLoopAccumulator = other.invertLoopAccumulator;
     }
 }
