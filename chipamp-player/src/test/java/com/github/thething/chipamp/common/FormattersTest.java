@@ -78,6 +78,14 @@ class FormattersTest {
     }
 
     @Test
+    void shouldFormatEffects() throws IOException {
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+
+        assertThat(Formatters.formatEffects(mod, 0, 2)).isEqualTo("{\"0\":\"SET_VOLUME\",\"1\":\"VOLUME_SLIDE\",\"2\":\"SET_VOLUME\",\"3\":\"SET_VOLUME\"}");
+        assertThat(Formatters.formatEffects(mod, 0, 48)).isEqualTo("{\"0\":\"NONE\",\"1\":\"NONE\",\"2\":\"SET_SAMPLE_OFFSET\",\"3\":\"FINE_VOLUME_SLIDE_DOWN\"}");
+    }
+
+    @Test
     void shouldFormatSamples() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         String formatted = Formatters.formatSamples(mod);

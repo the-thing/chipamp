@@ -299,9 +299,8 @@ public final class Sampler {
 
                 if (config.loggingEnabled) {
                     System.out.print(Formatters.formatRow(mod, patternIndex, rowIndex));
-                    System.out.print(" {");
+                    System.out.print(' ');
                     System.out.print(Formatters.formatEffects(mod, patternIndex, rowIndex));
-                    System.out.println("}");
                 }
 
                 handleNewRow();

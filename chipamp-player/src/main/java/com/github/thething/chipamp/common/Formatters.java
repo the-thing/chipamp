@@ -167,6 +167,8 @@ public final class Formatters {
     }
 
     public static void formatEffects(Mod mod, int patternIndex, int rowIndex, StringBuilder out) {
+        out.append('{');
+
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
 
@@ -186,6 +188,8 @@ public final class Formatters {
 
             out.append("\"");
         }
+
+        out.append('}');
     }
 
     public static String formatSamples(Mod mod) {
