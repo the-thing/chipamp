@@ -161,7 +161,6 @@ final class Channel {
     void copyFrom(Channel other) {
         sample = other.sample;
         period = other.period;
-        periodTriggered = other.periodTriggered;
         samplePosition = other.samplePosition;
         sampleIncrement = other.sampleIncrement;
         volume = other.volume;

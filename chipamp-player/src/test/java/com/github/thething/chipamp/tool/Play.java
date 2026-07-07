@@ -31,39 +31,20 @@ public class Play {
     @Test
     public void playAsync() throws IOException, LineUnavailableException, InterruptedException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        Mod mod = modLoader.load("chip/Angelwings - 1995.mod");
 
         Sampler sampler = new Sampler();
-        sampler.setClockHz(Mods.PAL_CLOCK_HZ);
-        sampler.setSamplingRate(48_000);
-        sampler.setMinPeriod(Mods.MIN_PERIOD);
-        sampler.setMaxPeriod(Mods.MAX_PERIOD);
-        sampler.setVolumeMultiplier(0.5f);
-        sampler.setStereoEnabled(true);
-        sampler.setStereoFoldDownEnabled(false);
-        sampler.setVolumeSlideDeltaEnabled(false);
-        sampler.setLoopDetectionEnabled(true);
-        sampler.setLoggingEnabled(true);
         sampler.loadMod(mod);
-        sampler.setOpenMPTPanning();
-
-        // player.setMuted(0, true);
-        // player.setMuted(1, true);
-        // player.setMuted(2, true);
-        // player.setMuted(3, true);
-
-        System.out.println("getBytesPerTick: " + sampler.getBytesPerTick());
-        System.out.println("getBytesPerRow: " + sampler.getBytesPerRow());
 
         AudioFormat format = sampler.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-        ThreadFactory factory = (runnable) -> new Thread(runnable, "AsyncSourceDataLine");
 
         try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info)) {
             line.open(format);
             line.start();
 
             byte[] writeBuffer = new byte[1024 * 64];
+            ThreadFactory factory = (runnable) -> new Thread(runnable, "AsyncSourceDataLine");
 
             try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, 4096 * 4, factory)) {
                 while (sampler.getSequenceIndex() < mod.getLength()) {
@@ -90,7 +71,6 @@ public class Play {
                     } else {
                         Thread.sleep(1);
                     }
-
                 }
             }
         }
@@ -99,33 +79,9 @@ public class Play {
     @Test
     void playSync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/elmstreet.mod");
-
-        Sampler sampler = new Sampler();
-        sampler.setClockHz(Mods.PAL_CLOCK_HZ);
-        sampler.setSamplingRate(48_000);
-        sampler.setMinPeriod(Mods.MIN_PERIOD);
-        sampler.setMaxPeriod(Mods.MAX_PERIOD);
-        sampler.setVolumeMultiplier(0.5f);
-        sampler.setStereoEnabled(true);
-        sampler.setStereoFoldDownEnabled(true);
-        sampler.setVolumeSlideDeltaEnabled(false);
-        sampler.setLoopDetectionEnabled(true);
-        sampler.setLoggingEnabled(true);
-        sampler.setOpenMPTPanning();
-        sampler.loadMod(mod);
-
-        Player player = new Player(sampler);
-        player.play();
-    }
-
-    @Test
-    public void playWithPlayer() throws IOException, LineUnavailableException {
-        ModLoader modLoader = new ModLoader(false);
         Mod mod = modLoader.load("chip/Tip - Stardust Memories.mod");
 
         Sampler sampler = new Sampler();
-        sampler.setLoggingEnabled(true);
         sampler.loadMod(mod);
 
         Player player = new Player(sampler);

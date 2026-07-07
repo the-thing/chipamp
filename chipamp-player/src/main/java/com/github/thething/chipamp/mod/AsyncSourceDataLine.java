@@ -80,7 +80,7 @@ public final class AsyncSourceDataLine implements Closeable {
                 // System.out.println("size: " + size);
 
                 // int min = Math.min(size / 2, readBuffer.length);
-                int readLength = buffer.peek(readBuffer, 0, 4);
+                int readLength = buffer.peek(readBuffer, 0, 1024);
 
                 if (readLength > 0) {
                     maxBufferUnderFlow = 0;
