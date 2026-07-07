@@ -2,6 +2,8 @@ package com.github.thething.chipamp.mod;
 
 import java.util.Arrays;
 
+// TODO add default configuration for channel panning
+// TODO add configuration for fine tune period lookup (if should calculate or find nearest)
 final class Config {
 
     private static final boolean DEFAULT_LOGGING_ENABLED = false;
