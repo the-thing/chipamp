@@ -296,13 +296,36 @@ public enum ExtendedEffectType implements Effect {
     INVERT_LOOP(0x0F) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            // TODO
-            System.out.println("INVERT_LOOP not supported: ");
+            // ProTracker supposedly does not clear invert loop position or accumulator at all
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
+            if (channel.sample == null || !channel.sample.isLoopEnabled()) {
+                return;
+            }
+
+            int funkSpeed = Mods.getFunk(channel.effectArgumentY);
+
+            if (funkSpeed == 0) {
+                return;
+            }
+
+            channel.invertLoopAccumulator += funkSpeed;
+
+            if (channel.invertLoopAccumulator >= 128) {
+                channel.invertLoopAccumulator &= 127;
+                channel.invertLoopPosition++;
+
+                int loopLength = channel.sample.getLoopLength();
+
+                if (channel.invertLoopPosition >= loopLength) {
+                    channel.invertLoopPosition = 0;
+                }
+
+                int index = channel.sample.getLoopStart() + channel.invertLoopPosition;
+                channel.sample.invertData(index);
+            }
         }
     },
 

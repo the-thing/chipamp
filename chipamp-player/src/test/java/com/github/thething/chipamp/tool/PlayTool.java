@@ -135,13 +135,10 @@ class PlayTool {
 
         Sampler sampler = new Sampler();
         sampler.loadMod(mod);
-        sampler.seekSequence(3);
         sampler.setLoggingEnabled(true);
 
-        // sequence 3 (pattern 0), row 1
-
         Player player = new Player(sampler);
-        player.playPatterns(1);
+        player.play();
     }
 
     // TODO remove

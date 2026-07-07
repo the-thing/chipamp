@@ -76,8 +76,8 @@ public final class Sample {
         return data[index];
     }
 
-    public byte[] data() {
-        return Arrays.copyOf(data, data.length);
+    public void invertData(int index) {
+        data[index] = (byte) -data[index];
     }
 
     public int getDataLength() {

@@ -58,6 +58,8 @@ final class Channel {
     Sample delayedSample;
     int loopRowIndex;
     int loopCounter;
+    int invertLoopPosition;
+    int invertLoopAccumulator;
 
     Channel(boolean right) {
         this.right = right;
@@ -101,6 +103,8 @@ final class Channel {
         tremoloWaveformType = WaveformType.SINE;
         loopRowIndex = 0;
         loopCounter = 0;
+        invertLoopPosition = 0;
+        invertLoopAccumulator = 0;
     }
 
     void resetOnNewSampleWithPeriod() {
@@ -201,5 +205,7 @@ final class Channel {
         delayedSample = other.delayedSample;
         loopRowIndex = other.loopRowIndex;
         loopCounter = other.loopCounter;
+        invertLoopPosition = other.invertLoopPosition;
+        invertLoopAccumulator = other.invertLoopAccumulator;
     }
 }

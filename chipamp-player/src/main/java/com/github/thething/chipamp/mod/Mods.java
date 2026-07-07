@@ -39,7 +39,7 @@ public final class Mods {
             "A-X", "B-X", "C-X", "D-X", "E-X", "F-X", "G-X"
     };
 
-    public static final int[] SINE_TABLE = {
+    private static final int[] SINE_TABLE = {
             0, 24, 49, 74, 97, 120, 141, 161, 180,
             197, 212, 224, 235, 244, 250, 253, 255,
             253, 250, 244, 235, 224, 212, 197, 180,
@@ -111,6 +111,10 @@ public final class Mods {
             {814, 768, 725, 684, 646, 610, 575, 543, 513, 484, 457, 431,
                     407, 384, 363, 342, 323, 305, 288, 272, 256, 242, 228, 216,
                     203, 192, 181, 171, 161, 152, 144, 136, 128, 121, 114, 108}};
+
+    private static final int[] FUNK_TABLE = {
+            0, 5, 6, 7, 8, 10, 11, 13, 16, 19, 22, 26, 32, 43, 64, 128
+    };
 
     static {
         // C
@@ -434,5 +438,9 @@ public final class Mods {
         }
 
         return -1;
+    }
+
+    public static int getFunk(int index) {
+        return FUNK_TABLE[index];
     }
 }
