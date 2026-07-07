@@ -30,7 +30,7 @@ interface Effect {
             }
 
             if (activeSample != null && activeFineTune != 0) {
-                period = Mods.getFineTunePeriod(period, activeFineTune);
+                period = Mods.getFineTunePeriod(period, activeFineTune, config.roundNearestPeriodEnabled);
             }
 
             if (activeSample != null) {

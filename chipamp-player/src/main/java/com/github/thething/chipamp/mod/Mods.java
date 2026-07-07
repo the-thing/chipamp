@@ -212,16 +212,18 @@ public final class Mods {
         return NOTES[period];
     }
 
-    public static int getFineTunePeriod(int period, int fineTune) {
+    public static int getFineTunePeriod(int period, int fineTune, boolean roundNearestPeriod) {
         requireInRange(fineTune, -8, 7);
 
         int periodIndex = getPeriodIndex(period);
 
         if (periodIndex == -1) {
-            // TODO decide what to do (either find nearest or compute custom)
             // this happens when mods use non-standard periods outside of range e.g. 90s_house_project.mod
-            // return findNearestPeriod(period, fineTune);
-            throw new IllegalArgumentException("Invalid period: " + period);
+            if (roundNearestPeriod) {
+                return findNearestPeriod(period, fineTune);
+            } else {
+                return getCustomFineTunePeriod(period, fineTune);
+            }
         }
 
         fineTune += 8;

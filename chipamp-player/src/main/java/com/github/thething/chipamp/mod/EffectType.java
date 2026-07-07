@@ -85,7 +85,7 @@ public enum EffectType implements Effect {
                 }
 
                 if (activeSample != null && activeFineTune != 0) {
-                    period = Mods.getFineTunePeriod(period, activeFineTune);
+                    period = Mods.getFineTunePeriod(period, activeFineTune, config.roundNearestPeriodEnabled);
                 }
 
                 channel.portamentoTargetPeriod = period;
@@ -149,7 +149,7 @@ public enum EffectType implements Effect {
                 }
 
                 if (activeSample != null && activeFineTune != 0) {
-                    period = Mods.getFineTunePeriod(period, activeFineTune);
+                    period = Mods.getFineTunePeriod(period, activeFineTune, config.roundNearestPeriodEnabled);
                 }
 
                 channel.portamentoTargetPeriod = period;

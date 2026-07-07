@@ -18,7 +18,7 @@ final class Config {
     private static final float DEFAULT_VOLUME_MULTIPLIER = 0.5f;
     private static final float DEFAULT_LEFT_PAN = Mods.MPT_LEFT_PAN;
     private static final float DEFAULT_RIGHT_PAN = Mods.MPT_RIGHT_PAN;
-    private static final boolean DEFAULT_ROUND_NEAREST_PERIOD = true;
+    private static final boolean DEFAULT_ROUND_NEAREST_PERIOD_ENABLED = true;
 
     final boolean[] muted;
     final boolean[] effectEnabled;
@@ -33,7 +33,7 @@ final class Config {
     boolean stereoEnabled;
     boolean stereoFoldDownEnabled;
     boolean volumeSlideDeltaEnabled;
-    boolean roundNearestPeriod;
+    boolean roundNearestPeriodEnabled;
     boolean loopDetectionEnabled;
     boolean loggingEnabled;
 
@@ -60,7 +60,7 @@ final class Config {
         this.stereoEnabled = DEFAULT_STEREO_ENABLED;
         this.stereoFoldDownEnabled = DEFAULT_STEREO_FOLD_DOWN_ENABLED;
         this.volumeSlideDeltaEnabled = DEFAULT_VOLUME_SLIDE_DELTA_ENABLED;
-        this.roundNearestPeriod = DEFAULT_ROUND_NEAREST_PERIOD;
+        this.roundNearestPeriodEnabled = DEFAULT_ROUND_NEAREST_PERIOD_ENABLED;
         this.loopDetectionEnabled = DEFAULT_LOOP_DETECTION_ENABLED;
         this.loggingEnabled = DEFAULT_LOGGING_ENABLED;
     }
