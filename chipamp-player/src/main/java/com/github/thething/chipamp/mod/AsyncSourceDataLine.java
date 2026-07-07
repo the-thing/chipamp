@@ -1,5 +1,6 @@
 package com.github.thething.chipamp.mod;
 
+import com.github.thething.chipamp.common.Maths;
 import com.github.thething.chipamp.concurrent.SpScByteCircularBuffer;
 
 import javax.sound.sampled.SourceDataLine;
@@ -18,7 +19,7 @@ public final class AsyncSourceDataLine implements Closeable {
         this.thread = requireNonNull(thread);
     }
 
-    public static AsyncSourceDataLine launch(SourceDataLine line, int chunkLength, ThreadFactory threadFactory) {
+    public static AsyncSourceDataLine launch(SourceDataLine line, int bufferCapacity, int readLength, ThreadFactory threadFactory) {
         if (!line.isOpen()) {
             throw new IllegalStateException("SourceDataLine is not open");
         }
@@ -27,14 +28,19 @@ public final class AsyncSourceDataLine implements Closeable {
             throw new IllegalArgumentException("SourceDataLine buffer size must be greater than zero");
         }
 
-        if (chunkLength <= 0) {
-            throw new IllegalArgumentException("chunkLength must be greater than zero");
+        if (bufferCapacity <= 0) {
+            throw new IllegalArgumentException("bufferCapacity must be greater than zero");
         }
 
-        int readLength = Math.min(chunkLength, line.getBufferSize());
+        int length = Math.min(bufferCapacity, line.getBufferSize());
+        length = Maths.roundDownPow2(length);
 
-        SpScByteCircularBuffer buffer = new SpScByteCircularBuffer(1024 * 1024 * 10);
-        Task task = new Task(line, buffer, 1024);
+        if (length < 4) {
+            throw new IllegalArgumentException("bufferCapacity must be greater than or equal to 4");
+        }
+
+        SpScByteCircularBuffer buffer = new SpScByteCircularBuffer(length);
+        Task task = new Task(line, buffer, readLength);
         Thread thread = threadFactory.newThread(task);
         thread.start();
 
@@ -64,7 +70,7 @@ public final class AsyncSourceDataLine implements Closeable {
         private final SpScByteCircularBuffer buffer;
         private final byte[] readBuffer;
 
-        public Task(SourceDataLine sourceDataLine, SpScByteCircularBuffer buffer, int readLength) {
+        private Task(SourceDataLine sourceDataLine, SpScByteCircularBuffer buffer, int readLength) {
             this.sourceDataLine = sourceDataLine;
             this.buffer = buffer;
             this.readBuffer = new byte[readLength];
@@ -72,44 +78,23 @@ public final class AsyncSourceDataLine implements Closeable {
 
         @Override
         public void run() {
-            int maxBufferUnderFlow = 0;
-
             while (!Thread.currentThread().isInterrupted()) {
-                int size = buffer.size();
+                int readCount = buffer.peek(readBuffer);
 
-                // System.out.println("size: " + size);
+                if (readCount > 0) {
+                    int writeCount = sourceDataLine.write(readBuffer, 0, readCount);
 
-                // int min = Math.min(size / 2, readBuffer.length);
-                int readLength = buffer.peek(readBuffer, 0, 1024);
-
-                if (readLength > 0) {
-                    maxBufferUnderFlow = 0;
-                    int written = sourceDataLine.write(readBuffer, 0, readLength);
-
-                    if (written != readLength) {
-                        throw new RuntimeException("Unexpected end of audio");
+                    if (writeCount != readCount) {
+                        throw new RuntimeException("Unable to write all samples");
                     }
 
-                    buffer.skipBytes(written);
+                    buffer.skipBytes(writeCount);
                 } else {
-                    maxBufferUnderFlow++;
-
-                    System.out.println("maxBufferUnderFlow: " + maxBufferUnderFlow);
-
-                    // System.out.println("buffer underflow: " + readLength);
-//                    try {
-//                        Thread.sleep(1L);
-//                    } catch (InterruptedException e) {
-//                        Thread.currentThread().interrupt();
-//                        return;
-//                    }
-
                     try {
                         Thread.sleep(10L);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-
                 }
             }
         }

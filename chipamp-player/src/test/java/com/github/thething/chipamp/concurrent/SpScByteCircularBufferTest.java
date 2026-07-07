@@ -14,6 +14,7 @@ public class SpScByteCircularBufferTest {
     @BeforeEach
     void setUp() {
         underTest = new SpScByteCircularBuffer(8);
+        assertThat(underTest.capacity()).isEqualTo(8);
     }
 
     @Test

@@ -1,10 +1,8 @@
 package com.github.thething.chipamp.tool;
 
 import com.github.thething.chipamp.mod.AsyncSourceDataLine;
-import com.github.thething.chipamp.mod.ExtendedEffectType;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
-import com.github.thething.chipamp.mod.Mods;
 import com.github.thething.chipamp.mod.Player;
 import com.github.thething.chipamp.mod.Sampler;
 import org.junit.jupiter.api.Test;
@@ -19,7 +17,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ThreadFactory;
 
@@ -28,7 +25,7 @@ class PlayTool {
     @Test
     public void playAsync() throws IOException, LineUnavailableException, InterruptedException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/Angelwings - 1995.mod");
+        Mod mod = modLoader.load("chip/other/euroremix.mod");
 
         Sampler sampler = new Sampler();
         sampler.loadMod(mod);
@@ -43,23 +40,18 @@ class PlayTool {
             byte[] buffer = new byte[1024 * 64];
             ThreadFactory factory = (runnable) -> new Thread(runnable, "AsyncSourceDataLine");
 
-            try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, 4096 * 4, factory)) {
-                while (sampler.getSequenceIndex() < mod.getLength()) {
-                    int writeLength = 1024;
+            int writeLength = 1024;
+            int readLength = 1024;
 
+            try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, buffer.length, readLength, factory)) {
+                while (sampler.getSequenceIndex() < mod.getLength()) {
                     if (asyncLine.size() < writeLength) {
                         int readCount = sampler.read(buffer);
+                        int writeCount = asyncLine.write(buffer, 0, readCount);
 
-                        if (writeLength != readCount) {
-                            System.out.println("readCount: " + readCount + ", writeLength = " + writeLength);
+                        if (writeCount != readCount) {
+                            throw new RuntimeException("Unable to write all samples");
                         }
-
-                        int dupa = asyncLine.write(buffer, 0, readCount);
-
-                        if (dupa != readCount) {
-                            System.out.println("dupa: " + dupa + ", readCount = " + readCount);
-                        }
-
                     } else {
                         Thread.sleep(1);
                     }
@@ -141,41 +133,6 @@ class PlayTool {
 
         Player player = new Player(sampler);
         player.play();
-    }
-
-    // TODO remove
-    @Test
-    void foo() throws IOException {
-        ModLoader loader = new ModLoader(true);
-
-        main:
-        for (File file : new File("C:\\Users\\Marcin\\Downloads\\mod").listFiles()) {
-            if (!file.getName().endsWith(".mod")) {
-                continue;
-            }
-
-            // System.out.println("Loading file: " + file.getName());
-            Mod mod = loader.load(file);
-
-            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.INVERT_LOOP)) {
-                System.out.println("INVERT_LOOP present: " + file.getName());
-
-//                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-//                    for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
-//                        for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-//                            Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
-//
-//                            if (instrument.extendedEffectType() == ExtendedEffectType.SET_FILTER) {
-//                                if ((instrument.effectArgumentY() & 1) == 0) {
-//                                    System.out.println("SET FILTER present: " + file.getName());
-//                                    continue main;
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-            }
-        }
     }
 
     public static void main(String[] args) {

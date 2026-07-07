@@ -16,4 +16,12 @@ public final class Maths {
     public static int roundUpPow2(int value) {
         return 1 << (32 - Integer.numberOfLeadingZeros(value - 1));
     }
+
+    public static int roundDownPow2(int value) {
+        if (value <= 0) {
+            throw new IllegalArgumentException("Value must be positive: " + value);
+        }
+
+        return Integer.highestOneBit(value);
+    }
 }

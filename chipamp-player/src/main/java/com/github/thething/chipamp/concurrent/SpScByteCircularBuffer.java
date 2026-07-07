@@ -193,7 +193,7 @@ public final class SpScByteCircularBuffer {
      * <b>Thread Safety:</b> This method must be called only by the consumer thread.
      *
      * @param count the number of bytes to skip
-     * @return the actual number of bytes skipped (may be less than {@code count} if fewer bytes are available)
+     * @return the actual number of bytes skipped (maybe less than {@code count} if fewer bytes are available)
      */
     public int skipBytes(int count) {
         int readIndex = this.readIndex.getPlain();
@@ -206,6 +206,15 @@ public final class SpScByteCircularBuffer {
         }
 
         return count;
+    }
+
+    /**
+     * Returns the capacity of the buffer.
+     *
+     * @return the capacity of the buffer in bytes
+     */
+    public int capacity() {
+        return buffer.length;
     }
 
     /**
