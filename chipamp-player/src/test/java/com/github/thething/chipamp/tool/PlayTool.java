@@ -17,6 +17,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ThreadFactory;
 
@@ -133,6 +134,71 @@ class PlayTool {
 
         Player player = new Player(sampler);
         player.play();
+    }
+
+    // TODO remove
+    @Test
+    void test() throws IOException, LineUnavailableException {
+        ModLoader modLoader = new ModLoader(true);
+        Mod mod = modLoader.load("chip/other/4566.mod");
+
+        // System.out.println(Formatters.formatPatterns(mod));
+
+        Sampler sampler = new Sampler();
+        sampler.setLoggingEnabled(true);
+        sampler.updateMod(mod);
+
+
+        Player player = new Player(sampler);
+        player.play();
+
+//        AudioFormat format = sampler.getCompatibleAudioFormat();
+//        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+//
+//        byte[] buffer = new byte[4096];
+//
+//        try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info)) {
+//            line.open(format);
+//            line.start();
+//
+//            while (sampler.getSequenceIndex() < mod.getLength()) {
+//                int readCount = sampler.read(buffer);
+//
+//                if (readCount != buffer.length) {
+//                    throw new RuntimeException("Unexpected end of audio");
+//                }
+//
+//                int writeCount = line.write(buffer, 0, readCount);
+//
+//                if (writeCount != readCount) {
+//                    throw new RuntimeException("Unable to write all samples");
+//                }
+//            }
+//
+//            line.drain();
+//        }
+    }
+
+    // TODO remove
+    @Test
+    void foo() throws IOException {
+        ModLoader modLoader = new ModLoader(true);
+        Sampler sampler = new Sampler();
+
+        for (File file : new File("C:\\Users\\Marcin\\Downloads\\mod").listFiles()) {
+            if (!file.getName().endsWith(".mod")) {
+                continue;
+            }
+
+            System.out.println("Loading: " + file.getName());
+            Mod mod = modLoader.load(file);
+
+            sampler.updateMod(mod);
+
+            while (sampler.getSequenceIndex() < mod.getLength()) {
+                sampler.read();
+            }
+        }
     }
 
     public static void main(String[] args) {

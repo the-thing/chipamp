@@ -77,7 +77,6 @@ class ModLoaderTest {
                 continue;
             }
 
-            System.out.println("Loading module: " + file.getName());
             Mod mod = underTest.load(file);
             assertThat(mod).isNotNull();
         }
