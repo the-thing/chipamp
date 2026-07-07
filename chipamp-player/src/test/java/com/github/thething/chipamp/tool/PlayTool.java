@@ -138,7 +138,7 @@ class PlayTool {
         sampler.loadMod(mod);
         sampler.setLoggingEnabled(true);
 
-        // there are plenty inver effects there
+        // there are plenty of invert loop effects there
 
         Player player = new Player(sampler);
         player.play();
