@@ -1,5 +1,6 @@
 package com.github.thething.chipamp.tool;
 
+import com.github.thething.chipamp.io.Resources;
 import com.github.thething.chipamp.mod.AsyncSourceDataLine;
 import com.github.thething.chipamp.mod.ExtendedEffectType;
 import com.github.thething.chipamp.mod.Mod;
@@ -136,6 +137,8 @@ class PlayTool {
         Sampler sampler = new Sampler();
         sampler.loadMod(mod);
         sampler.setLoggingEnabled(true);
+
+        // there are plenty inver effects there
 
         Player player = new Player(sampler);
         player.play();
