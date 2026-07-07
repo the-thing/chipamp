@@ -35,7 +35,7 @@ class SamplerTest {
     @Test
     void shouldReadModWithLoopEffect() throws IOException {
         Mod mod = modLoader.load("chip/Jogeir Liljedahl - Nearly There.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         byte[] audio = underTest.read();
         assertThat(audio.length).isEqualTo(74_889_920);
@@ -44,7 +44,7 @@ class SamplerTest {
     @Test
     void shouldReadModWithInfiniteLoop() throws IOException {
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         byte[] audio = underTest.read();
         assertThat(audio.length).isEqualTo(25_743_360);
@@ -53,7 +53,7 @@ class SamplerTest {
     @Test
     void shouldGenerateAudioFile() throws IOException, UnsupportedAudioFileException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         byte[] expectedAudio = Resources.readAudio("wav/axel-stereo-48kHz-pal.wav");
         byte[] audio = underTest.read();
@@ -64,7 +64,7 @@ class SamplerTest {
     @Test
     void shouldGenerateSinglePattern() throws IOException, UnsupportedAudioFileException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         int sequenceIndex = underTest.skipPatterns(4);
         assertThat(sequenceIndex).isEqualTo(4);
@@ -78,7 +78,7 @@ class SamplerTest {
     @Test
     void shouldZeroStateAfterSequenceEnd() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         byte[] sample = new byte[underTest.getBytesPerSample()];
         int sampleCount = 0;
@@ -114,7 +114,7 @@ class SamplerTest {
     @Test
     void shouldSeekSequence() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         underTest.seekSequence(11);
 
@@ -141,7 +141,7 @@ class SamplerTest {
     @Test
     void shouldSeekPattern() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         int sequenceIndex = underTest.seekPattern(11);
         assertThat(sequenceIndex).isEqualTo(11);
@@ -163,7 +163,7 @@ class SamplerTest {
     @Test
     void shouldMatchStateWhenSkippingAndReading() throws IOException {
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         underTest.reset();
         underTest.skipPatterns(1);
@@ -185,7 +185,7 @@ class SamplerTest {
     @Test
     void shouldMatchStateWhenSkippingAndSeeking() throws IOException {
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         underTest.reset();
         underTest.skipPatterns(1);
@@ -207,7 +207,7 @@ class SamplerTest {
     @Test
     void shouldReadSameAudionWhenReadingAndSkippingPatterns() throws IOException {
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         for (int sequenceIndex = 0; sequenceIndex < mod.getLength(); sequenceIndex++) {
             underTest.reset();
@@ -225,7 +225,7 @@ class SamplerTest {
     @Test
     void shouldGenerateSameAudioForSkipAndSeek() throws IOException {
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         for (int sequenceIndex = 1; sequenceIndex < 2; sequenceIndex++) {
             underTest.reset();
@@ -243,7 +243,7 @@ class SamplerTest {
     @Test
     void shouldReturnSongLengthInMillis() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         assertThat(underTest.getSampleCount()).isEqualTo(8_834_496);
         assertThat(underTest.getModLength(TimeUnit.SECONDS)).isEqualTo(184L);
@@ -253,7 +253,7 @@ class SamplerTest {
     @Test
     void shouldReturnBytesPerSample() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         assertThat(underTest.getBytesPerSample()).isEqualTo(4);
 
@@ -265,7 +265,7 @@ class SamplerTest {
     @Test
     void shouldReturnBytesPerTick() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         assertThat(underTest.getBytesPerTick()).isEqualTo(3840);
 
@@ -277,7 +277,7 @@ class SamplerTest {
     @Test
     void shouldReturnSamplesPerTick() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         assertThat(underTest.getSamplesPerTick()).isEqualTo(960);
     }
@@ -285,7 +285,7 @@ class SamplerTest {
     @Test
     void shouldReturnSamplesPerRow() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        underTest.loadMod(mod);
+        underTest.updateMod(mod);
 
         assertThat(underTest.getSamplesPerRow()).isEqualTo(5760);
     }

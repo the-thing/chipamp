@@ -487,7 +487,7 @@ public final class Sampler {
         return mod;
     }
 
-    public void loadMod(Mod mod) {
+    public void updateMod(Mod mod) {
         if (mod.getChannelCount() > channels.length) {
             throw new IllegalArgumentException("Mod has more channels than the player supports");
         }

@@ -28,7 +28,7 @@ class PlayTool {
         Mod mod = modLoader.load("chip/other/euroremix.mod");
 
         Sampler sampler = new Sampler();
-        sampler.loadMod(mod);
+        sampler.updateMod(mod);
 
         AudioFormat format = sampler.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -66,7 +66,7 @@ class PlayTool {
         Mod mod = modLoader.load("chip/Tip - Stardust Memories.mod");
 
         Sampler sampler = new Sampler();
-        sampler.loadMod(mod);
+        sampler.updateMod(mod);
 
         Player player = new Player(sampler);
         player.play();
@@ -78,7 +78,7 @@ class PlayTool {
         Mod mod = modLoader.load("chip/other/static_-_hardcore.mod");
 
         Sampler sampler = new Sampler();
-        sampler.loadMod(mod);
+        sampler.updateMod(mod);
         sampler.seekSequence(2);
         sampler.setLoggingEnabled(true);
 
@@ -94,7 +94,7 @@ class PlayTool {
         Mod mod = modLoader.load("chip/other/adventure_in.mod");
 
         Sampler sampler = new Sampler();
-        sampler.loadMod(mod);
+        sampler.updateMod(mod);
         sampler.seekSequence(2);
         sampler.setLoggingEnabled(true);
 
@@ -110,7 +110,7 @@ class PlayTool {
         Mod mod = modLoader.load("chip/other/emotional_extacy.mod");
 
         Sampler sampler = new Sampler();
-        sampler.loadMod(mod);
+        sampler.updateMod(mod);
         sampler.seekSequence(1);
         sampler.setLoggingEnabled(true);
 
@@ -126,7 +126,7 @@ class PlayTool {
         Mod mod = modLoader.load("chip/other/euroremix.mod");
 
         Sampler sampler = new Sampler();
-        sampler.loadMod(mod);
+        sampler.updateMod(mod);
         sampler.setLoggingEnabled(true);
 
         // there are plenty of invert loop effects there
