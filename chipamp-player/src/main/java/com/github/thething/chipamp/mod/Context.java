@@ -19,6 +19,8 @@ final class Context {
     int loopRowIndex;
     int loopCounter;
 
+    int extraDelay;
+
     boolean hardwareFilterEnabled;
     float hardwareFilterDelta;
     float hardwareFilterLeft;
@@ -42,6 +44,8 @@ final class Context {
         loopRowIndex = 0;
         loopCounter = 0;
 
+        extraDelay = 0;
+
         hardwareFilterEnabled = false;
         hardwareFilterDelta = 0.0f;
         hardwareFilterLeft = 0.0f;
@@ -62,6 +66,8 @@ final class Context {
         loopPending = other.loopPending;
         loopRowIndex = other.loopRowIndex;
         loopCounter = other.loopCounter;
+
+        extraDelay = other.extraDelay;
 
         hardwareFilterEnabled = other.hardwareFilterEnabled;
         hardwareFilterDelta = other.hardwareFilterDelta;
@@ -92,25 +98,5 @@ final class Context {
      */
     private static int samplesPerTick(int tempo, int samplingRate) {
         return (int) Math.round((double) samplingRate * 2_500_000.0 / (tempo * 1_000_000.0));
-    }
-
-    @Override
-    public String toString() {
-        return "Context{" +
-                "speed=" + speed +
-                ", tempo=" + tempo +
-                ", samplesPerTick=" + samplesPerTick +
-                ", jumpPending=" + jumpPending +
-                ", jumpSequenceIndex=" + jumpSequenceIndex +
-                ", breakPending=" + breakPending +
-                ", breakRowIndex=" + breakRowIndex +
-                ", loopPending=" + loopPending +
-                ", loopRowIndex=" + loopRowIndex +
-                ", loopCounter=" + loopCounter +
-                ", hardwareFilterEnabled=" + hardwareFilterEnabled +
-                ", hardwareFilterDelta=" + hardwareFilterDelta +
-                ", hardwareFilterLeft=" + hardwareFilterLeft +
-                ", hardwareFilterRight=" + hardwareFilterRight +
-                '}';
     }
 }

@@ -311,8 +311,9 @@ public final class Sampler {
 
             tickIndex++;
 
-            if (tickIndex >= context.speed) {
+            if (tickIndex >= context.speed + context.extraDelay) {
                 tickIndex = 0;
+                context.extraDelay = 0;
                 advanceRow();
             }
 
@@ -383,12 +384,10 @@ public final class Sampler {
             // both position jump and pattern break effects are pending
             nextSequenceIndex = context.jumpSequenceIndex;
             nextRowIndex = context.breakRowIndex;
-
         } else if (context.jumpPending) {
             // jump to row 0 of specific pattern
             nextSequenceIndex = context.jumpSequenceIndex;
             nextRowIndex = 0;
-
         } else if (context.breakPending) {
             // jump to next pattern's specific row
             nextSequenceIndex = sequenceIndex + 1;

@@ -112,6 +112,22 @@ class PlayTool {
         player.playPatterns(1);
     }
 
+    @Test
+    void playDelayPattern() throws IOException, LineUnavailableException {
+        ModLoader modLoader = new ModLoader(true);
+        Mod mod = modLoader.load("chip/other/emotional_extacy.mod");
+
+        Sampler sampler = new Sampler();
+        sampler.loadMod(mod);
+        sampler.seekSequence(1);
+        sampler.setLoggingEnabled(true);
+
+        // sequence 1 (pattern 7), row 62
+
+        Player player = new Player(sampler);
+        player.playPatterns(1);
+    }
+
     // TODO remove
     @Test
     void foo() throws IOException {

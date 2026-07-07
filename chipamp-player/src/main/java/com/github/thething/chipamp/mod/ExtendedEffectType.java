@@ -283,24 +283,26 @@ public enum ExtendedEffectType implements Effect {
     DELAY_PATTERN(0x0E) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            // TODO
-            System.out.println("DELAY_PATTERN not supported");
+            if (channel.effectArgumentY != 0) {
+                context.extraDelay = context.speed * channel.effectArgumentY;
+            }
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
         }
     },
 
     INVERT_LOOP(0x0F) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            System.out.println("INVERT_LOOP not supported");
+            // TODO
+            System.out.println("INVERT_LOOP not supported: ");
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
+            // TODO
         }
     },
 
