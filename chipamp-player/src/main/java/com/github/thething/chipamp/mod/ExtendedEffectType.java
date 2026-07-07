@@ -151,7 +151,7 @@ public enum ExtendedEffectType implements Effect {
     ROUGH_PANNING(0x08) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            channel.setPanning(channel.effectArgumentY / 16.0f);
+            // TODO check if this is used anywhere
         }
 
         @Override

@@ -70,13 +70,12 @@ class PlayTool {
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
         sampler.setLoggingEnabled(true);
-        sampler.setOpenMPTPanning();
         sampler.setStereoFoldDownEnabled(false);
 
-        sampler.seekPattern(2);
+        sampler.seekPattern(60);
 
         Player player = new Player(sampler);
-        player.playPatterns(1);
+        player.play();
     }
 
     @Test

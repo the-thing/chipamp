@@ -1,7 +1,5 @@
 package com.github.thething.chipamp.mod;
 
-import static com.github.thething.chipamp.common.Requirements.requireInRange;
-
 final class Channel {
 
     /**
@@ -15,8 +13,8 @@ final class Channel {
     int period;
     float samplePosition;
     float sampleIncrement;
-    float leftPanning;
-    float rightPanning;
+    float leftPan;
+    float rightPan;
 
     /**
      * Effect data for the current row.
@@ -62,20 +60,20 @@ final class Channel {
     int invertLoopPosition;
     int invertLoopAccumulator;
 
-    Channel(boolean right) {
+    Channel(Config config, boolean right) {
         this.right = right;
-        reset();
+        reset(config);
     }
 
-    void reset() {
+    void reset(Config config) {
         sample = null;
         volume = 64;
         fineTune = 0;
         period = 0;
         samplePosition = 0.0f;
         sampleIncrement = 0.0f;
-        leftPanning = right ? 0.0f : 1.0f;
-        rightPanning = right ? 1.0f : 0.0f;
+
+        updatePanning(config.leftPan, config.rightPan);
 
         effectType = EffectType.NONE;
         extendedEffectType = ExtendedEffectType.NONE;
@@ -116,8 +114,8 @@ final class Channel {
         period = other.period;
         samplePosition = other.samplePosition;
         sampleIncrement = other.sampleIncrement;
-        leftPanning = other.leftPanning;
-        rightPanning = other.rightPanning;
+        leftPan = other.leftPan;
+        rightPan = other.rightPan;
 
         effectType = other.effectType;
         extendedEffectType = other.extendedEffectType;
@@ -213,8 +211,14 @@ final class Channel {
         this.fineTune = sample.getFineTune();
     }
 
-    void setPanning(float right) {
-        this.rightPanning = requireInRange(right, 0.0f, 1.0f);
-        this.leftPanning = 1.0f - right;
+    // TODO refactor this to only single value
+    void updatePanning(float leftPan, float rightPan) {
+        if (right) {
+            this.leftPan = 1.0f - rightPan;
+            this.rightPan = rightPan;
+        } else {
+            this.leftPan = leftPan;
+            this.rightPan = 1.0f - leftPan;
+        }
     }
 }

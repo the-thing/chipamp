@@ -2,7 +2,6 @@ package com.github.thething.chipamp.mod;
 
 import java.util.Arrays;
 
-// TODO add default configuration for channel panning
 // TODO add configuration for fine tune period lookup (if should calculate or find nearest)
 final class Config {
 
@@ -17,6 +16,9 @@ final class Config {
     private static final int DEFAULT_MAX_PERIOD = Mods.MAX_PERIOD;
     private static final int DEFAULT_CLOCK_HZ = Mods.PAL_CLOCK_HZ;
     private static final float DEFAULT_VOLUME_MULTIPLIER = 0.5f;
+    private static final float DEFAULT_LEFT_PAN = Mods.MPT_LEFT_PAN;
+    private static final float DEFAULT_RIGHT_PAN = Mods.MPT_RIGHT_PAN;
+    private static final boolean DEFAULT_ROUND_NEAREST_PERIOD = true;
 
     final boolean[] muted;
     final boolean[] effectEnabled;
@@ -26,9 +28,12 @@ final class Config {
     int minPeriod;
     int maxPeriod;
     float volumeMultiplier;
+    float leftPan;
+    float rightPan;
     boolean stereoEnabled;
     boolean stereoFoldDownEnabled;
     boolean volumeSlideDeltaEnabled;
+    boolean roundNearestPeriod;
     boolean loopDetectionEnabled;
     boolean loggingEnabled;
 
@@ -50,9 +55,12 @@ final class Config {
         this.minPeriod = DEFAULT_MIN_PERIOD;
         this.maxPeriod = DEFAULT_MAX_PERIOD;
         this.volumeMultiplier = DEFAULT_VOLUME_MULTIPLIER;
+        this.leftPan = DEFAULT_LEFT_PAN;
+        this.rightPan = DEFAULT_RIGHT_PAN;
         this.stereoEnabled = DEFAULT_STEREO_ENABLED;
         this.stereoFoldDownEnabled = DEFAULT_STEREO_FOLD_DOWN_ENABLED;
         this.volumeSlideDeltaEnabled = DEFAULT_VOLUME_SLIDE_DELTA_ENABLED;
+        this.roundNearestPeriod = DEFAULT_ROUND_NEAREST_PERIOD;
         this.loopDetectionEnabled = DEFAULT_LOOP_DETECTION_ENABLED;
         this.loggingEnabled = DEFAULT_LOGGING_ENABLED;
     }

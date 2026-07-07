@@ -22,8 +22,8 @@ public final class Sampler {
     private static final byte[] EMPTY_BUFFER = new byte[0];
     private static final byte[] TMP_BUFFER = new byte[4];
 
-    private final Channel[] channels;
     private final Config config;
+    private final Channel[] channels;
     private final Context context;
     private final Set<State> visited;
     private final Channel[][] channelsBySequenceRow;
@@ -37,14 +37,14 @@ public final class Sampler {
     private int sampleIndex;
 
     public Sampler() {
+        this.config = new Config(Mod.MAX_CHANNEL_COUNT);
         this.channels = new Channel[Mod.MAX_CHANNEL_COUNT];
 
         for (int i = 0; i < channels.length; i++) {
             boolean right = (i & 3) == 1 || (i & 3) == 2; // (LRRL) repeating pattern
-            this.channels[i] = new Channel(right);
+            this.channels[i] = new Channel(config, right);
         }
 
-        this.config = new Config(channels.length);
         this.context = new Context(config.samplingRate);
         this.visited = new HashSet<>();
 
@@ -53,7 +53,7 @@ public final class Sampler {
         for (int i = 0; i < channelsBySequenceRow.length; i++) {
             for (int channelIndex = 0; channelIndex < channelsBySequenceRow[i].length; channelIndex++) {
                 boolean right = (i & 3) == 1 || (i & 3) == 2; // (LRRL) repeating pattern
-                this.channelsBySequenceRow[i][channelIndex] = new Channel(right);
+                this.channelsBySequenceRow[i][channelIndex] = new Channel(config, right);
             }
         }
 
@@ -71,7 +71,7 @@ public final class Sampler {
         visited.add(INITIAL_STATE);
 
         for (Channel channel : channels) {
-            channel.reset();
+            channel.reset(config);
         }
 
         sequenceIndex = 0;
@@ -336,8 +336,8 @@ public final class Sampler {
                 continue;
             }
 
-            left += sample * channels[i].leftPanning;
-            right += sample * channels[i].rightPanning;
+            left += sample * channels[i].leftPan;
+            right += sample * channels[i].rightPan;
         }
 
         left *= config.volumeMultiplier;
@@ -505,19 +505,21 @@ public final class Sampler {
         reset();
     }
 
-    public void setPanning(int channelIndex, float right) {
-        channels[channelIndex].setPanning(requireInRange(right, 0.0f, 1.0f));
-    }
+    public void setLeftPan(float leftPan) {
+        requireInRange(leftPan, 0.0f, 1.0f);
+        config.leftPan = leftPan;
 
-    public void setDefaultPanning() {
-        for (Channel channel : channels) {
-            channel.setPanning(channel.right ? 1.0f : 0.0f);
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            channels[channelIndex].updatePanning(leftPan, config.rightPan);
         }
     }
 
-    public void setOpenMPTPanning() {
-        for (Channel channel : channels) {
-            channel.setPanning(channel.right ? Mods.MPT_PAN_RIGHT : Mods.MPT_PAN_LEFT);
+    public void setRightPan(float rightPan) {
+        requireInRange(rightPan, 0.0f, 1.0f);
+        config.rightPan = rightPan;
+
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            channels[channelIndex].updatePanning(config.leftPan, rightPan);
         }
     }
 
