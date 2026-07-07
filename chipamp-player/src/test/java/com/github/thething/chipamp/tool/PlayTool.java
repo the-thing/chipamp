@@ -1,6 +1,5 @@
 package com.github.thething.chipamp.tool;
 
-import com.github.thething.chipamp.common.Formatters;
 import com.github.thething.chipamp.mod.AsyncSourceDataLine;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
@@ -27,10 +26,11 @@ class PlayTool {
     @Test
     public void playAsync() throws IOException, LineUnavailableException, InterruptedException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/other/euroremix.mod");
+        Mod mod = modLoader.load("chip/Slawomir Mrozek - Franko End.mod");
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
+        sampler.setLoggingEnabled(true);
 
         AudioFormat format = sampler.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -65,13 +65,18 @@ class PlayTool {
     @Test
     void playSync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/Tip - Stardust Memories.mod");
+        Mod mod = modLoader.load("chip/H0ffman - Eon.mod");
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
+        sampler.setLoggingEnabled(true);
+        sampler.setOpenMPTPanning();
+        sampler.setStereoFoldDownEnabled(false);
+
+        sampler.seekPattern(2);
 
         Player player = new Player(sampler);
-        player.play();
+        player.playPatterns(1);
     }
 
     @Test
@@ -142,8 +147,6 @@ class PlayTool {
     void test() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/other/90s_house_project.mod");
-
-        // System.out.println(Formatters.formatPatterns(mod));
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);

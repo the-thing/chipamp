@@ -62,8 +62,6 @@ public final class Sampler {
         for (int i = 0; i < contextBySequenceRow.length; i++) {
             contextBySequenceRow[i] = new Context(config.samplingRate);
         }
-
-        setOpenMPTPanning();
     }
 
     public void reset() {

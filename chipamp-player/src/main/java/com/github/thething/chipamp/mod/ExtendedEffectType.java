@@ -92,11 +92,6 @@ public enum ExtendedEffectType implements Effect {
             fineTune = (fineTune << 28) >> 28;
 
             channel.fineTune = fineTune;
-
-//            if (channel.sample != null && channel.period > 0) {
-//                int newPeriod = Mods.getFineTunePeriod(channel.period, fineTune);
-//                channel.updatePeriodAndIncrement(newPeriod, config.clockHz, config.samplingRate);
-//            }
         }
 
         @Override

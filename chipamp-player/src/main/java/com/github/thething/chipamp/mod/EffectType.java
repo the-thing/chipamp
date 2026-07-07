@@ -34,7 +34,7 @@ public enum EffectType implements Effect {
                 default -> 0;
             };
 
-            int newPeriod = Mods.shiftUpPeriodBySemitones(channel.arpeggioPeriod, channel.sample.getFineTune(), semitones);
+            int newPeriod = Mods.shiftUpPeriodBySemitones(channel.arpeggioPeriod, channel.fineTune, semitones);
             channel.updateIncrement(newPeriod, config.clockHz, config.samplingRate);
         }
     },
@@ -403,7 +403,7 @@ public enum EffectType implements Effect {
         }
 
         if (channel.glissandoEnabled) {
-            int fineTune = channel.sample != null ? channel.sample.getFineTune() : 0;
+            int fineTune = channel.fineTune;
             newPeriod = Mods.findNearestPeriod(newPeriod, fineTune);
         }
 
