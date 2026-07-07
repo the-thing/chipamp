@@ -49,7 +49,7 @@ class ModLoaderTest {
 
     @Test
     void shouldLoadEmptyMod() throws IOException {
-        Mod mod = underTest.load("chip/effect/empty.mod");
+        Mod mod = underTest.load("chip/other/empty.mod");
         assertThat(mod.getTitle()).isEqualTo("");
         assertThat(mod.getLength()).isEqualTo(1);
         assertThat(mod.getSampleCount()).isEqualTo(31);
@@ -85,7 +85,7 @@ class ModLoaderTest {
 
     @Test
     public void shouldLoadModWithShortenedSample() throws IOException {
-        Mod mod = underTest.load("chip/effect/elmstreet.mod");
+        Mod mod = underTest.load("chip/other/elmstreet.mod");
         assertThat(mod.getChannelCount()).isEqualTo(4);
         assertThat(mod.getSampleCount()).isEqualTo(31);
 
@@ -115,7 +115,7 @@ class ModLoaderTest {
 
     @Test
     public void shouldTrimLoopLengthOfTwoToZero() throws IOException {
-        Mod mod = underTest.load("chip/effect/eisenzeit.mod");
+        Mod mod = underTest.load("chip/other/eisenzeit.mod");
         assertThat(mod.getChannelCount()).isEqualTo(4);
         assertThat(mod.getSampleCount()).isEqualTo(31);
 
@@ -145,7 +145,7 @@ class ModLoaderTest {
 
     @Test
     void shouldLoadModWith16Channels() throws IOException {
-        Mod mod = underTest.load("chip/effect/di_-_demo.mod");
+        Mod mod = underTest.load("chip/other/di_-_demo.mod");
         assertThat(mod.getChannelCount()).isEqualTo(16);
         assertThat(mod.getSampleCount()).isEqualTo(31);
     }

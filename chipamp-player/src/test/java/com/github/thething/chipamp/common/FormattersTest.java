@@ -48,7 +48,7 @@ class FormattersTest {
     @Test
     void shouldFormatEmptyModule() throws IOException {
         String expected = Resources.readText("empty-patterns.txt");
-        Mod mod = modLoader.load("chip/effect/empty.mod");
+        Mod mod = modLoader.load("chip/other/empty.mod");
         String formatted = Formatters.formatPatterns(mod);
 
         assertThat(formatted).isEqualTo(expected);

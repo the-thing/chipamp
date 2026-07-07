@@ -2,7 +2,6 @@ package com.github.thething.chipamp.tool;
 
 import com.github.thething.chipamp.mod.AsyncSourceDataLine;
 import com.github.thething.chipamp.mod.ExtendedEffectType;
-import com.github.thething.chipamp.mod.Instrument;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
 import com.github.thething.chipamp.mod.Mods;
@@ -24,7 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ThreadFactory;
 
-class Play {
+class PlayTool {
 
     @Test
     public void playAsync() throws IOException, LineUnavailableException, InterruptedException {
@@ -84,7 +83,7 @@ class Play {
     @Test
     void playStrangeSound() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/effect/static_-_hardcore.mod");
+        Mod mod = modLoader.load("chip/other/static_-_hardcore.mod");
 
         Sampler sampler = new Sampler();
         sampler.loadMod(mod);
@@ -96,6 +95,21 @@ class Play {
         sampler.setMuted(3, true);
 
         // sequence 2 (pattern 0), row 50 it sounds strange
+
+        Player player = new Player(sampler);
+        player.playPatterns(1);
+    }
+
+    @Test
+    void playCutSample() throws IOException, LineUnavailableException {
+        ModLoader modLoader = new ModLoader(true);
+        Mod mod = modLoader.load("chip/other/adventure_in.mod");
+
+        Sampler sampler = new Sampler();
+        sampler.loadMod(mod);
+        sampler.seekSequence(2);
+
+        // sequence 2 (pattern 0), row 14
 
         Player player = new Player(sampler);
         player.playPatterns(1);
@@ -115,29 +129,30 @@ class Play {
             // System.out.println("Loading file: " + file.getName());
             Mod mod = loader.load(file);
 
-            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.SET_FILTER)) {
+            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.CUT_SAMPLE)) {
+                System.out.println("CUT SAMPLE present: " + file.getName());
 
-                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                    for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
-                        for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-                            Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
-
-                            if (instrument.extendedEffectType() == ExtendedEffectType.SET_FILTER) {
-                                if ((instrument.effectArgumentY() & 1) == 0) {
-                                    System.out.println("SET FILTER present: " + file.getName());
-                                    continue main;
-                                }
-                            }
-                        }
-                    }
-                }
+//                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+//                    for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+//                        for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
+//                            Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
+//
+//                            if (instrument.extendedEffectType() == ExtendedEffectType.SET_FILTER) {
+//                                if ((instrument.effectArgumentY() & 1) == 0) {
+//                                    System.out.println("SET FILTER present: " + file.getName());
+//                                    continue main;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
     }
 
     public static void main(String[] args) {
         LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
-                .selectors(DiscoverySelectors.selectClass(Play.class))
+                .selectors(DiscoverySelectors.selectClass(PlayTool.class))
                 .build();
 
         Launcher launcher = LauncherFactory.create();
