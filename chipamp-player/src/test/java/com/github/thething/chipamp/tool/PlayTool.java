@@ -1,5 +1,6 @@
 package com.github.thething.chipamp.tool;
 
+import com.github.thething.chipamp.common.Formatters;
 import com.github.thething.chipamp.mod.AsyncSourceDataLine;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
@@ -140,44 +141,18 @@ class PlayTool {
     @Test
     void test() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/other/4566.mod");
+        Mod mod = modLoader.load("chip/other/90s_house_project.mod");
 
         // System.out.println(Formatters.formatPatterns(mod));
 
         Sampler sampler = new Sampler();
-        sampler.setLoggingEnabled(true);
         sampler.updateMod(mod);
+        sampler.setLoggingEnabled(true);
 
-        sampler.seekSequence(4);
+        sampler.seekSequence(11);
 
         Player player = new Player(sampler);
-        player.playPatterns(1);
-
-//        AudioFormat format = sampler.getCompatibleAudioFormat();
-//        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-//
-//        byte[] buffer = new byte[4096];
-//
-//        try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info)) {
-//            line.open(format);
-//            line.start();
-//
-//            while (sampler.getSequenceIndex() < mod.getLength()) {
-//                int readCount = sampler.read(buffer);
-//
-//                if (readCount != buffer.length) {
-//                    throw new RuntimeException("Unexpected end of audio");
-//                }
-//
-//                int writeCount = line.write(buffer, 0, readCount);
-//
-//                if (writeCount != readCount) {
-//                    throw new RuntimeException("Unable to write all samples");
-//                }
-//            }
-//
-//            line.drain();
-//        }
+        player.play();
     }
 
     // TODO remove

@@ -216,6 +216,12 @@ public final class Mods {
         requireInRange(fineTune, -8, 7);
 
         int periodIndex = getPeriodIndex(period);
+
+        if (periodIndex == -1) {
+            // this happens when mods use non-standard periods outside of range e.g. 90s_house_project.mod
+            return findNearestPeriod(period, fineTune);
+        }
+
         fineTune += 8;
 
         return FINE_TUNE_PERIODS[fineTune][periodIndex];
