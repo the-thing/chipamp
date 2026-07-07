@@ -675,6 +675,10 @@ public final class Sampler {
         this.config.volumeSlideDeltaEnabled = volumeSlideDeltaEnabled;
     }
 
+    public void setRoundNearestPeriodEnabled(boolean roundNearestPeriodEnabled) {
+        this.config.roundNearestPeriodEnabled = roundNearestPeriodEnabled;
+    }
+
     public void setLoopDetectionEnabled(boolean loopDetectionEnabled) {
         this.config.loopDetectionEnabled = loopDetectionEnabled;
     }

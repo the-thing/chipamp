@@ -141,6 +141,29 @@ class PlayTool {
         player.play();
     }
 
+    @Test
+    void playCustomPeriods() throws IOException, LineUnavailableException {
+        ModLoader modLoader = new ModLoader(true);
+        Mod mod = modLoader.load("chip/other/90s_house_project.mod");
+
+        Sampler sampler = new Sampler();
+        sampler.updateMod(mod);
+        sampler.setRoundNearestPeriodEnabled(false);
+        sampler.setLoggingEnabled(true);
+
+        sampler.setMuted(0, true);
+        sampler.setMuted(1, true);
+        sampler.setMuted(2, true);
+        sampler.setMuted(3, false);
+
+        sampler.seekSequence(12);
+
+        // pattern 12 is full of custom notes on channel 3
+
+        Player player = new Player(sampler);
+        player.playPatterns(1);
+    }
+
     // TODO remove
     @Test
     void test() throws IOException, LineUnavailableException {
@@ -149,9 +172,14 @@ class PlayTool {
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
+        sampler.setRoundNearestPeriodEnabled(false);
         sampler.setLoggingEnabled(true);
 
-        sampler.seekSequence(11);
+        sampler.setMuted(0, true);
+        sampler.setMuted(1, true);
+        sampler.setMuted(2, true);
+
+        sampler.seekSequence(12);
 
         Player player = new Player(sampler);
         player.play();
