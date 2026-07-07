@@ -76,4 +76,14 @@ class FormattersTest {
         assertThat(Formatters.formatHexInt(Integer.MIN_VALUE)).isEqualTo("80000000");
         assertThat(Formatters.formatHexInt(Integer.MAX_VALUE)).isEqualTo("7FFFFFFF");
     }
+
+    @Test
+    void shouldFormatSamples() throws IOException {
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        String formatted = Formatters.formatSamples(mod);
+
+        String expected = Resources.readText("samples.txt");
+
+        assertThat(formatted).isEqualTo(expected);
+    }
 }

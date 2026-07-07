@@ -4,6 +4,7 @@ import com.github.thething.chipamp.mod.EffectType;
 import com.github.thething.chipamp.mod.Instrument;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.Mods;
+import com.github.thething.chipamp.mod.Sample;
 
 public final class Formatters {
 
@@ -184,6 +185,41 @@ public final class Formatters {
             }
 
             out.append("\"");
+        }
+    }
+
+    public static String formatSamples(Mod mod) {
+        StringBuilder out = new StringBuilder();
+        formatSamples(mod, out);
+        return out.toString();
+    }
+
+    public static void formatSamples(Mod mod, StringBuilder out) {
+        for (int sampleIndex = 0; sampleIndex < mod.getSampleCount(); sampleIndex++) {
+            Sample sample = mod.getSample(sampleIndex);
+
+            Strings.padLeft(out, sample.getName(), 22, ' ');
+            out.append(" | ");
+
+            Strings.padLeft(out, String.valueOf(sampleIndex + 1), 2, ' ');
+            out.append(" | ");
+
+            Strings.padLeft(out, String.valueOf(sample.getDataLength()), 5, '0');
+            out.append(" | ");
+
+            Strings.padLeft(out, String.valueOf(sample.getFineTune()), 2, ' ');
+            out.append(" | ");
+
+            Strings.padLeft(out, String.valueOf(sample.getVolume()), 2, ' ');
+            out.append(" | ");
+
+            Strings.padLeft(out, String.valueOf(sample.getLoopStart()), 5, ' ');
+            out.append(" | ");
+
+            Strings.padLeft(out, String.valueOf(sample.getLoopEnd()), 5, ' ');
+            out.append(" |");
+
+            out.append("\r\n");
         }
     }
 }
