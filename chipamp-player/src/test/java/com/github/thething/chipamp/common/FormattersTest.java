@@ -88,8 +88,8 @@ class FormattersTest {
     @Test
     void shouldFormatSamples() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
-        String formatted = Formatters.formatSamples(mod);
 
+        String formatted = Formatters.formatSamples(mod);
         String expected = Resources.readText("samples.txt");
 
         assertThat(formatted).isEqualTo(expected);
