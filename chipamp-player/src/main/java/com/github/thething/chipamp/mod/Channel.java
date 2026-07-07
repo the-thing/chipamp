@@ -36,6 +36,7 @@ final class Channel {
     int portamentoTargetPeriod;
     int portamentoSpeed;
     int retriggerTickIndex;
+    int cutSampleIndex;
     boolean glissandoEnabled;
     boolean periodTriggered;
     int volumeSlide;
@@ -83,6 +84,7 @@ final class Channel {
         portamentoTargetPeriod = 0;
         portamentoSpeed = 0;
         retriggerTickIndex = 0;
+        cutSampleIndex = 0;
         glissandoEnabled = false;
         volumeSlide = 0;
         vibratoPosition = 0;
@@ -177,6 +179,7 @@ final class Channel {
         portamentoTargetPeriod = other.portamentoTargetPeriod;
         portamentoSpeed = other.portamentoSpeed;
         retriggerTickIndex = other.retriggerTickIndex;
+        cutSampleIndex = other.cutSampleIndex;
         glissandoEnabled = other.glissandoEnabled;
         periodTriggered = other.periodTriggered;
         volumeSlide = other.volumeSlide;

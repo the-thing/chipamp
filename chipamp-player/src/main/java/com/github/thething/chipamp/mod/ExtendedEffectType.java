@@ -206,13 +206,21 @@ public enum ExtendedEffectType implements Effect {
     CUT_SAMPLE(0x0C) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            // TODO
-            System.out.println("CUT_SAMPLE not supported");
+            if (channel.effectArgumentY == 0) {
+                // cut sample immediately
+                channel.volume = 0;
+            } else {
+                channel.cutSampleIndex = 0;
+            }
         }
 
         @Override
         public void onMidRow(Channel channel, Context context, Config config) {
-            // TODO
+            channel.cutSampleIndex++;
+
+            if (channel.cutSampleIndex == channel.effectArgumentY) {
+                channel.volume = 0;
+            }
         }
     },
 
