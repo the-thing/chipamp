@@ -5,7 +5,7 @@ import static com.github.thething.chipamp.common.Requirements.requireInRange;
 final class Channel {
 
     /**
-     * Hardware panning left or right.
+     * Default hardware panning for that channel.
      */
     final boolean right;
 
