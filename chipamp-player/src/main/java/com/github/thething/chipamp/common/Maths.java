@@ -91,10 +91,6 @@ public final class Maths {
      * @throws IllegalArgumentException if value is not positive
      */
     public static int roundDownPow2(int value) {
-        if (value <= 0) {
-            throw new IllegalArgumentException("Value must be positive: " + value);
-        }
-
         return Integer.highestOneBit(value);
     }
 
