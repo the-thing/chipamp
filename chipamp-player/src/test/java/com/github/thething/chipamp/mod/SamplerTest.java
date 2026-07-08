@@ -296,7 +296,8 @@ class SamplerTest {
     }
 
     @Test
-    void shouldLoadModWithInvalidSampleData() throws IOException {
+    void shouldLoadModWithEmptyDelayedSample() throws IOException {
+        // pattern 0, row 17
         Mod mod = modLoader.load("chip/other/entertainer_pizcon.mod");
         underTest.updateMod(mod);
     }
