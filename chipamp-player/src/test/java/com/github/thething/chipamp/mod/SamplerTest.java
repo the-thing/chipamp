@@ -53,7 +53,6 @@ class SamplerTest {
         assertThat(audio.length).isEqualTo(25_743_360);
     }
 
-    // TODO
     @Test
     void shouldGenerateAudioFile() throws IOException, UnsupportedAudioFileException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
@@ -65,7 +64,6 @@ class SamplerTest {
         assertThat(audio).containsExactly(expectedAudio);
     }
 
-    // TODO
     @Test
     void shouldGenerateSinglePattern() throws IOException, UnsupportedAudioFileException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
@@ -297,7 +295,7 @@ class SamplerTest {
 
     @Test
     void shouldLoadModWithEmptyDelayedSample() throws IOException {
-        // pattern 0, row 17
+        // empty pattern 0, row 17
         Mod mod = modLoader.load("chip/other/entertainer_pizcon.mod");
         underTest.updateMod(mod);
     }

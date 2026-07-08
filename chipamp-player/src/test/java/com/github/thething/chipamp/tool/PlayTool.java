@@ -157,23 +157,6 @@ class PlayTool {
 
     // TODO remove
     @Test
-    void test() throws IOException, LineUnavailableException {
-        ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/other/elgpasa.mod");
-
-        // System.out.println(Formatters.formatSamples(mod));
-        // System.out.println(Formatters.formatPatterns(mod));
-
-        Sampler sampler = new Sampler();
-        sampler.updateMod(mod);
-        sampler.setLoggingEnabled(true);
-
-        Player player = new Player(sampler);
-        player.play();
-    }
-
-    // TODO remove
-    @Test
     void foo() throws IOException {
         ModLoader modLoader = new ModLoader(true);
         Sampler sampler = new Sampler();
