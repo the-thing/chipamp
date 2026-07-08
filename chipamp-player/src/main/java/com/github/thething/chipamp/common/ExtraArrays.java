@@ -14,8 +14,20 @@ public final class ExtraArrays {
     }
 
     /**
-     * Searches for the first occurrence of a value in a subrange of a byte array.
-     * Returns the relative index from the start of the subrange, not the absolute index in the array.
+     * Searches for the first occurrence of a value in a byte array. Returns the index of the first match, or {@code -1}
+     * if not found.
+     *
+     * @param values the byte array to search
+     * @param value  the value to search for
+     * @return the index of the first occurrence, or {@code -1} if not found
+     */
+    public static int indexOf(byte[] values, byte value) {
+        return indexOf(values, 0, values.length, value);
+    }
+
+    /**
+     * Searches for the first occurrence of a value in a subrange of a byte array. Returns the relative index from the
+     * start of the subrange, not the absolute index in the array.
      *
      * @param values the byte array to search
      * @param offset the starting position in the array
