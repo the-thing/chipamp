@@ -242,19 +242,23 @@ public enum ExtendedEffectType implements Effect {
                     channel.updateSample(channel.delayedSample);
                 }
 
-                // TODO check if delayed period can be 0
-                channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
-                channel.samplePosition = 0.0f;
-                channel.resetOnNewSampleWithPeriod();
+                 if (channel.delayedPeriod != 0) {
+                    // it is possible that delayed period is 0 - entertainer_pizcon.mod
+                    channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
+                    channel.samplePosition = 0.0f;
+                    channel.resetOnNewSampleWithPeriod();
+                }
 
                 // reset delayed sample
                 channel.delayedSample = null;
                 channel.delayedPeriod = 0;
             } else if (delay > 0 && delay < context.speed) {
                 channel.delayedTriggerTickIndex = delay;
+            } else {
+                // otherwise the delayed sample never triggers
+                channel.delayedSample = null;
+                channel.delayedPeriod = 0;
             }
-
-            // otherwise the delayed sample never triggers
         }
 
         @Override
@@ -274,10 +278,12 @@ public enum ExtendedEffectType implements Effect {
                     channel.updateSample(channel.delayedSample);
                 }
 
-                // TODO check if delayed period can be 0
-                channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
-                channel.samplePosition = 0.0f;
-                channel.resetOnNewSampleWithPeriod();
+                if (channel.delayedPeriod != 0) {
+                    // it is possible that delayed period is 0 - entertainer_pizcon.mod
+                    channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
+                    channel.samplePosition = 0.0f;
+                    channel.resetOnNewSampleWithPeriod();
+                }
 
                 // reset delayed sample
                 channel.delayedTickIndex = 0;
