@@ -5,6 +5,9 @@ package com.github.thething.chipamp.common;
  */
 public final class Strings {
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private Strings() {
     }
 
@@ -47,14 +50,33 @@ public final class Strings {
         out.append(value);
     }
 
+    /**
+     * Checks if the character at the specified index in the string is a digit (0-9).
+     *
+     * @param str   the string to check
+     * @param index the index of the character to check
+     * @return {@code true} if the character is a digit, {@code false} otherwise
+     */
     public static boolean isDigit(String str, int index) {
         char c = str.charAt(index);
         return c >= '0' && c <= '9';
     }
 
+    /**
+     * Compares two strings for equality, handling null values safely. Returns {@code true} if both strings are null or
+     * have identical content.
+     *
+     * @param str1 the first string to compare
+     * @param str2 the second string to compare
+     * @return {@code true} if the strings are equal, {@code false} otherwise
+     */
     public static boolean equals(String str1, String str2) {
         if (str1 == str2) {
             return true;
+        }
+
+        if (str1 == null || str2 == null) {
+            return false;
         }
 
         if (str1.length() != str2.length()) {
