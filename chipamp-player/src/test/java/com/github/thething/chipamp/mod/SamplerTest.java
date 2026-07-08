@@ -294,4 +294,10 @@ class SamplerTest {
 
         assertThat(underTest.getSamplesPerRow()).isEqualTo(5760);
     }
+
+    @Test
+    void shouldLoadModWithInvalidSampleData() throws IOException {
+        Mod mod = modLoader.load("chip/other/entertainer_pizcon.mod");
+        underTest.updateMod(mod);
+    }
 }

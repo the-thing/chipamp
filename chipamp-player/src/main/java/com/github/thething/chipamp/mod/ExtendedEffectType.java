@@ -236,10 +236,20 @@ public enum ExtendedEffectType implements Effect {
 
             if (delay == 0) {
                 // trigger immediately
-                channel.updateSample(channel.delayedSample);
+
+                if (channel.delayedSample != null) {
+                    // it is possible that delayed sample is null - entertainer_pizcon.mod
+                    channel.updateSample(channel.delayedSample);
+                }
+
+                // TODO check if delayed period can be 0
                 channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
                 channel.samplePosition = 0.0f;
                 channel.resetOnNewSampleWithPeriod();
+
+                // reset delayed sample
+                channel.delayedSample = null;
+                channel.delayedPeriod = 0;
             } else if (delay > 0 && delay < context.speed) {
                 channel.delayedTriggerTickIndex = delay;
             }
@@ -258,7 +268,13 @@ public enum ExtendedEffectType implements Effect {
 
             if (channel.delayedTriggerTickIndex == channel.delayedTickIndex) {
                 // trigger new period with sample
-                channel.updateSample(channel.delayedSample);
+
+                if (channel.delayedSample != null) {
+                    // it is possible that delayed sample is null - entertainer_pizcon.mod
+                    channel.updateSample(channel.delayedSample);
+                }
+
+                // TODO check if delayed period can be 0
                 channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
                 channel.samplePosition = 0.0f;
                 channel.resetOnNewSampleWithPeriod();
