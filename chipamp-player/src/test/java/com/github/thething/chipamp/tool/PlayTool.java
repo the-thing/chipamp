@@ -29,7 +29,7 @@ class PlayTool {
     @Test
     public void playAsync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/Slawomir Mrozek - Franko End.mod");
+        Mod mod = modLoader.load("chip/H0ffman - Eon.mod");
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
