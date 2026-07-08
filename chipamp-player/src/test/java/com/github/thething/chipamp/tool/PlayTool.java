@@ -1,5 +1,7 @@
 package com.github.thething.chipamp.tool;
 
+import com.github.thething.chipamp.concurrent.IdleStrategy;
+import com.github.thething.chipamp.concurrent.SleepingIdleStrategy;
 import com.github.thething.chipamp.mod.AsyncSourceDataLine;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
@@ -21,10 +23,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ThreadFactory;
 
+@SuppressWarnings("NewClassNamingConvention")
 class PlayTool {
 
     @Test
-    public void playAsync() throws IOException, LineUnavailableException, InterruptedException {
+    public void playAsync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/Slawomir Mrozek - Franko End.mod");
 
@@ -34,6 +37,7 @@ class PlayTool {
 
         AudioFormat format = sampler.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+        IdleStrategy idleStrategy = new SleepingIdleStrategy(100L);
 
         try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info)) {
             line.open(format);
@@ -55,7 +59,11 @@ class PlayTool {
                             throw new RuntimeException("Unable to write all samples");
                         }
                     } else {
-                        Thread.sleep(100);
+                        idleStrategy.idle();
+                    }
+
+                    if (Thread.currentThread().isInterrupted()) {
+                        break;
                     }
                 }
             }
@@ -161,19 +169,22 @@ class PlayTool {
         ModLoader modLoader = new ModLoader(true);
         Sampler sampler = new Sampler();
 
-        for (File file : new File("C:\\Users\\Marcin\\Downloads\\mod").listFiles()) {
+        File dir = new File("C:\\Users\\Marcin\\Downloads\\mod");
+        File[] files = dir.listFiles();
+
+        if (files == null) {
+            throw new RuntimeException("Unable to list files in directory: " + dir.getAbsolutePath());
+        }
+
+        for (File file : files) {
             if (!file.getName().endsWith(".mod")) {
                 continue;
             }
 
             System.out.println("Loading: " + file.getName());
+
             Mod mod = modLoader.load(file);
-
             sampler.updateMod(mod);
-
-            while (sampler.getSequenceIndex() < mod.getLength()) {
-                sampler.read();
-            }
         }
     }
 
