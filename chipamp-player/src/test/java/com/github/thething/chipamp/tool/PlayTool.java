@@ -55,7 +55,7 @@ class PlayTool {
                             throw new RuntimeException("Unable to write all samples");
                         }
                     } else {
-                        Thread.sleep(1);
+                        Thread.sleep(100);
                     }
                 }
             }
@@ -65,14 +65,11 @@ class PlayTool {
     @Test
     void playSync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/H0ffman - Eon.mod");
+        Mod mod = modLoader.load("chip/Captain - Space Debris.mod");
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
         sampler.setLoggingEnabled(true);
-        sampler.setStereoFoldDownEnabled(false);
-
-        sampler.seekPattern(60);
 
         Player player = new Player(sampler);
         player.play();
@@ -85,13 +82,13 @@ class PlayTool {
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
-        sampler.seekSequence(2);
         sampler.setLoggingEnabled(true);
 
         // sequence 2 (pattern 0), row 50 it sounds strange
+        sampler.seekSequence(2);
 
         Player player = new Player(sampler);
-        player.playPatterns(3);
+        player.playPatterns(1);
     }
 
     @Test
@@ -101,9 +98,9 @@ class PlayTool {
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
-        sampler.seekSequence(2);
         sampler.setLoggingEnabled(true);
 
+        sampler.seekSequence(2);
         // sequence 2 (pattern 0), row 14
 
         Player player = new Player(sampler);
@@ -117,10 +114,10 @@ class PlayTool {
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
-        sampler.seekSequence(1);
         sampler.setLoggingEnabled(true);
 
         // sequence 1 (pattern 7), row 62
+        sampler.seekSequence(1);
 
         Player player = new Player(sampler);
         player.playPatterns(1);
@@ -151,14 +148,8 @@ class PlayTool {
         sampler.setRoundNearestPeriodEnabled(false);
         sampler.setLoggingEnabled(true);
 
-        sampler.setMuted(0, true);
-        sampler.setMuted(1, true);
-        sampler.setMuted(2, true);
-        sampler.setMuted(3, false);
-
-        sampler.seekSequence(12);
-
         // pattern 12 is full of custom notes on channel 3
+        sampler.seekSequence(12);
 
         Player player = new Player(sampler);
         player.playPatterns(1);
