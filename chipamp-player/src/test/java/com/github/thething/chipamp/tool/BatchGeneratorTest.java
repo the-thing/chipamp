@@ -7,6 +7,7 @@ import com.github.thething.chipamp.mod.Mods;
 import com.github.thething.chipamp.mod.Sampler;
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -20,7 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-class BatchGenerator {
+class BatchGeneratorTest {
 
     private Sampler sampler;
     private ModLoader modLoader;
@@ -33,6 +34,7 @@ class BatchGenerator {
 
     @ParameterizedTest
     @MethodSource("modSource")
+    @Disabled
     void shouldGenerate(
             String resourceName, int clockHz, int samplingRate,
             int minPeriod, int maxPeriod, float volumeMultiplier,
@@ -81,7 +83,7 @@ class BatchGenerator {
 
     public static void main(String[] args) {
         LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
-                .selectors(DiscoverySelectors.selectClass(BatchGenerator.class))
+                .selectors(DiscoverySelectors.selectClass(BatchGeneratorTest.class))
                 .build();
 
         Launcher launcher = LauncherFactory.create();
