@@ -2,6 +2,19 @@ package com.github.thething.chipamp.common;
 
 public final class Maths {
 
+    private static final float[] FLOAT_MULTIPLIERS;
+
+    static {
+        FLOAT_MULTIPLIERS = new float[10];
+
+        float value = 1.0f;
+
+        for (int i = 0; i < FLOAT_MULTIPLIERS.length; i++) {
+            FLOAT_MULTIPLIERS[i] = value;
+            value *= 10.0f;
+        }
+    }
+
     private Maths() {
     }
 
@@ -23,5 +36,9 @@ public final class Maths {
         }
 
         return Integer.highestOneBit(value);
+    }
+
+    public static float round(float value, int scale) {
+        return Math.round(value * FLOAT_MULTIPLIERS[scale]) / FLOAT_MULTIPLIERS[scale];
     }
 }

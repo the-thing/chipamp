@@ -214,11 +214,10 @@ public enum EffectType implements Effect {
     SET_PANNING_POSITION(0x08) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            // original amiga doesn't support this effect
             int panningPosition = (channel.effectArgumentX) << 4 | channel.effectArgumentY;
 
-            float rightPan = panningPosition / 255.0f;
-            float leftPan = 1.0f - rightPan;
+            float rightPan = Maths.round(panningPosition / 255.0f, 2);
+            float leftPan = Maths.round(1.0f - rightPan, 2);
 
             channel.updatePanning(leftPan, rightPan);
         }

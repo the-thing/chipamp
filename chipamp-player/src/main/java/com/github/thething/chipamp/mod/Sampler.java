@@ -728,6 +728,14 @@ public final class Sampler {
         return context.speed * context.samplesPerTick;
     }
 
+    public float getLeftPan(int channelIndex) {
+        return channels[channelIndex].leftPan;
+    }
+
+    public float getRightPan(int channelIndex) {
+        return channels[channelIndex].rightPan;
+    }
+
     private record State(int patternIndex, int rowIndex, boolean loopPending, int loopRowIndex, int loopCounter) {
     }
 }

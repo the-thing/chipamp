@@ -151,7 +151,12 @@ public enum ExtendedEffectType implements Effect {
     ROUGH_PANNING(0x08) {
         @Override
         public void onNewRow(Channel channel, Context context, Config config, int rowIndex) {
-            // TODO check if this is used anywhere
+            int panningPosition = channel.effectArgumentY;
+
+            float rightPan = Maths.round(panningPosition / 15.0f, 2);
+            float leftPan = Maths.round(1.0f - rightPan, 2);
+
+            channel.updatePanning(leftPan, rightPan);
         }
 
         @Override
@@ -242,7 +247,7 @@ public enum ExtendedEffectType implements Effect {
                     channel.updateSample(channel.delayedSample);
                 }
 
-                 if (channel.delayedPeriod != 0) {
+                if (channel.delayedPeriod != 0) {
                     // it is possible that delayed period is 0 - entertainer_pizcon.mod
                     channel.updatePeriodAndIncrement(channel.delayedPeriod, config.clockHz, config.samplingRate);
                     channel.samplePosition = 0.0f;

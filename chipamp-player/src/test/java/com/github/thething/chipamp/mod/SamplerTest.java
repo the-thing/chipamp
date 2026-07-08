@@ -299,4 +299,29 @@ class SamplerTest {
         Mod mod = modLoader.load("chip/other/entertainer_pizcon.mod");
         underTest.updateMod(mod);
     }
+
+    @Test
+    void shouldSampleModWithRoughPanningExtendedEffect() throws IOException {
+        underTest.setLeftPan(1.0f);
+        underTest.setRightPan(1.0f);
+
+        Mod mod = modLoader.load("chip/other/eternal_vortex-1.mod");
+        assertThat(Mods.isExtendedEffectPresent(mod, ExtendedEffectType.ROUGH_PANNING)).isTrue();
+
+        underTest.updateMod(mod);
+
+        assertThat(underTest.getLeftPan(1)).isEqualTo(0.0f);
+        assertThat(underTest.getRightPan(1)).isEqualTo(1.0f);
+
+        underTest.seekSequence(0, 1);
+
+        assertThat(underTest.getLeftPan(1)).isEqualTo(0.0f);
+        assertThat(underTest.getRightPan(1)).isEqualTo(1.0f);
+
+        // effect takes place on sequence 0, row 1
+        underTest.seekSequence(0, 2);
+
+        assertThat(underTest.getLeftPan(1)).isEqualTo(0.53f);
+        assertThat(underTest.getRightPan(1)).isEqualTo(0.47f);
+    }
 }
