@@ -10,13 +10,43 @@ import java.util.Set;
 
 import static com.github.thething.chipamp.common.Requirements.requireInRange;
 
+/**
+ * Utility class for MOD (Module) file format operations and constants.
+ * <p>
+ * This class provides functionality for working with ProTracker MOD files, including period-to-frequency conversion,
+ * note handling, effect processing, and waveform generation. It contains period tables, fine-tuning calculations, and
+ * various helper methods for analyzing and manipulating MOD data.
+ */
 public final class Mods {
 
+    /**
+     * PAL system clock frequency in Hertz (3,546,895 Hz). Used for period-to-frequency conversion in PAL systems.
+     */
     public static final int PAL_CLOCK_HZ = 3_546_895;
+
+    /**
+     * NTSC system clock frequency in Hertz (3,579,545 Hz). Used for period-to-frequency conversion in NTSC systems.
+     */
     public static final int NTSC_CLOCK_HZ = 3_579_545;
+
+    /**
+     * Minimum valid period value (B-4, the highest note).
+     */
     public static final int MIN_PERIOD = 57;
+
+    /**
+     * Maximum valid period value (C-0, the lowest note).
+     */
     public static final int MAX_PERIOD = 1712;
+
+    /**
+     * ModPlug Tracker left pan position (92/255).
+     */
     public static final float MPT_LEFT_PAN = 92.0f / 255.0f;
+
+    /**
+     * ModPlug Tracker right pan position (192/255).
+     */
     public static final float MPT_RIGHT_PAN = 192.0f / 255.0f;
 
     /**
@@ -33,12 +63,21 @@ public final class Mods {
      */
     private static final String[] NOTES = new String[1713];
 
+    /**
+     * Sorted array of all valid period values used for binary search operations.
+     */
     private static final int[] PERIODS;
 
+    /**
+     * Custom note names for non-standard periods, indexed by the first character of the note name.
+     */
     private static final String[] CUSTOM_NOTES = new String[]{
             "A-X", "B-X", "C-X", "D-X", "E-X", "F-X", "G-X"
     };
 
+    /**
+     * Sine wave lookup table for waveform generation (32 values, 0-255 range).
+     */
     private static final int[] SINE_TABLE = {
             0, 24, 49, 74, 97, 120, 141, 161, 180,
             197, 212, 224, 235, 244, 250, 253, 255,
@@ -46,6 +85,10 @@ public final class Mods {
             161, 141, 120, 97, 74, 49, 24
     };
 
+    /**
+     * Fine-tune period tables for all 16 fine-tune values (-8 to +7). Each row contains 36 period values (3 octaves ×
+     * 12 notes).
+     */
     private static final int[][] FINE_TUNE_PERIODS = {
             // fine -8
             {907, 856, 808, 762, 720, 678, 640, 604, 570, 538, 508, 480,
@@ -112,6 +155,9 @@ public final class Mods {
                     407, 384, 363, 342, 323, 305, 288, 272, 256, 242, 228, 216,
                     203, 192, 181, 171, 161, 152, 144, 136, 128, 121, 114, 108}};
 
+    /**
+     * Funk repeat (invert loop) speed table for the EFx effect.
+     */
     private static final int[] FUNK_TABLE = {
             0, 5, 6, 7, 8, 10, 11, 13, 16, 19, 22, 26, 32, 43, 64, 128
     };
@@ -204,6 +250,12 @@ public final class Mods {
     private Mods() {
     }
 
+    /**
+     * Gets the note name for a given period value.
+     *
+     * @param period the period value
+     * @return the note name (e.g., "C-3", "A#2") or null if the period is invalid or non-standard
+     */
     public static String getNote(int period) {
         if (period > NOTES.length) {
             return null;
@@ -212,6 +264,17 @@ public final class Mods {
         return NOTES[period];
     }
 
+    /**
+     * Applies fine-tuning to a period value.
+     * <p>
+     * Fine-tuning allows adjustment of pitch by ±8 steps, where each step is 1/8 of a semitone.
+     *
+     * @param period             the base period value
+     * @param fineTune           the fine-tune value (-8 to +7)
+     * @param roundNearestPeriod whether to round non-standard periods to the nearest valid period
+     * @return the fine-tuned period value
+     * @throws IllegalArgumentException if fine-tune is not in range [-8, 7]
+     */
     public static int getFineTunePeriod(int period, int fineTune, boolean roundNearestPeriod) {
         requireInRange(fineTune, -8, 7);
 
@@ -231,6 +294,17 @@ public final class Mods {
         return FINE_TUNE_PERIODS[fineTune][periodIndex];
     }
 
+    /**
+     * Calculates a custom fine-tuned period using a mathematical formula.
+     * <p>
+     * Used for non-standard periods that don't exist in the standard period table. The formula applies exponential
+     * scaling: period * 2^(-fineTune/96)
+     *
+     * @param period   the base period value
+     * @param fineTune the fine-tune value (-8 to +7)
+     * @return the fine-tuned period value, rounded to the nearest integer
+     * @throws IllegalArgumentException if fine-tune is not in range [-8, 7]
+     */
     public static int getCustomFineTunePeriod(int period, int fineTune) {
         requireInRange(fineTune, -8, 7);
 
@@ -243,10 +317,24 @@ public final class Mods {
         return (int) Math.round(period * factor);
     }
 
+    /**
+     * Gets the index of a period in the period table with the default fine-tuning (0).
+     *
+     * @param period the period value to look up
+     * @return the index (0-35) or -1 if the period is not found in the table
+     */
     public static int getPeriodIndex(int period) {
         return getPeriodIndex(period, 0);
     }
 
+    /**
+     * Gets the index of a period in the fine-tuned period table.
+     *
+     * @param period   the period value to look up
+     * @param fineTune the fine-tune value (-8 to +7)
+     * @return the index (0-35) or -1 if the period is not found in the table
+     * @throws IllegalArgumentException if fine-tune is not in range [-8, 7]
+     */
     public static int getPeriodIndex(int period, int fineTune) {
         requireInRange(fineTune, -8, 7);
 
@@ -261,6 +349,18 @@ public final class Mods {
         return -1;
     }
 
+    /**
+     * Shifts a period up or down by a specified number of semitones.
+     * <p>
+     * Positive semitones shift the period up (lower pitch), negative semitones shift down (higher pitch). The result is
+     * clamped to the valid period range.
+     *
+     * @param period    the base period value
+     * @param fineTune  the fine-tune value (-8 to +7)
+     * @param semitones the number of semitones to shift (can be negative)
+     * @return the shifted period value, or the original period if it's not found in the table
+     * @throws IllegalArgumentException if fine-tune is not in range [-8, 7]
+     */
     public static int shiftUpPeriodBySemitones(int period, int fineTune, int semitones) {
         requireInRange(fineTune, -8, 7);
 
@@ -280,6 +380,14 @@ public final class Mods {
         return periods[newIndex];
     }
 
+    /**
+     * Finds the nearest valid period to a target period value in the fine-tuned period table.
+     *
+     * @param targetPeriod the target period value
+     * @param fineTune     the fine-tune value (-8 to +7)
+     * @return the nearest valid period value
+     * @throws IllegalArgumentException if fine-tune is not in range [-8, 7]
+     */
     public static int findNearestPeriod(int targetPeriod, int fineTune) {
         requireInRange(fineTune, -8, 7);
 
@@ -299,6 +407,14 @@ public final class Mods {
         return nearest;
     }
 
+    /**
+     * Finds the closest note name for a given period value using binary search.
+     * <p>
+     * If the exact period is not found, returns the note name of the closest period.
+     *
+     * @param period the period value
+     * @return the closest note name (e.g., "C-3", "A#2")
+     */
     public static String findClosestNote(int period) {
         int index = Arrays.binarySearch(PERIODS, period);
 
@@ -326,11 +442,28 @@ public final class Mods {
         }
     }
 
+    /**
+     * Gets a custom note name for non-standard periods.
+     * <p>
+     * Returns a note name like "A-X", "B-X", etc., based on the closest standard note.
+     *
+     * @param period the period value
+     * @return the custom note name
+     */
     public static String getCustomNote(int period) {
         String note = findClosestNote(period);
         return CUSTOM_NOTES[note.charAt(0) - 'A'];
     }
 
+    /**
+     * Gets a waveform value for a given waveform type and position.
+     * <p>
+     * Used for vibrato and tremolo effects. The position wraps around every 64 steps.
+     *
+     * @param type     the waveform type (SINE, SAWTOOTH, or SQUARE)
+     * @param position the position in the waveform (0-63, wraps automatically)
+     * @return the waveform value in the range [-255, 255]
+     */
     public static int getWaveformValue(WaveformType type, int position) {
         position = position & 63;
         int raw = SINE_TABLE[position & 31];
@@ -349,6 +482,12 @@ public final class Mods {
         }
     }
 
+    /**
+     * Collects all unique effect types used in a MOD file.
+     *
+     * @param mod the MOD file to analyze
+     * @return a set of all unique effect types found in the MOD
+     */
     public static Set<EffectType> getUniqueEffects(Mod mod) {
         EnumSet<EffectType> effectTypes = EnumSet.noneOf(EffectType.class);
 
@@ -368,6 +507,12 @@ public final class Mods {
         return effectTypes;
     }
 
+    /**
+     * Collects all unique extended effect types used in a MOD file.
+     *
+     * @param mod the MOD file to analyze
+     * @return a set of all unique extended effect types found in the MOD
+     */
     public static Set<ExtendedEffectType> getUniqueExtendedEffects(Mod mod) {
         EnumSet<ExtendedEffectType> extendedEffectTypes = EnumSet.noneOf(ExtendedEffectType.class);
 
@@ -388,12 +533,16 @@ public final class Mods {
     }
 
     /**
-     * Convert a period value to a playback frequency (Hz).
+     * Converts a period value to a playback frequency in Hertz.
      * <p>
-     * frequency = clock / period
+     * Uses the formula: frequency = clock / period
      * <p>
-     * Period 428 → middle C (C-3) = 8287 Hz on PAL. The mixer then re-samples this to whatever output rate you have
-     * chosen.
+     * For example, period 428 (middle C, C-3) produces 8287 Hz on PAL systems. The mixer then resamples this to the
+     * output sample rate.
+     *
+     * @param period the period value
+     * @param clock  the clock frequency in Hz (typically PAL_CLOCK_HZ or NTSC_CLOCK_HZ)
+     * @return the frequency in Hz, or 0 if the period is non-positive
      */
     public static float periodToHz(int period, float clock) {
         if (period <= 0) {
@@ -403,7 +552,13 @@ public final class Mods {
         return clock / period;
     }
 
-    public static boolean containsCustomNotes(Mod mod) {
+    /**
+     * Checks if a MOD file contains any non-standard period values (custom notes).
+     *
+     * @param mod the MOD file to check
+     * @return true if the MOD contains at least one custom note, false otherwise
+     */
+    public static boolean isCustomNotePresent(Mod mod) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
                 for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
@@ -420,6 +575,13 @@ public final class Mods {
         return false;
     }
 
+    /**
+     * Checks if a specific effect type is used anywhere in a MOD file.
+     *
+     * @param mod        the MOD file to check
+     * @param effectType the effect type to search for
+     * @return true if the effect is found at least once, false otherwise
+     */
     public static boolean isEffectPresent(Mod mod, EffectType effectType) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
@@ -436,6 +598,13 @@ public final class Mods {
         return false;
     }
 
+    /**
+     * Checks if a specific extended effect type is used anywhere in a MOD file.
+     *
+     * @param mod        the MOD file to check
+     * @param effectType the extended effect type to search for
+     * @return true if the extended effect is found at least once, false otherwise
+     */
     public static boolean isExtendedEffectPresent(Mod mod, ExtendedEffectType effectType) {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
@@ -452,6 +621,13 @@ public final class Mods {
         return false;
     }
 
+    /**
+     * Finds the first sequence position that references a given pattern index.
+     *
+     * @param mod          the MOD file to search
+     * @param patternIndex the pattern index to find
+     * @return the sequence index (0-127) or -1 if the pattern is not found in the sequence
+     */
     public static int findSequenceIndex(Mod mod, int patternIndex) {
         for (int sequenceIndex = 0; sequenceIndex < mod.getLength(); sequenceIndex++) {
             if (mod.getPatternIndex(sequenceIndex) == patternIndex) {
@@ -462,6 +638,14 @@ public final class Mods {
         return -1;
     }
 
+    /**
+     * Gets the funk repeat (invert loop) speed value for a given index.
+     * <p>
+     * Used by the EFx (invert loop) effect to determine sample manipulation speed.
+     *
+     * @param index the funk table index (0-15)
+     * @return the funk speed value
+     */
     public static int getFunk(int index) {
         return FUNK_TABLE[index];
     }
