@@ -7,12 +7,8 @@ import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
 import com.github.thething.chipamp.mod.Player;
 import com.github.thething.chipamp.mod.Sampler;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.engine.discovery.DiscoverySelectors;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
-import org.junit.platform.launcher.core.LauncherFactory;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -23,10 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ThreadFactory;
 
-@SuppressWarnings("NewClassNamingConvention")
-class PlayTool {
+class PlayTest {
 
     @Test
+    @Disabled
     public void playAsync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/H0ffman - Eon.mod");
@@ -71,6 +67,7 @@ class PlayTool {
     }
 
     @Test
+    @Disabled
     void playSync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/Captain - Space Debris.mod");
@@ -84,6 +81,7 @@ class PlayTool {
     }
 
     @Test
+    @Disabled
     void playStrangeSound() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/other/static_-_hardcore.mod");
@@ -100,6 +98,7 @@ class PlayTool {
     }
 
     @Test
+    @Disabled
     void playCutSample() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/other/adventure_in.mod");
@@ -116,6 +115,7 @@ class PlayTool {
     }
 
     @Test
+    @Disabled
     void playDelayPattern() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/other/emotional_extacy.mod");
@@ -132,6 +132,7 @@ class PlayTool {
     }
 
     @Test
+    @Disabled
     void playInvertLoop() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/other/euroremix.mod");
@@ -147,6 +148,7 @@ class PlayTool {
     }
 
     @Test
+    @Disabled
     void playCustomPeriods() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/other/90s_house_project.mod");
@@ -165,6 +167,7 @@ class PlayTool {
 
     // TODO remove
     @Test
+    @Disabled
     void foo() throws IOException {
         ModLoader modLoader = new ModLoader(true);
         Sampler sampler = new Sampler();
@@ -186,14 +189,5 @@ class PlayTool {
             Mod mod = modLoader.load(file);
             sampler.updateMod(mod);
         }
-    }
-
-    public static void main(String[] args) {
-        LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
-                .selectors(DiscoverySelectors.selectClass(PlayTool.class))
-                .build();
-
-        Launcher launcher = LauncherFactory.create();
-        launcher.execute(request);
     }
 }
