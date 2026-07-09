@@ -9,6 +9,13 @@ import javax.sound.sampled.SourceDataLine;
 import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Plays audio from MOD format tracker files using a {@link Sampler}.
+ * <p>
+ * This class provides methods to play audio through Java's sound system, supporting playback by sequence index,
+ * patterns, or rows. It manages the audio line and buffer for audio output.
+ * </p>
+ */
 public final class Player {
 
     private static final int DEFAULT_BUFFER_SIZE = 4096;
@@ -19,15 +26,37 @@ public final class Player {
         this.sampler = requireNonNull(sampler);
     }
 
+    /**
+     * Plays the entire MOD file from the current position to the end.
+     *
+     * @throws LineUnavailableException if the audio line cannot be opened
+     */
     public void play() throws LineUnavailableException {
         Mod mod = sampler.getMod();
         play(mod.getLength());
     }
 
+    /**
+     * Plays the MOD file from the current sequence position to the specified end sequence index.
+     * <p>
+     * This method opens an audio line, plays the audio, and drains the line before closing it.
+     * </p>
+     *
+     * @param endSequenceIndex the sequence index to stop at (exclusive)
+     * @throws LineUnavailableException if the audio line cannot be opened
+     */
     public void play(int endSequenceIndex) throws LineUnavailableException {
         play(sampler.getSequenceIndex(), endSequenceIndex);
     }
 
+    /**
+     * Plays the MOD file from the specified start sequence index to the end sequence index.
+     *
+     * @param startSequenceIndex the sequence index to start at (inclusive)
+     * @param endSequenceIndex   the sequence index to stop at (exclusive)
+     * @throws LineUnavailableException  if the audio line cannot be opened
+     * @throws IndexOutOfBoundsException if the sequence indices are out of bounds
+     */
     public void play(int startSequenceIndex, int endSequenceIndex) throws LineUnavailableException {
         AudioFormat format = sampler.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -42,6 +71,16 @@ public final class Player {
         }
     }
 
+    /**
+     * Plays the MOD file from the specified start sequence index to the end sequence index using the provided audio
+     * line.
+     *
+     * @param line               the audio line to write audio data to
+     * @param startSequenceIndex the sequence index to start at (inclusive)
+     * @param endSequenceIndex   the sequence index to stop at (exclusive)
+     * @throws IndexOutOfBoundsException if the sequence indices are out of bounds
+     * @throws RuntimeException          if the sampler unexpectedly stops producing audio
+     */
     public void play(SourceDataLine line, int startSequenceIndex, int endSequenceIndex) {
         Mod mod = sampler.getMod();
         checkFromToIndex(startSequenceIndex, endSequenceIndex, mod.getLength());
@@ -64,6 +103,13 @@ public final class Player {
         }
     }
 
+    /**
+     * Plays the specified number of patterns from the current position.
+     *
+     * @param patternCount the number of patterns to play
+     * @return the actual number of patterns played
+     * @throws LineUnavailableException if the audio line cannot be opened
+     */
     public int playPatterns(int patternCount) throws LineUnavailableException {
         AudioFormat format = sampler.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -82,11 +128,24 @@ public final class Player {
         return playedPatternCount;
     }
 
+    /**
+     * Plays the specified number of patterns from the current position using the provided audio line.
+     * <p>
+     * The audio line should be opened and started before calling this method. This method does not drain or close the
+     * line. Playback stops when the requested number of patterns have been played or the end of the MOD is reached.
+     * </p>
+     *
+     * @param line         the audio line to write audio data to
+     * @param patternCount the number of patterns to play
+     * @return the actual number of patterns played
+     * @throws RuntimeException if the sampler unexpectedly stops producing audio or if not all samples can be written
+     *                          to the line
+     */
     public int playPatterns(SourceDataLine line, int patternCount) {
         Mod mod = sampler.getMod();
         requireNonNull(mod);
 
-        byte[] buffer = new byte[4];
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
         int lastSequenceIndex = sampler.getSequenceIndex();
         int playedPatternCount = 0;
 
@@ -112,6 +171,16 @@ public final class Player {
         return playedPatternCount;
     }
 
+    /**
+     * Plays the specified number of rows from the current position.
+     * <p>
+     * This method opens a new audio line, plays the rows, and drains the line before closing it.
+     * </p>
+     *
+     * @param rowCount the number of rows to play
+     * @return the actual number of rows played
+     * @throws LineUnavailableException if the audio line cannot be opened
+     */
     public int playRows(int rowCount) throws LineUnavailableException {
         AudioFormat format = sampler.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -130,6 +199,15 @@ public final class Player {
         return playedRowCount;
     }
 
+    /**
+     * Plays the specified number of rows from the current position using the provided audio line.
+     *
+     * @param line     the audio line to write audio data to
+     * @param rowCount the number of rows to play
+     * @return the actual number of rows played
+     * @throws RuntimeException if the sampler unexpectedly stops producing audio, or if not, all samples can be written
+     *                          to the line
+     */
     public int playRows(SourceDataLine line, int rowCount) {
         Mod mod = sampler.getMod();
         requireNonNull(mod);
@@ -138,7 +216,7 @@ public final class Player {
             return 0;
         }
 
-        byte[] buffer = new byte[4];
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         int sequenceIndex = sampler.getSequenceIndex();
         int rowIndex = sampler.getRowIndex();
