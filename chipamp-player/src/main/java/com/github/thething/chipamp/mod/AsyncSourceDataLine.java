@@ -1,6 +1,7 @@
 package com.github.thething.chipamp.mod;
 
-import com.github.thething.chipamp.common.Maths;
+import com.github.thething.chipamp.concurrent.IdleStrategy;
+import com.github.thething.chipamp.concurrent.SleepingIdleStrategy;
 import com.github.thething.chipamp.concurrent.SpScByteCircularBuffer;
 
 import javax.sound.sampled.SourceDataLine;
@@ -11,6 +12,10 @@ import static java.util.Objects.requireNonNull;
 
 public final class AsyncSourceDataLine implements Closeable {
 
+    private static final IdleStrategy DEFAULT_IDLE_STRATEGY = new SleepingIdleStrategy(100L);
+    private static final ThreadFactory DEFAULT_THREAD_FACTORY = (runnable) -> new Thread(runnable, "AsyncSourceDataLine");
+    private static final int DEFAULT_BUFFER_CAPACITY = 1024 * 64;
+
     private final SpScByteCircularBuffer buffer;
     private final Thread thread;
 
@@ -19,28 +24,23 @@ public final class AsyncSourceDataLine implements Closeable {
         this.thread = requireNonNull(thread);
     }
 
-    public static AsyncSourceDataLine launch(SourceDataLine line, int bufferCapacity, int readLength, ThreadFactory threadFactory) {
+    public static AsyncSourceDataLine launch(SourceDataLine line, int readLength) {
+        return launch(line, DEFAULT_IDLE_STRATEGY, DEFAULT_BUFFER_CAPACITY, readLength, DEFAULT_THREAD_FACTORY);
+    }
+
+    public static AsyncSourceDataLine launch(SourceDataLine line, IdleStrategy idleStrategy, int bufferCapacity, int readLength, ThreadFactory threadFactory) {
         if (!line.isOpen()) {
             throw new IllegalStateException("SourceDataLine is not open");
         }
 
-        if (line.getBufferSize() <= 0) {
-            throw new IllegalArgumentException("SourceDataLine buffer size must be greater than zero");
+        requireNonNull(idleStrategy);
+
+        if (bufferCapacity < 0) {
+            throw new IllegalArgumentException("bufferCapacity must be greater than or equal to zero");
         }
 
-        if (bufferCapacity <= 0) {
-            throw new IllegalArgumentException("bufferCapacity must be greater than zero");
-        }
-
-        int length = Math.min(bufferCapacity, line.getBufferSize());
-        length = Maths.roundDownPow2(length);
-
-        if (length < 4) {
-            throw new IllegalArgumentException("bufferCapacity must be greater than or equal to 4");
-        }
-
-        SpScByteCircularBuffer buffer = new SpScByteCircularBuffer(length);
-        Task task = new Task(line, buffer, readLength);
+        SpScByteCircularBuffer buffer = new SpScByteCircularBuffer(bufferCapacity);
+        Task task = new Task(line, buffer, idleStrategy, readLength);
         Thread thread = threadFactory.newThread(task);
         thread.start();
 
@@ -68,33 +68,29 @@ public final class AsyncSourceDataLine implements Closeable {
 
         private final SourceDataLine sourceDataLine;
         private final SpScByteCircularBuffer buffer;
+        private final IdleStrategy idleStrategy;
         private final byte[] readBuffer;
 
-        private Task(SourceDataLine sourceDataLine, SpScByteCircularBuffer buffer, int readLength) {
+        private Task(SourceDataLine sourceDataLine, SpScByteCircularBuffer buffer, IdleStrategy idleStrategy, int readLength) {
             this.sourceDataLine = sourceDataLine;
             this.buffer = buffer;
+            this.idleStrategy = idleStrategy;
             this.readBuffer = new byte[readLength];
         }
 
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
-                int readCount = buffer.peek(readBuffer);
+                int readCount = buffer.read(readBuffer);
 
                 if (readCount > 0) {
                     int writeCount = sourceDataLine.write(readBuffer, 0, readCount);
 
                     if (writeCount != readCount) {
-                        throw new RuntimeException("Unable to write all samples");
+                        throw new RuntimeException("Unable to write all samples: " + readCount + " != " + writeCount);
                     }
-
-                    buffer.skipBytes(writeCount);
                 } else {
-                    try {
-                        Thread.sleep(10L);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                    idleStrategy.idle();
                 }
             }
         }
