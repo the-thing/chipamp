@@ -49,6 +49,13 @@ public final class Resources {
         return in;
     }
 
+    /**
+     * Returns the URL of the specified classpath resource.
+     *
+     * @param resourceName the name of the resource to locate
+     * @return the URL of the resource
+     * @throws IOException if the resource is not found
+     */
     public static URL getResource(String resourceName) throws IOException {
         URL resource = Resources.class.getClassLoader().getResource(resourceName);
 
@@ -174,7 +181,22 @@ public final class Resources {
      * @throws IOException if an I/O error occurs while writing the file
      */
     public static void saveAudio(String fileName, AudioFormat format, byte[] audio) throws IOException {
-        saveAudio(new File(fileName), format, audio, 0, audio.length);
+        saveAudio(new File(fileName), format, audio);
+    }
+
+    /**
+     * Saves a portion of audio data to a WAV file.
+     *
+     * @param fileName the name of the file to create
+     * @param format   the audio format of the audio data
+     * @param audio    the audio data array
+     * @param offset   the starting position in the audio array
+     * @param length   the number of bytes to write
+     * @throws IOException               if an I/O error occurs while writing the file
+     * @throws IndexOutOfBoundsException if offset and length are invalid for the audio array
+     */
+    public static void saveAudio(String fileName, AudioFormat format, byte[] audio, int offset, int length) throws IOException {
+        saveAudio(new File(fileName), format, audio, offset, length);
     }
 
     /**

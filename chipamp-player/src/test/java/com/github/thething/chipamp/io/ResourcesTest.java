@@ -2,6 +2,8 @@ package com.github.thething.chipamp.io;
 
 import org.junit.jupiter.api.Test;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 
@@ -64,7 +66,31 @@ class ResourcesTest {
         byte[] bytes = Resources.readBytes("axel-patterns.txt");
 
         assertThat(bytes.length).isEqualTo(95680);
-        assertThat(bytes[0]).isEqualTo((byte)48);
-        assertThat(bytes[95679]).isEqualTo(0x00);
+        assertThat(bytes[0]).isEqualTo((byte) 48);
+        assertThat(bytes[95679]).isEqualTo((byte) 10);
+    }
+
+    @Test
+    void shouldReturnText() throws IOException {
+        String text = Resources.readText("axel-patterns.txt");
+
+        assertThat(text.length()).isEqualTo(95680);
+        assertThat(text).startsWith("0000 | 00 | A-3 12 --- | F-3 08 A03 | --- -- --- | A-3 0A C08 |");
+    }
+
+    @Test
+    void shouldGetAudioData() throws UnsupportedAudioFileException, IOException {
+        byte[] audio = Resources.readAudio("wav/axel-stereo-48kHz-pal.wav");
+
+        assertThat(audio.length).isEqualTo(35_337_984);
+    }
+
+    @Test
+    void shouldSaveAudio() throws IOException {
+        byte[] audio = new byte[]{1, 2, 3, 4};
+        AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44_000, 8, 2, 4, 44_000, false);
+
+        Resources.saveAudio("test1.wav", format, audio);
+        Resources.saveAudio("test2.wav", format, audio, 0, audio.length);
     }
 }
