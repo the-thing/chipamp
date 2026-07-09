@@ -301,6 +301,13 @@ class SamplerTest {
     }
 
     @Test
+    void shouldLoadModWithFilter() throws IOException {
+        // pattern 8, row 36
+        Mod mod = modLoader.load("chip/other/alexel_-_synthetic_dreams.mod");
+        underTest.updateMod(mod);
+    }
+
+    @Test
     void shouldSampleModWithRoughPanningExtendedEffect() throws IOException {
         underTest.setLeftPan(1.0f);
         underTest.setRightPan(1.0f);

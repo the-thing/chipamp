@@ -3,8 +3,10 @@ package com.github.thething.chipamp.tool;
 import com.github.thething.chipamp.concurrent.IdleStrategy;
 import com.github.thething.chipamp.concurrent.SleepingIdleStrategy;
 import com.github.thething.chipamp.mod.AsyncSourceDataLine;
+import com.github.thething.chipamp.mod.ExtendedEffectType;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
+import com.github.thething.chipamp.mod.Mods;
 import com.github.thething.chipamp.mod.Player;
 import com.github.thething.chipamp.mod.Sampler;
 import org.junit.jupiter.api.Disabled;
@@ -165,6 +167,23 @@ class PlayTest {
         player.playPatterns(1);
     }
 
+    @Test
+    @Disabled
+    void playFilter() throws IOException, LineUnavailableException {
+        ModLoader modLoader = new ModLoader(true);
+        Mod mod = modLoader.load("chip/other/alexel_-_synthetic_dreams.mod");
+
+        Sampler sampler = new Sampler();
+        sampler.updateMod(mod);
+        sampler.setLoggingEnabled(true);
+
+        sampler.seekPattern(8);
+
+        // pattern 8, row 36
+        Player player = new Player(sampler);
+        player.playPatterns(1);
+    }
+
     // TODO remove
     @Test
     @Disabled
@@ -187,6 +206,11 @@ class PlayTest {
             System.out.println("Loading: " + file.getName());
 
             Mod mod = modLoader.load(file);
+
+            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.SET_FILTER)) {
+                System.out.println("Found extended effect: " + ExtendedEffectType.SET_FILTER);
+            }
+
             // sampler.updateMod(mod);
         }
     }
