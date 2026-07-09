@@ -1,7 +1,5 @@
 package com.github.thething.chipamp.io;
 
-import org.junit.platform.commons.io.Resource;
-
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -23,6 +21,9 @@ import java.util.Arrays;
 
 import static java.util.Objects.checkFromIndexSize;
 
+/**
+ * Utility class for loading and saving resources from the classpath.
+ */
 public final class Resources {
 
     private static final int DEFAULT_BUFFER_LENGTH = 4096;
@@ -31,27 +32,45 @@ public final class Resources {
     private Resources() {
     }
 
-    public static InputStream getResourceAsStream(String name) throws IOException {
-        InputStream in = Resources.class.getClassLoader().getResourceAsStream(name);
+    /**
+     * Opens an input stream for the specified classpath resource.
+     *
+     * @param resourceName the name of the resource to load
+     * @return an input stream for reading the resource
+     * @throws IOException if the resource is not found
+     */
+    public static InputStream getResourceAsStream(String resourceName) throws IOException {
+        InputStream in = Resources.class.getClassLoader().getResourceAsStream(resourceName);
 
         if (in == null) {
-            throw new IOException("Unable to find resource: " + name);
+            throw new IOException("Resource not found: " + resourceName);
         }
 
         return in;
     }
 
-    public static String getFileName(String resourceName) throws IOException {
+    public static URL getResource(String resourceName) throws IOException {
         URL resource = Resources.class.getClassLoader().getResource(resourceName);
 
         if (resource == null) {
             throw new IOException("Resource not found: " + resourceName);
         }
 
+        return resource;
+    }
+
+    /**
+     * Gets the file name of the specified classpath resource.
+     *
+     * @param resourceName the name of the resource
+     * @return the file name portion of the resource path
+     * @throws IOException if the resource is not found or cannot be converted to a URI
+     */
+    public static String getFileName(String resourceName) throws IOException {
         URI uri;
 
         try {
-            uri = resource.toURI();
+            uri = getResource(resourceName).toURI();
         } catch (URISyntaxException e) {
             throw new IOException("Failed to convert resource to URI: " + resourceName, e);
         }
@@ -59,18 +78,15 @@ public final class Resources {
         return Paths.get(uri).getFileName().toString();
     }
 
-    public static File[] listFiles(String name) {
-        URL resource = Resources.class.getClassLoader().getResource(name);
-
-        if (resource == null) {
-            throw new RuntimeException("Resource not found: " + name);
-        }
-
-        File file = new File(resource.getFile());
-
-        if (!file.exists()) {
-            throw new RuntimeException("File not found: " + file.getAbsolutePath());
-        }
+    /**
+     * Lists all files in the specified resource directory.
+     *
+     * @param resourceName the name of the directory resource
+     * @return an array of files in the directory, or null if the directory is empty
+     * @throws java.io.IOException if the resource is not found, does not exist, or is not a directory
+     */
+    public static File[] listFiles(String resourceName) throws IOException {
+        File file = new File(getResource(resourceName).getFile());
 
         if (!file.isDirectory()) {
             throw new RuntimeException("Not a directory: " + file.getAbsolutePath());
@@ -79,12 +95,26 @@ public final class Resources {
         return file.listFiles();
     }
 
-    public static byte[] readBytes(String name) throws IOException {
-        try (InputStream in = getResourceAsStream(name)) {
+    /**
+     * Reads all bytes from the specified classpath resource.
+     *
+     * @param resourceName the name of the resource to read
+     * @return a byte array containing all bytes from the resource
+     * @throws IOException if an I/O error occurs or the resource is not found
+     */
+    public static byte[] readBytes(String resourceName) throws IOException {
+        try (InputStream in = getResourceAsStream(resourceName)) {
             return readBytes(in);
         }
     }
 
+    /**
+     * Reads all bytes from the specified input stream.
+     *
+     * @param in the input stream to read from
+     * @return a byte array containing all bytes from the stream
+     * @throws IOException if an I/O error occurs
+     */
     public static byte[] readBytes(InputStream in) throws IOException {
         byte[] buffer = new byte[DEFAULT_BUFFER_LENGTH];
         int offset = 0;
@@ -101,10 +131,25 @@ public final class Resources {
         return Arrays.copyOf(buffer, offset);
     }
 
+    /**
+     * Reads the entire contents of a text resource using UTF-8 encoding.
+     *
+     * @param name the name of the text resource to read
+     * @return the contents of the resource as a string
+     * @throws IOException if an I/O error occurs or the resource is not found
+     */
     public static String readText(String name) throws IOException {
         return readText(name, DEFAULT_CHARSET);
     }
 
+    /**
+     * Reads the entire contents of a text resource using the specified character encoding.
+     *
+     * @param name    the name of the text resource to read
+     * @param charset the character encoding to use
+     * @return the contents of the resource as a string
+     * @throws IOException if an I/O error occurs or the resource is not found
+     */
     public static String readText(String name, Charset charset) throws IOException {
         StringBuilder text = new StringBuilder();
         char[] buffer = new char[DEFAULT_BUFFER_LENGTH];
@@ -120,14 +165,41 @@ public final class Resources {
         return text.toString();
     }
 
+    /**
+     * Saves audio data to a WAV file.
+     *
+     * @param fileName the name of the file to create
+     * @param format   the audio format of the audio data
+     * @param audio    the audio data to save
+     * @throws IOException if an I/O error occurs while writing the file
+     */
     public static void saveAudio(String fileName, AudioFormat format, byte[] audio) throws IOException {
         saveAudio(new File(fileName), format, audio, 0, audio.length);
     }
 
+    /**
+     * Saves audio data to a WAV file.
+     *
+     * @param file   the file to create
+     * @param format the audio format of the audio data
+     * @param audio  the audio data to save
+     * @throws IOException if an I/O error occurs while writing the file
+     */
     public static void saveAudio(File file, AudioFormat format, byte[] audio) throws IOException {
         saveAudio(file, format, audio, 0, audio.length);
     }
 
+    /**
+     * Saves a portion of audio data to a WAV file.
+     *
+     * @param file   the file to create
+     * @param format the audio format of the audio data
+     * @param audio  the audio data array
+     * @param offset the starting position in the audio array
+     * @param length the number of bytes to write
+     * @throws IOException               if an I/O error occurs while writing the file
+     * @throws IndexOutOfBoundsException if offset and length are invalid for the audio array
+     */
     public static void saveAudio(File file, AudioFormat format, byte[] audio, int offset, int length) throws IOException {
         checkFromIndexSize(offset, length, audio.length);
 
@@ -136,6 +208,17 @@ public final class Resources {
         }
     }
 
+    /**
+     * Reads audio data from a classpath resource.
+     * <p>
+     * The audio format is automatically detected by the Java Sound API.
+     * </p>
+     *
+     * @param name the name of the audio resource to read
+     * @return a byte array containing the audio data
+     * @throws IOException                   if an I/O error occurs or the resource is not found
+     * @throws UnsupportedAudioFileException if the audio file format is not supported
+     */
     public static byte[] readAudio(String name) throws IOException, UnsupportedAudioFileException {
         try (AudioInputStream in = AudioSystem.getAudioInputStream(getResourceAsStream(name))) {
             return readBytes(in);

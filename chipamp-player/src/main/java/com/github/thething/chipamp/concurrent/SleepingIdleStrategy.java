@@ -12,7 +12,7 @@ public final class SleepingIdleStrategy implements IdleStrategy {
 
     public SleepingIdleStrategy(long sleepTimeMillis) {
         if (sleepTimeMillis < 0) {
-            throw new IllegalArgumentException("sleepTimeMillis must be greater than or equal to zero: " + sleepTimeMillis);
+            throw new IllegalArgumentException("Sleep time must be greater than or equal to zero: " + sleepTimeMillis);
         }
 
         this.sleepTimeMillis = sleepTimeMillis;
