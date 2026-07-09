@@ -372,6 +372,7 @@ public final class Mods {
         int index = getPeriodIndex(period, fineTune);
 
         if (index == -1) {
+            // TODO check if this ever happens
             return period;
         }
 
@@ -408,14 +409,14 @@ public final class Mods {
     }
 
     /**
-     * Finds the closest note name for a given period value using binary search.
+     * Finds the nearest note name for a given period.
      * <p>
      * If the exact period is not found, returns the note name of the closest period.
      *
      * @param period the period value
      * @return the closest note name (e.g., "C-3", "A#2")
      */
-    public static String findClosestNote(int period) {
+    public static String findNearestNote(int period) {
         int index = Arrays.binarySearch(PERIODS, period);
 
         if (index >= 0) {
@@ -423,10 +424,6 @@ public final class Mods {
         }
 
         index = -index - 1;
-
-        if (index == 0) {
-            return NOTES[PERIODS[0]];
-        }
 
         if (index == PERIODS.length) {
             return NOTES[PERIODS[PERIODS.length - 1]];
@@ -451,7 +448,7 @@ public final class Mods {
      * @return the custom note name
      */
     public static String getCustomNote(int period) {
-        String note = findClosestNote(period);
+        String note = findNearestNote(period);
         return CUSTOM_NOTES[note.charAt(0) - 'A'];
     }
 
@@ -491,10 +488,10 @@ public final class Mods {
     public static Set<EffectType> getUniqueEffects(Mod mod) {
         EnumSet<EffectType> effectTypes = EnumSet.noneOf(EffectType.class);
 
-        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
-            for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                    Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+                for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
+                    Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
                     EffectType effectType = instrument.effectType();
 
                     if (effectType != EffectType.NONE && effectType != EffectType.EXTENDED_EFFECT) {
@@ -516,10 +513,10 @@ public final class Mods {
     public static Set<ExtendedEffectType> getUniqueExtendedEffects(Mod mod) {
         EnumSet<ExtendedEffectType> extendedEffectTypes = EnumSet.noneOf(ExtendedEffectType.class);
 
-        for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
-            for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-                for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                    Instrument instrument = mod.getInstrument(patternIndex, rowIndex, channelIndex);
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+                for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
+                    Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
                     ExtendedEffectType extendedEffectType = instrument.extendedEffectType();
 
                     if (extendedEffectType != ExtendedEffectType.NONE) {
@@ -535,21 +532,21 @@ public final class Mods {
     /**
      * Converts a period value to a playback frequency in Hertz.
      * <p>
-     * Uses the formula: frequency = clock / period
+     * Uses the formula: frequency = clockHz / period
      * <p>
      * For example, period 428 (middle C, C-3) produces 8287 Hz on PAL systems. The mixer then resamples this to the
      * output sample rate.
      *
      * @param period the period value
-     * @param clock  the clock frequency in Hz (typically PAL_CLOCK_HZ or NTSC_CLOCK_HZ)
+     * @param clockHz  the clockHz frequency in Hz (typically PAL_CLOCK_HZ or NTSC_CLOCK_HZ)
      * @return the frequency in Hz, or 0 if the period is non-positive
      */
-    public static float periodToHz(int period, float clock) {
+    public static float periodToHz(int period, float clockHz) {
         if (period <= 0) {
             return 0.0f;
         }
 
-        return clock / period;
+        return clockHz / period;
     }
 
     /**
