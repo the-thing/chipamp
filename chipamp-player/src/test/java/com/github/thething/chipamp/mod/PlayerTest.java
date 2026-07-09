@@ -31,12 +31,12 @@ class PlayerTest {
     @Mock
     private SourceDataLine sourceDataLine;
 
+    @SuppressWarnings("resource")
     @BeforeEach
     void setUp() {
         doAnswer(invocation -> {
             // return the length of written bytes
-            int length = invocation.getArgument(2);
-            return length;
+            return invocation.getArgument(2);
         }).when(sourceDataLine).write(any(byte[].class), anyInt(), anyInt());
 
         sampler = new Sampler();
