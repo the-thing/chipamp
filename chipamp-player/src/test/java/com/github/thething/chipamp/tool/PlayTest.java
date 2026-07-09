@@ -185,6 +185,23 @@ class PlayTest {
         player.playPatterns(1);
     }
 
+    @Test
+    @Disabled
+    void playSetPanning() throws IOException, LineUnavailableException {
+        ModLoader modLoader = new ModLoader(true);
+        Mod mod = modLoader.load("chip/other/afrigan_gagga.mod");
+
+        Sampler sampler = new Sampler();
+        sampler.updateMod(mod);
+        sampler.setLoggingEnabled(true);
+
+        // sequence 15, row 11
+        sampler.seekSequence(15);
+
+        Player player = new Player(sampler);
+        player.playPatterns(1);
+    }
+
     // TODO remove
     @Test
     // @Disabled
