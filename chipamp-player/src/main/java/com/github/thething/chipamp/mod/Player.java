@@ -5,6 +5,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.util.function.Function;
 
 import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.requireNonNull;
@@ -20,10 +21,26 @@ public final class Player {
 
     private static final int DEFAULT_BUFFER_SIZE = 4096;
 
+    private static final Function<AudioFormat, SourceDataLine> DEFAULT_SOURCE_DATA_LINE_FACTORY = (format) -> {
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+
+        try {
+            return (SourceDataLine) AudioSystem.getLine(info);
+        } catch (LineUnavailableException e) {
+            throw new RuntimeException("  to obtain source data line: " + e.getMessage(), e);
+        }
+    };
+
     private final Sampler sampler;
+    private final Function<AudioFormat, SourceDataLine> sourceDataLineFactory;
 
     public Player(Sampler sampler) {
+        this(sampler, DEFAULT_SOURCE_DATA_LINE_FACTORY);
+    }
+
+    public Player(Sampler sampler, Function<AudioFormat, SourceDataLine> sourceDataLineFactory) {
         this.sampler = requireNonNull(sampler);
+        this.sourceDataLineFactory = requireNonNull(sourceDataLineFactory);
     }
 
     /**
@@ -59,9 +76,8 @@ public final class Player {
      */
     public void play(int startSequenceIndex, int endSequenceIndex) throws LineUnavailableException {
         AudioFormat format = sampler.getCompatibleAudioFormat();
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
 
-        try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info)) {
+        try (SourceDataLine line = sourceDataLineFactory.apply(format)) {
             line.open(format);
             line.start();
 
@@ -97,7 +113,11 @@ public final class Player {
                 throw new RuntimeException("Unexpected end of audio");
             }
 
-            line.write(buffer, 0, readCount);
+            int writtenCount = line.write(buffer, 0, readCount);
+
+            if (writtenCount != readCount) {
+                throw new RuntimeException("Unable to write all samples");
+            }
 
             sequenceIndex = sampler.getSequenceIndex();
         }
@@ -112,11 +132,9 @@ public final class Player {
      */
     public int playPatterns(int patternCount) throws LineUnavailableException {
         AudioFormat format = sampler.getCompatibleAudioFormat();
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-
         int playedPatternCount;
 
-        try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info)) {
+        try (SourceDataLine line = sourceDataLineFactory.apply(format)) {
             line.open(format);
             line.start();
 
@@ -183,11 +201,9 @@ public final class Player {
      */
     public int playRows(int rowCount) throws LineUnavailableException {
         AudioFormat format = sampler.getCompatibleAudioFormat();
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-
         int playedRowCount;
 
-        try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info)) {
+        try (SourceDataLine line = sourceDataLineFactory.apply(format)) {
             line.open(format);
             line.start();
 
@@ -211,10 +227,6 @@ public final class Player {
     public int playRows(SourceDataLine line, int rowCount) {
         Mod mod = sampler.getMod();
         requireNonNull(mod);
-
-        if (rowCount < 0) {
-            return 0;
-        }
 
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
