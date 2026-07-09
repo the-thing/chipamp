@@ -530,49 +530,6 @@ public final class Mods {
     }
 
     /**
-     * Converts a period value to a playback frequency in Hertz.
-     * <p>
-     * Uses the formula: frequency = clockHz / period
-     * <p>
-     * For example, period 428 (middle C, C-3) produces 8287 Hz on PAL systems. The mixer then resamples this to the
-     * output sample rate.
-     *
-     * @param period the period value
-     * @param clockHz  the clockHz frequency in Hz (typically PAL_CLOCK_HZ or NTSC_CLOCK_HZ)
-     * @return the frequency in Hz, or 0 if the period is non-positive
-     */
-    public static float periodToHz(int period, float clockHz) {
-        if (period <= 0) {
-            return 0.0f;
-        }
-
-        return clockHz / period;
-    }
-
-    /**
-     * Checks if a MOD file contains any non-standard period values (custom notes).
-     *
-     * @param mod the MOD file to check
-     * @return true if the MOD contains at least one custom note, false otherwise
-     */
-    public static boolean isCustomNotePresent(Mod mod) {
-        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-            for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
-                for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
-                    Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
-                    int period = instrument.period();
-
-                    if (getNote(period) == null) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Checks if a specific effect type is used anywhere in a MOD file.
      *
      * @param mod        the MOD file to check
@@ -609,6 +566,53 @@ public final class Mods {
                     Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
 
                     if (instrument.extendedEffectType() == effectType) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Converts a period value to a playback frequency in Hertz.
+     * <p>
+     * Uses the formula: frequency = clockHz / period
+     * <p>
+     * For example, period 428 (middle C, C-3) produces 8287 Hz on PAL systems. The mixer then resamples this to the
+     * output sample rate.
+     *
+     * @param period the period value
+     * @param clockHz  the clockHz frequency in Hz (typically PAL_CLOCK_HZ or NTSC_CLOCK_HZ)
+     * @return the frequency in Hz, or 0 if the period is non-positive
+     */
+    public static float convertPeriodToHz(int period, float clockHz) {
+        if (period <= 0) {
+            return 0.0f;
+        }
+
+        return clockHz / period;
+    }
+
+    /**
+     * Checks if a MOD file contains any non-standard period values (custom notes).
+     *
+     * @param mod the MOD file to check
+     * @return true if the MOD contains at least one custom note, false otherwise
+     */
+    public static boolean isCustomNotePresent(Mod mod) {
+        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
+            for (int patternIndex = 0; patternIndex < mod.getPatternCount(); patternIndex++) {
+                for (int rowIndex = 0; rowIndex < Mod.ROW_COUNT; rowIndex++) {
+                    Instrument instrument = mod.getInstrument(channelIndex, patternIndex, rowIndex);
+                    int period = instrument.period();
+
+                    if (period == 0) {
+                        continue;
+                    }
+
+                    if (getNote(period) == null) {
                         return true;
                     }
                 }

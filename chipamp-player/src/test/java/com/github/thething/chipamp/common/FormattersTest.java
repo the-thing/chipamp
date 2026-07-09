@@ -55,6 +55,15 @@ class FormattersTest {
     }
 
     @Test
+    void shouldFormatModWithCustomNotes() throws IOException {
+        String expected = Resources.readText("abstract-vision-sleep-patterns.txt");
+        Mod mod = modLoader.load("chip/other/abstract_vision_-_sleep.mod");
+        String formatted = Formatters.formatPatterns(mod);
+
+        assertThat(formatted).isEqualTo(expected);
+    }
+
+    @Test
     void shouldReturnFormattedHexByte() {
         assertThat(Formatters.formatHexByte(0)).isEqualTo("00");
         assertThat(Formatters.formatHexByte(1)).isEqualTo("01");

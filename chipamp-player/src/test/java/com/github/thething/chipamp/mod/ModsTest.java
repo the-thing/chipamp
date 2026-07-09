@@ -1,3 +1,4 @@
+
 package com.github.thething.chipamp.mod;
 
 import org.junit.jupiter.api.Test;
@@ -114,5 +115,86 @@ class ModsTest {
                 ExtendedEffectType.FINE_VOLUME_SLIDE_UP,
                 ExtendedEffectType.FINE_VOLUME_SLIDE_DOWN
         );
+    }
+
+    @Test
+    void shouldReturnTrueWhenEffectIsPresent() throws IOException {
+        ModLoader loader = new ModLoader();
+        Mod mod = loader.load("chip/DJ Metune - Axel F.mod");
+
+        assertThat(Mods.isEffectPresent(mod, EffectType.SLIDE_UP)).isTrue();
+        assertThat(Mods.isEffectPresent(mod, EffectType.PATTERN_BREAK)).isTrue();
+    }
+
+    @Test
+    void shouldReturnFalseWhenEffectIsAbsent() throws IOException {
+        ModLoader loader = new ModLoader();
+        Mod mod = loader.load("chip/DJ Metune - Axel F.mod");
+
+        assertThat(Mods.isEffectPresent(mod, EffectType.POSITION_JUMP)).isFalse();
+    }
+
+    @Test
+    void shouldReturnTrueWhenExtendedEffectIsPresent() throws IOException {
+        ModLoader loader = new ModLoader();
+        Mod mod = loader.load("chip/DJ Metune - Axel F.mod");
+
+        assertThat(Mods.isExtendedEffectPresent(mod, ExtendedEffectType.FINE_VOLUME_SLIDE_UP)).isTrue();
+        assertThat(Mods.isExtendedEffectPresent(mod, ExtendedEffectType.FINE_VOLUME_SLIDE_DOWN)).isTrue();
+    }
+
+    @Test
+    void shouldReturnFalseWhenExtendedEffectIsAbsent() throws IOException {
+        ModLoader loader = new ModLoader();
+        Mod mod = loader.load("chip/DJ Metune - Axel F.mod");
+
+        assertThat(Mods.isExtendedEffectPresent(mod, ExtendedEffectType.SET_FILTER)).isFalse();
+        assertThat(Mods.isExtendedEffectPresent(mod, ExtendedEffectType.SET_GLISSANDO)).isFalse();
+    }
+
+    @Test
+    void shouldReturnConvertedPeriodToHz() {
+        assertThat(Mods.convertPeriodToHz(-40, Mods.NTSC_CLOCK_HZ)).isEqualTo(0.0f);
+        assertThat(Mods.convertPeriodToHz(213, Mods.NTSC_CLOCK_HZ)).isEqualTo(16805.375f);
+        assertThat(Mods.convertPeriodToHz(578, Mods.NTSC_CLOCK_HZ)).isEqualTo(6192.9844f);
+    }
+
+    @Test
+    void shouldReturnTrueWhenCustomNoteIsPresent() throws IOException {
+        ModLoader loader = new ModLoader();
+        Mod mod = loader.load("chip/other/abstract_vision_-_sleep.mod");
+
+        assertThat(Mods.isCustomNotePresent(mod)).isTrue();
+    }
+
+    @Test
+    void shouldReturnFalseWhenCustomNoteIsAbsent() throws IOException {
+        ModLoader loader = new ModLoader();
+        Mod mod = loader.load("chip/DJ Metune - Axel F.mod");
+
+        assertThat(Mods.isCustomNotePresent(mod)).isFalse();
+    }
+
+    @Test
+    void shouldReturnSequenceIndexForPattern() throws IOException {
+        ModLoader loader = new ModLoader();
+        Mod mod = loader.load("chip/Captain - Space Debris.mod");
+
+        assertThat(Mods.findSequenceIndex(mod, 18)).isEqualTo(5);
+        assertThat(Mods.findSequenceIndex(mod, 1)).isEqualTo(0);
+    }
+
+    @Test
+    void shouldReturnMinusOneWhenSequenceIndexIsNotFound() throws IOException {
+        ModLoader loader = new ModLoader();
+        Mod mod = loader.load("chip/Captain - Space Debris.mod");
+
+        assertThat(Mods.findSequenceIndex(mod, 77)).isEqualTo(-1);
+    }
+
+    @Test
+    void shouldReturnFunkValue() {
+        assertThat(Mods.getFunk(1)).isEqualTo(5);
+        assertThat(Mods.getFunk(5)).isEqualTo(10);
     }
 }

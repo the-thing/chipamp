@@ -187,7 +187,7 @@ class PlayTest {
             System.out.println("Loading: " + file.getName());
 
             Mod mod = modLoader.load(file);
-            sampler.updateMod(mod);
+            // sampler.updateMod(mod);
         }
     }
 }

@@ -196,12 +196,12 @@ final class Channel {
     void updatePeriodAndIncrement(int period, int clockHz, int samplingRate) {
         this.period = period;
 
-        float noteHz = Mods.periodToHz(period, clockHz);
+        float noteHz = Mods.convertPeriodToHz(period, clockHz);
         sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0.0f;
     }
 
     void updateIncrement(int period, int clockHz, int samplingRate) {
-        float noteHz = Mods.periodToHz(period, clockHz);
+        float noteHz = Mods.convertPeriodToHz(period, clockHz);
         this.sampleIncrement = (samplingRate > 0 && noteHz > 0) ? noteHz / samplingRate : 0.0f;
     }
 
