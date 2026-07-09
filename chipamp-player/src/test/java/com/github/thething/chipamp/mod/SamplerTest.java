@@ -308,6 +308,25 @@ class SamplerTest {
     }
 
     @Test
+    void shouldChangeChannelPanning() throws IOException {
+        Mod mod = modLoader.load("chip/other/afrigan_gagga.mod");
+        underTest.updateMod(mod);
+
+        assertThat(underTest.getLeftPan(5)).isEqualTo(0.25f);
+        assertThat(underTest.getRightPan(5)).isEqualTo(0.75f);
+
+        underTest.seekSequence(15, 11);
+
+        assertThat(underTest.getLeftPan(5)).isEqualTo(0.25f);
+        assertThat(underTest.getRightPan(5)).isEqualTo(0.75f);
+
+        underTest.seekSequence(15, 12);
+
+        assertThat(underTest.getLeftPan(5)).isEqualTo(0.0f);
+        assertThat(underTest.getRightPan(5)).isEqualTo(1.0f);
+    }
+
+    @Test
     void shouldSampleModWithRoughPanningExtendedEffect() throws IOException {
         underTest.setLeftPan(1.0f);
         underTest.setRightPan(1.0f);

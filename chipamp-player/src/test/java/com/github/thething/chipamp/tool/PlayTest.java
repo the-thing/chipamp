@@ -3,6 +3,7 @@ package com.github.thething.chipamp.tool;
 import com.github.thething.chipamp.concurrent.IdleStrategy;
 import com.github.thething.chipamp.concurrent.SleepingIdleStrategy;
 import com.github.thething.chipamp.mod.AsyncSourceDataLine;
+import com.github.thething.chipamp.mod.EffectType;
 import com.github.thething.chipamp.mod.ExtendedEffectType;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
@@ -186,7 +187,7 @@ class PlayTest {
 
     // TODO remove
     @Test
-    @Disabled
+    // @Disabled
     void foo() throws IOException {
         ModLoader modLoader = new ModLoader(true);
         Sampler sampler = new Sampler();
@@ -207,8 +208,12 @@ class PlayTest {
 
             Mod mod = modLoader.load(file);
 
-            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.SET_FILTER)) {
-                System.out.println("Found extended effect: " + ExtendedEffectType.SET_FILTER);
+//            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.Se)) {
+//                System.out.println("Found extended effect: " + ExtendedEffectType.SET_FILTER);
+//            }
+
+            if (Mods.isEffectPresent(mod, EffectType.SET_PANNING_POSITION)) {
+                System.out.println("Found effect: " + EffectType.SET_PANNING_POSITION);
             }
 
             // sampler.updateMod(mod);

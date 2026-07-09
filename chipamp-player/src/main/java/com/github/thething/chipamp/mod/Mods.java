@@ -42,12 +42,12 @@ public final class Mods {
     /**
      * ModPlug Tracker left pan position (92/255).
      */
-    public static final float MPT_LEFT_PAN = 92.0f / 255.0f;
+    public static final float MPT_LEFT_PAN = Maths.round(92.0f / 255.0f, 2);
 
     /**
      * ModPlug Tracker right pan position (192/255).
      */
-    public static final float MPT_RIGHT_PAN = 192.0f / 255.0f;
+    public static final float MPT_RIGHT_PAN = Maths.round(192.0f / 255.0f, 2);
 
     /**
      * ProTracker period table. Octaves 0 and 4 are non-standard.

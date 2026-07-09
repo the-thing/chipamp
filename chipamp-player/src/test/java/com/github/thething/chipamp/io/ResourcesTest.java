@@ -42,7 +42,7 @@ class ResourcesTest {
     @Test
     void shouldReturnFilesFromDirectory() throws IOException {
         File[] files = Resources.listFiles("chip/other");
-        assertThat(files.length).isEqualTo(15);
+        assertThat(files.length).isEqualTo(17);
     }
 
     @Test
