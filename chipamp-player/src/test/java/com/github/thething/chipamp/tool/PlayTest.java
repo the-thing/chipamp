@@ -4,7 +4,6 @@ import com.github.thething.chipamp.concurrent.IdleStrategy;
 import com.github.thething.chipamp.concurrent.SleepingIdleStrategy;
 import com.github.thething.chipamp.mod.AsyncSourceDataLine;
 import com.github.thething.chipamp.mod.EffectType;
-import com.github.thething.chipamp.mod.ExtendedEffectType;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
 import com.github.thething.chipamp.mod.Mods;
@@ -25,10 +24,10 @@ import java.util.concurrent.ThreadFactory;
 class PlayTest {
 
     @Test
-    @Disabled
+    // @Disabled
     public void playAsync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/H0ffman - Eon.mod");
+        Mod mod = modLoader.load("chip/other/euroremix.mod");
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
@@ -42,20 +41,28 @@ class PlayTest {
             line.open(format);
             line.start();
 
+            int writeLength = sampler.getBytesPerRow();
+            int readLength = writeLength;
             byte[] buffer = new byte[1024 * 64];
-            ThreadFactory factory = (runnable) -> new Thread(runnable, "AsyncSourceDataLine");
 
-            int writeLength = 1024;
-            int readLength = 1024;
+            System.out.println("writeLength: " + writeLength);
 
-            try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, buffer.length, readLength, factory)) {
+            try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, readLength)) {
                 while (sampler.getSequenceIndex() < mod.getLength()) {
-                    if (asyncLine.size() < writeLength) {
-                        int readCount = sampler.read(buffer);
+                    int diff = writeLength - asyncLine.size();
+                    System.out.println("diff: " + diff);
+
+                    if (diff > 0) {
+                        int readCount = sampler.read(buffer, 0, diff);
+
+                        if (readCount <= 0) {
+                            throw new RuntimeException("Unexpected end of audio");
+                        }
+
                         int writeCount = asyncLine.write(buffer, 0, readCount);
 
                         if (writeCount != readCount) {
-                            throw new RuntimeException("Unable to write all samples");
+                            throw new RuntimeException("Unable to write all samples: " + readCount + " != " + writeCount);
                         }
                     } else {
                         idleStrategy.idle();
