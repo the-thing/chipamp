@@ -4,10 +4,25 @@ import com.github.thething.chipamp.common.Strings;
 
 import java.util.function.ToIntFunction;
 
+/**
+ * Detects the number of audio channels based on a tracker ID string.
+ * <p>
+ * This detector recognizes various tracker ID patterns commonly found in MOD files to determine the number of audio
+ * channels. If no recognized pattern is found, it defaults to 4 channels.
+ */
 public final class DefaultChannelDetector implements ToIntFunction<String> {
 
     public static final DefaultChannelDetector INSTANCE = new DefaultChannelDetector();
 
+    /**
+     * Detects the number of channels from the given tracker ID string.
+     * <p>
+     * The method checks the tracker ID against known patterns to determine the channel count. If no pattern matches, it
+     * returns 4 as the default channel count.
+     *
+     * @param trackerId the tracker ID string (typically 4 characters)
+     * @return the number of audio channels (defaults to 4 if no pattern is recognized)
+     */
     @Override
     public int applyAsInt(String trackerId) {
         // (XX)CH

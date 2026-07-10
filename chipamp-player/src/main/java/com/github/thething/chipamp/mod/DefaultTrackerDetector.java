@@ -7,10 +7,15 @@ import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Detects whether a tracker ID string corresponds to a valid MOD tracker format.
+ * <p>
+ * This detector checks tracker IDs against known tracker signatures and common patterns used in MOD music files. It can
+ * be used to validate module files by recognizing their tracker ID markers.
+ */
 public final class DefaultTrackerDetector implements Predicate<String> {
 
-    private static final Set<String> DEFAULT_TRACKER_IDS = Set.of(
-            "M.K.", "M!K!", "M&K!", "N.T.", "NSMS", "LARD", "OKTA", "OCTA");
+    private static final Set<String> DEFAULT_TRACKER_IDS = Set.of("M.K.", "M!K!", "M&K!", "N.T.", "NSMS", "LARD", "OKTA", "OCTA");
 
     public static final DefaultTrackerDetector INSTANCE = new DefaultTrackerDetector();
 
@@ -20,10 +25,22 @@ public final class DefaultTrackerDetector implements Predicate<String> {
         this(DEFAULT_TRACKER_IDS);
     }
 
+    /**
+     * Creates a new tracker detector with a custom set of known tracker IDs.
+     *
+     * @param knownTrackerIds the set of known tracker ID strings to recognize
+     * @throws NullPointerException if knownTrackerIds is null
+     */
     public DefaultTrackerDetector(Set<String> knownTrackerIds) {
         this.knownTrackerIds = requireNonNull(knownTrackerIds);
     }
 
+    /**
+     * Tests whether the given tracker ID corresponds to a valid MOD tracker format.
+     *
+     * @param trackerId the tracker ID string to test (typically 4 characters)
+     * @return {@code true} if the tracker ID is recognized, {@code false} otherwise
+     */
     @Override
     public boolean test(String trackerId) {
         if (knownTrackerIds.contains(trackerId)) {
@@ -61,10 +78,6 @@ public final class DefaultTrackerDetector implements Predicate<String> {
         }
 
         // CD(X)1
-        if (trackerId.charAt(0) == 'C' && trackerId.charAt(1) == 'D' && Strings.isDigit(trackerId, 2) && trackerId.charAt(3) == '1') {
-            return true;
-        }
-
-        return false;
+        return trackerId.charAt(0) == 'C' && trackerId.charAt(1) == 'D' && Strings.isDigit(trackerId, 2) && trackerId.charAt(3) == '1';
     }
 }
