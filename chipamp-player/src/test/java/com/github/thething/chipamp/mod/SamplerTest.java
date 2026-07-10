@@ -79,6 +79,29 @@ class SamplerTest {
     }
 
     @Test
+    void shouldSkipRows() throws IOException {
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.updateMod(mod);
+
+        int skippedRowCount = underTest.skipRows(23);
+        assertThat(skippedRowCount).isEqualTo(23);
+
+        skippedRowCount = underTest.skipRows(10);
+        assertThat(skippedRowCount).isEqualTo(10);
+
+        underTest.seekSequence(23);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(23);
+        assertThat(underTest.getRowIndex()).isEqualTo(0);
+
+        skippedRowCount = underTest.skipRows(4);
+        assertThat(skippedRowCount).isEqualTo(4);
+
+        skippedRowCount = underTest.skipRows(100);
+        assertThat(skippedRowCount).isEqualTo(28);
+    }
+
+    @Test
     void shouldZeroStateAfterSequenceEnd() throws IOException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.updateMod(mod);
