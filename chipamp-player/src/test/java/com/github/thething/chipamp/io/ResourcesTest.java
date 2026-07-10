@@ -90,7 +90,7 @@ class ResourcesTest {
         byte[] audio = new byte[]{1, 2, 3, 4};
         AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44_000, 8, 2, 4, 44_000, false);
 
-        Resources.saveAudio("test1.wav", format, audio);
-        Resources.saveAudio("test2.wav", format, audio, 0, audio.length);
+        Resources.saveAudio("target/test1.wav", format, audio);
+        Resources.saveAudio("target/test2.wav", format, audio, 0, audio.length);
     }
 }
