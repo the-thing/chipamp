@@ -700,8 +700,8 @@ public final class Sampler {
         requireInRange(leftPan, 0.0f, 1.0f);
         config.leftPan = leftPan;
 
-        for (int channelIndex = 0; channelIndex < channels.length; channelIndex++) {
-            channels[channelIndex].updatePanning(leftPan, config.rightPan);
+        for (Channel channel : channels) {
+            channel.updatePanning(leftPan, config.rightPan);
         }
     }
 
@@ -716,8 +716,8 @@ public final class Sampler {
         requireInRange(rightPan, 0.0f, 1.0f);
         config.rightPan = rightPan;
 
-        for (int channelIndex = 0; channelIndex < channels.length; channelIndex++) {
-            channels[channelIndex].updatePanning(config.leftPan, rightPan);
+        for (Channel channel : channels) {
+            channel.updatePanning(config.leftPan, rightPan);
         }
     }
 
@@ -733,6 +733,16 @@ public final class Sampler {
     }
 
     /**
+     * Returns whether a single channel is muted.
+     *
+     * @param channelIndex the channel to check
+     * @return {@code true} if the channel is muted, {@code false} otherwise
+     */
+    public boolean isMuted(int channelIndex) {
+        return config.muted[channelIndex];
+    }
+
+    /**
      * Enables or disables processing of a single effect type across all channels.
      *
      * @param effectType the effect type to enable or disable
@@ -741,10 +751,25 @@ public final class Sampler {
      */
     public void setEffectEnabled(EffectType effectType, boolean enabled) {
         if (effectType == null || effectType == EffectType.NONE) {
-            throw new IllegalArgumentException("effectType must not be null or NONE");
+            throw new IllegalArgumentException("Effect type must not be null or NONE");
         }
 
         config.effectEnabled[effectType.getCode()] = enabled;
+    }
+
+    /**
+     * Checks if a single effect type is enabled across all channels.
+     *
+     * @param effectType the effect type to check
+     * @return {@code true} if the effect is enabled, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code effectType} is {@code null} or {@link EffectType#NONE}
+     */
+    public boolean isEffectEnabled(EffectType effectType) {
+        if (effectType == null || effectType == EffectType.NONE) {
+            throw new IllegalArgumentException("Effect type must not be null or NONE");
+        }
+
+        return config.effectEnabled[effectType.getCode()];
     }
 
     /**
@@ -757,10 +782,26 @@ public final class Sampler {
      */
     public void setExtendedEffectEnabled(ExtendedEffectType extendedEffectType, boolean enabled) {
         if (extendedEffectType == null || extendedEffectType == ExtendedEffectType.NONE) {
-            throw new IllegalArgumentException("extendedEffectType must not be null or NONE");
+            throw new IllegalArgumentException("Extended effect must not be null or NONE");
         }
 
         config.extendedEffectEnabled[extendedEffectType.getCode()] = enabled;
+    }
+
+    /**
+     * Checks if a single extended effect type is enabled across all channels.
+     *
+     * @param extendedEffectType the extended effect type to check
+     * @return {@code true} if the extended effect is enabled, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code extendedEffectType} is {@code null} or
+     *                                  {@link ExtendedEffectType#NONE}
+     */
+    public boolean isExtendedEffectEnabled(ExtendedEffectType extendedEffectType) {
+        if (extendedEffectType == null || extendedEffectType == ExtendedEffectType.NONE) {
+            throw new IllegalArgumentException("Extended effect must not be null or NONE");
+        }
+
+        return config.extendedEffectEnabled[extendedEffectType.getCode()];
     }
 
     /**

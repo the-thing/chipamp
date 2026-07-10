@@ -384,4 +384,83 @@ class SamplerTest {
         assertThat(underTest.getLeftPan(1)).isEqualTo(0.53f);
         assertThat(underTest.getRightPan(1)).isEqualTo(0.47f);
     }
+
+    @Test
+    void shouldMuteAndUnmuteChannel() {
+        assertThat(underTest.isMuted(0)).isFalse();
+        assertThat(underTest.isMuted(1)).isFalse();
+        assertThat(underTest.isMuted(2)).isFalse();
+        assertThat(underTest.isMuted(3)).isFalse();
+
+        underTest.setMuted(1, true);
+
+        assertThat(underTest.isMuted(0)).isFalse();
+        assertThat(underTest.isMuted(1)).isTrue();
+        assertThat(underTest.isMuted(2)).isFalse();
+        assertThat(underTest.isMuted(3)).isFalse();
+    }
+
+    @Test
+    void shouldEnableAndDisableEffects() {
+        assertThat(underTest.isEffectEnabled(EffectType.SLIDE_UP)).isTrue();
+
+        underTest.setEffectEnabled(EffectType.SLIDE_UP, false);
+
+        assertThat(underTest.isEffectEnabled(EffectType.SLIDE_UP)).isFalse();
+
+        underTest.setEffectEnabled(EffectType.SLIDE_UP, true);
+
+        assertThat(underTest.isEffectEnabled(EffectType.SLIDE_UP)).isTrue();
+    }
+
+    @Test
+    void shouldEnableAndDisableExtendedEffects() {
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.ROUGH_PANNING)).isTrue();
+
+        underTest.setExtendedEffectEnabled(ExtendedEffectType.ROUGH_PANNING, false);
+
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.ROUGH_PANNING)).isFalse();
+
+        underTest.setExtendedEffectEnabled(ExtendedEffectType.ROUGH_PANNING, true);
+
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.ROUGH_PANNING)).isTrue();
+    }
+
+    @Test
+    void shouldEnableAndDisableAllEffects() {
+        assertThat(underTest.isEffectEnabled(EffectType.SLIDE_UP)).isTrue();
+        assertThat(underTest.isEffectEnabled(EffectType.EXTENDED_EFFECT)).isTrue();
+        assertThat(underTest.isEffectEnabled(EffectType.POSITION_JUMP)).isTrue();
+
+        underTest.setAllEffectsEnabled(false);
+
+        assertThat(underTest.isEffectEnabled(EffectType.SLIDE_UP)).isFalse();
+        assertThat(underTest.isEffectEnabled(EffectType.EXTENDED_EFFECT)).isFalse();
+        assertThat(underTest.isEffectEnabled(EffectType.POSITION_JUMP)).isFalse();
+
+        underTest.setAllEffectsEnabled(true);
+
+        assertThat(underTest.isEffectEnabled(EffectType.SLIDE_UP)).isTrue();
+        assertThat(underTest.isEffectEnabled(EffectType.EXTENDED_EFFECT)).isTrue();
+        assertThat(underTest.isEffectEnabled(EffectType.POSITION_JUMP)).isTrue();
+    }
+
+    @Test
+    void shouldEnableAndDisableAllExtendedEffects() {
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.ROUGH_PANNING)).isTrue();
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.CUT_SAMPLE)).isTrue();
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.FINE_SLIDE_UP)).isTrue();
+
+        underTest.setAllExtendedEffectsEnabled(false);
+
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.ROUGH_PANNING)).isFalse();
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.CUT_SAMPLE)).isFalse();
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.FINE_SLIDE_UP)).isFalse();
+
+        underTest.setAllExtendedEffectsEnabled(true);
+
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.ROUGH_PANNING)).isTrue();
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.CUT_SAMPLE)).isTrue();
+        assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.FINE_SLIDE_UP)).isTrue();
+    }
 }
