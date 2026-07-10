@@ -425,8 +425,11 @@ public final class Sampler {
         context.breakRowIndex = 0;
         context.loopPending = false;
         context.loopRowIndex = 0;
-        // we explicitly do not want to clear the loop counter
-        // we also do not want to clear hardware filter data
+
+        // we explicitly DO NOT want to clear
+        // loop counter
+        // hardware filter
+        // extra delay
     }
 
     private void handleNewRow() {

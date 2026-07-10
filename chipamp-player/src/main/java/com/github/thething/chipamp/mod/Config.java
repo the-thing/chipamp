@@ -2,6 +2,12 @@ package com.github.thething.chipamp.mod;
 
 import java.util.Arrays;
 
+/**
+ * Configuration settings for the MOD tracker playback.
+ * <p>
+ * This class contains all configurable parameters for controlling playback behavior, including audio settings (sampling
+ * rate, stereo), effect control, and channel muting.
+ */
 final class Config {
 
     private static final boolean DEFAULT_LOGGING_ENABLED = false;
@@ -36,6 +42,13 @@ final class Config {
     boolean loopDetectionEnabled;
     boolean loggingEnabled;
 
+    /**
+     * Creates a new configuration for the specified number of channels.
+     * <p>
+     * Initializes all arrays and sets default values for all parameters.
+     *
+     * @param channelCount the number of channels in the module
+     */
     Config(int channelCount) {
         this.muted = new boolean[channelCount];
         this.effectEnabled = new boolean[16];
@@ -45,6 +58,19 @@ final class Config {
         reset();
     }
 
+    /**
+     * Resets all configuration values to their defaults.
+     * <p>
+     * This unmutes all channels, enables all effects, and restores default values for:
+     * <ul>
+     *   <li>Clock frequency: PAL (7159090 Hz)</li>
+     *   <li>Sampling rate: 48000 Hz</li>
+     *   <li>Volume multiplier: 0.5</li>
+     *   <li>Stereo enabled: true</li>
+     *   <li>Loop detection enabled: true</li>
+     *   <li>And other playback settings</li>
+     * </ul>
+     */
     void reset() {
         Arrays.fill(this.muted, false);
         Arrays.fill(this.effectEnabled, DEFAULT_EFFECT_ENABLED);
