@@ -14,6 +14,7 @@ import javax.sound.sampled.SourceDataLine;
 import java.io.IOException;
 import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -103,7 +104,9 @@ class PlayerTest {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         sampler.updateMod(mod);
 
-        underTest.playPatterns(3);
+        int patternCount = underTest.playPatterns(3);
+
+        assertThat(patternCount).isEqualTo(3);
 
         verify(sourceDataLine).open(any(AudioFormat.class));
         verify(sourceDataLine).start();
@@ -117,7 +120,8 @@ class PlayerTest {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         sampler.updateMod(mod);
 
-        underTest.playRows(3435);
+        int rowCount = underTest.playRows(3435);
+        assertThat(rowCount).isEqualTo(1424);
 
         verify(sourceDataLine).open(any(AudioFormat.class));
         verify(sourceDataLine).start();
