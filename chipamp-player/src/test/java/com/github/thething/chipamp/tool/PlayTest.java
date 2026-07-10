@@ -19,19 +19,19 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.ThreadFactory;
 
 class PlayTest {
 
     @Test
-    // @Disabled
+    @Disabled
     public void playAsync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/other/euroremix.mod");
+        Mod mod = modLoader.load("chip/H0ffman - Eon.mod");
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
         sampler.setLoggingEnabled(true);
+        sampler.setStereoEnabled(false);
 
         AudioFormat format = sampler.getCompatibleAudioFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -45,12 +45,9 @@ class PlayTest {
             int readLength = writeLength;
             byte[] buffer = new byte[1024 * 64];
 
-            System.out.println("writeLength: " + writeLength);
-
             try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, readLength)) {
                 while (sampler.getSequenceIndex() < mod.getLength()) {
                     int diff = writeLength - asyncLine.size();
-                    System.out.println("diff: " + diff);
 
                     if (diff > 0) {
                         int readCount = sampler.read(buffer, 0, diff);
@@ -211,7 +208,7 @@ class PlayTest {
 
     // TODO remove
     @Test
-    // @Disabled
+    @Disabled
     void foo() throws IOException {
         ModLoader modLoader = new ModLoader(true);
         Sampler sampler = new Sampler();
