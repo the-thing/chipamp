@@ -372,7 +372,6 @@ public final class Mods {
         int index = getPeriodIndex(period, fineTune);
 
         if (index == -1) {
-            // TODO check if this ever happens
             return period;
         }
 

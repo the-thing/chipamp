@@ -150,7 +150,6 @@ class ModLoaderTest {
         assertThat(mod.getSampleCount()).isEqualTo(31);
     }
 
-    // TODO find more mods with sample numbers that are greater than sample count
     @Test
     void shouldLoadModWithInvalidSampleNumbers() throws IOException {
         Mod mod = underTest.load("chip/other/elgpasa.mod");

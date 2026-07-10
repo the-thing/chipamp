@@ -3,10 +3,8 @@ package com.github.thething.chipamp.tool;
 import com.github.thething.chipamp.concurrent.IdleStrategy;
 import com.github.thething.chipamp.concurrent.SleepingIdleStrategy;
 import com.github.thething.chipamp.mod.AsyncSourceDataLine;
-import com.github.thething.chipamp.mod.EffectType;
 import com.github.thething.chipamp.mod.Mod;
 import com.github.thething.chipamp.mod.ModLoader;
-import com.github.thething.chipamp.mod.Mods;
 import com.github.thething.chipamp.mod.Player;
 import com.github.thething.chipamp.mod.Sampler;
 import org.junit.jupiter.api.Disabled;
@@ -17,7 +15,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.io.File;
 import java.io.IOException;
 
 class PlayTest {
@@ -41,13 +38,12 @@ class PlayTest {
             line.open(format);
             line.start();
 
-            int writeLength = sampler.getBytesPerRow();
-            int readLength = writeLength;
+            int length = sampler.getBytesPerRow();
             byte[] buffer = new byte[1024 * 64];
 
-            try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, readLength)) {
+            try (AsyncSourceDataLine asyncLine = AsyncSourceDataLine.launch(line, length)) {
                 while (sampler.getSequenceIndex() < mod.getLength()) {
-                    int diff = writeLength - asyncLine.size();
+                    int diff = length - asyncLine.size();
 
                     if (diff > 0) {
                         int readCount = sampler.read(buffer, 0, diff);
@@ -204,40 +200,5 @@ class PlayTest {
 
         Player player = new Player(sampler);
         player.playPatterns(1);
-    }
-
-    // TODO remove
-    @Test
-    @Disabled
-    void foo() throws IOException {
-        ModLoader modLoader = new ModLoader(true);
-        Sampler sampler = new Sampler();
-
-        File dir = new File("C:\\Users\\Marcin\\Downloads\\mod");
-        File[] files = dir.listFiles();
-
-        if (files == null) {
-            throw new RuntimeException("Unable to list files in directory: " + dir.getAbsolutePath());
-        }
-
-        for (File file : files) {
-            if (!file.getName().endsWith(".mod")) {
-                continue;
-            }
-
-            System.out.println("Loading: " + file.getName());
-
-            Mod mod = modLoader.load(file);
-
-//            if (Mods.isExtendedEffectPresent(mod, ExtendedEffectType.Se)) {
-//                System.out.println("Found extended effect: " + ExtendedEffectType.SET_FILTER);
-//            }
-
-            if (Mods.isEffectPresent(mod, EffectType.SET_PANNING_POSITION)) {
-                System.out.println("Found effect: " + EffectType.SET_PANNING_POSITION);
-            }
-
-            // sampler.updateMod(mod);
-        }
     }
 }
