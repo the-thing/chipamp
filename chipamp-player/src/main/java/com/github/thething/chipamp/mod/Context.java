@@ -8,79 +8,20 @@ final class Context {
     private static final int DEFAULT_SPEED = 6;
     private static final int DEFAULT_TEMPO = 125;
 
-    /**
-     * Number of ticks per row
-     */
-    int speed;
-
-    /**
-     * Tempo in beats per minute
-     */
-    int tempo;
-
-    /**
-     * Number of output samples per tick
-     */
+    int speed; // ticks per row
+    int tempo; // beats per minute
     int samplesPerTick;
-
-    /**
-     * True if a pattern jump command is pending
-     */
     boolean jumpPending;
-
-    /**
-     * Target sequence index for the pending jump
-     */
     int jumpSequenceIndex;
-
-    /**
-     * True if a pattern break command is pending
-     */
     boolean breakPending;
-
-    /**
-     * Target row index for the pending break
-     */
     int breakRowIndex;
-
-    /**
-     * True if a pattern loop command is pending
-     */
     boolean loopPending;
-
-    /**
-     * Row index where the loop starts
-     */
     int loopRowIndex;
-
-    /**
-     * Number of loop iterations remaining
-     */
     int loopCounter;
-
-    /**
-     * Extra delay in ticks before advancing to the next row
-     */
     int extraDelay;
-
-    /**
-     * True if hardware low-pass filter is enabled (Amiga 500 style)
-     */
     boolean hardwareFilterEnabled;
-
-    /**
-     * Filter coefficient for one sample step
-     */
     float hardwareFilterDelta;
-
-    /**
-     * Current filter state for the left channel
-     */
     float hardwareFilterLeft;
-
-    /**
-     * Current filter state for the right channel
-     */
     float hardwareFilterRight;
 
     /**
