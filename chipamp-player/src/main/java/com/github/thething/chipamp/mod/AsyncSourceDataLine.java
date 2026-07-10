@@ -1,5 +1,6 @@
 package com.github.thething.chipamp.mod;
 
+import com.github.thething.chipamp.common.VisibleForTesting;
 import com.github.thething.chipamp.concurrent.IdleStrategy;
 import com.github.thething.chipamp.concurrent.SleepingIdleStrategy;
 import com.github.thething.chipamp.concurrent.SpScByteCircularBuffer;
@@ -117,6 +118,11 @@ public final class AsyncSourceDataLine implements Closeable {
     @Override
     public void close() {
         thread.interrupt();
+    }
+
+    @VisibleForTesting
+    SpScByteCircularBuffer getBuffer() {
+        return buffer;
     }
 
     /**

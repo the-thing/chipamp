@@ -188,6 +188,19 @@ public final class SpScByteCircularBuffer {
     }
 
     /**
+     * Returns {@code true} if the buffer is empty.
+     *
+     * <p>
+     * <b>Thread Safety:</b> This method can be called by either producer or consumer thread,
+     * but the returned value is approximate and may not reflect concurrent modifications.
+     *
+     * @return {@code true} if the buffer is empty, {@code false} otherwise
+     */
+    public boolean isEmpty() {
+        return writeIndex.getAcquire() == readIndex.getAcquire();
+    }
+
+    /**
      * Advances the read position by skipping the specified number of bytes.
      * <p>
      * <b>Thread Safety:</b> This method must be called only by the consumer thread.
