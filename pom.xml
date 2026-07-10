@@ -19,7 +19,7 @@
         <junit.version>6.1.0</junit.version>
         <mockito.version>5.23.0</mockito.version>
         <assert4j.version>3.27.7</assert4j.version>
-        <jacoco.plugin.version>0.8.14</jacoco.plugin.version>
+        <jacoco.plugin.version>0.8.15</jacoco.plugin.version>
         <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
         <maven.dependency.plugin.version>3.11.0</maven.dependency.plugin.version>
         <maven.surefire.plugin.version>3.5.6</maven.surefire.plugin.version>
