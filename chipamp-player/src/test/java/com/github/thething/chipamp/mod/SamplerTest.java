@@ -249,6 +249,17 @@ class SamplerTest {
     }
 
     @Test
+    public void shouldReturnReadRows() throws IOException {
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.updateMod(mod);
+
+        underTest.seekSequence(1);
+
+        byte[] audio = underTest.readRows(2);
+        assertThat(audio.length).isEqualTo(underTest.getBytesPerRow() * 2);
+    }
+
+    @Test
     void shouldGenerateSameAudioForSkipAndSeek() throws IOException {
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
         underTest.updateMod(mod);
