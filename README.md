@@ -1,5 +1,9 @@
 # 🎵 Chipamp
 
+[![Java CI](https://github.com/the-thing/chipamp/actions/workflows/ci.yml/badge.svg)](https://github.com/the-thing/chipamp/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/the-thing/chipamp/actions/workflows/codeql.yml/badge.svg)](https://github.com/the-thing/chipamp/actions/workflows/codeql.yml)
+[![Codecov](https://codecov.io/github/the-thing/chipamp/branch/main/graph/badge.svg)](https://app.codecov.io/github/the-thing/chipamp)
+
 **A pure-Java ProTracker MOD file player and playback engine.**
 
 Chipamp parses and plays classic Amiga (and PC) `.mod` tracker files with sample-accurate, tick-based emulation of the
