@@ -3,6 +3,7 @@
 [![Java CI](https://github.com/the-thing/chipamp/actions/workflows/ci.yml/badge.svg)](https://github.com/the-thing/chipamp/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/the-thing/chipamp/actions/workflows/codeql.yml/badge.svg)](https://github.com/the-thing/chipamp/actions/workflows/codeql.yml)
 [![Codecov](https://codecov.io/github/the-thing/chipamp/branch/main/graph/badge.svg)](https://app.codecov.io/github/the-thing/chipamp)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 **A pure-Java ProTracker MOD file player and playback engine.**
 
@@ -128,3 +129,5 @@ System.out.println(sampler.getModLength(TimeUnit.SECONDS) + "s");
 [https://www.exotica.org.uk/wiki/Protracker](https://www.exotica.org.uk/wiki/Protracker)
 <br/>
 [https://cdimage.debian.org/mirror/CRAN/web/packages/ProTrackR/refman/ProTrackR.html](https://cdimage.debian.org/mirror/CRAN/web/packages/ProTrackR/refman/ProTrackR.html)
+<br/>
+[https://en.wikipedia.org/wiki/Protracker](https://en.wikipedia.org/wiki/Protracker)
