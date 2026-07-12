@@ -70,7 +70,7 @@ class PlayTest {
     }
 
     @Test
-    // @Disabled
+    @Disabled
     void playSync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
         Mod mod = modLoader.load("chip/Captain - Space Debris.mod");
