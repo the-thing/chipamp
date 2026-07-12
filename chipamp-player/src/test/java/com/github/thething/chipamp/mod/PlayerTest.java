@@ -21,8 +21,6 @@ import static java.util.Objects.checkFromIndexSize;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -40,7 +38,7 @@ class PlayerTest {
     void setUp() {
         sampler = new Sampler();
         modLoader = new ModLoader();
-        sourceDataLine = spy(new CapturingSourceDataLine());
+        sourceDataLine = new CapturingSourceDataLine();
 
         doReturn(sourceDataLine).when(sourceDataLineFactory).apply(any(AudioFormat.class));
 
@@ -59,11 +57,6 @@ class PlayerTest {
 
         underTest.play();
         assertThat(sourceDataLine.totalBytesWritten).isEqualTo(7_368_964);
-
-        verify(sourceDataLine).open(any(AudioFormat.class));
-        verify(sourceDataLine).start();
-        verify(sourceDataLine).drain();
-        verify(sourceDataLine).close();
     }
 
     @Test
@@ -73,12 +66,12 @@ class PlayerTest {
         sampler.seekSequence(1);
 
         underTest.play(3);
-        assertThat(sourceDataLine.totalBytesWritten).isEqualTo(1_474_560);
 
-        verify(sourceDataLine).open(any(AudioFormat.class));
-        verify(sourceDataLine).start();
-        verify(sourceDataLine).drain();
-        verify(sourceDataLine).close();
+        assertThat(sourceDataLine.totalBytesWritten).isEqualTo(1_474_560);
+        assertThat(sourceDataLine.opened).isTrue();
+        assertThat(sourceDataLine.started).isTrue();
+        assertThat(sourceDataLine.drained).isTrue();
+        assertThat(sourceDataLine.closed).isTrue();
     }
 
     @Test
@@ -87,12 +80,12 @@ class PlayerTest {
         sampler.updateMod(mod);
 
         underTest.play(5, 8);
-        assertThat(sourceDataLine.totalBytesWritten).isEqualTo(2_211_840);
 
-        verify(sourceDataLine).open(any(AudioFormat.class));
-        verify(sourceDataLine).start();
-        verify(sourceDataLine).drain();
-        verify(sourceDataLine).close();
+        assertThat(sourceDataLine.totalBytesWritten).isEqualTo(2_211_840);
+        assertThat(sourceDataLine.opened).isTrue();
+        assertThat(sourceDataLine.started).isTrue();
+        assertThat(sourceDataLine.drained).isTrue();
+        assertThat(sourceDataLine.closed).isTrue();
     }
 
     @Test
@@ -104,11 +97,10 @@ class PlayerTest {
 
         assertThat(patternCount).isEqualTo(3);
         assertThat(sourceDataLine.totalBytesWritten).isEqualTo(2_208_004);
-
-        verify(sourceDataLine).open(any(AudioFormat.class));
-        verify(sourceDataLine).start();
-        verify(sourceDataLine).drain();
-        verify(sourceDataLine).close();
+        assertThat(sourceDataLine.opened).isTrue();
+        assertThat(sourceDataLine.started).isTrue();
+        assertThat(sourceDataLine.drained).isTrue();
+        assertThat(sourceDataLine.closed).isTrue();
     }
 
     @Test
@@ -120,16 +112,19 @@ class PlayerTest {
 
         assertThat(rowCount).isEqualTo(640);
         assertThat(sourceDataLine.totalBytesWritten).isEqualTo(7_368_964);
-
-        verify(sourceDataLine).open(any(AudioFormat.class));
-        verify(sourceDataLine).start();
-        verify(sourceDataLine).drain();
-        verify(sourceDataLine).close();
+        assertThat(sourceDataLine.opened).isTrue();
+        assertThat(sourceDataLine.started).isTrue();
+        assertThat(sourceDataLine.drained).isTrue();
+        assertThat(sourceDataLine.closed).isTrue();
     }
 
     private static class CapturingSourceDataLine implements SourceDataLine {
 
         private int totalBytesWritten;
+        private boolean opened;
+        private boolean started;
+        private boolean drained;
+        private boolean closed;
 
         @Override
         public void open(AudioFormat format, int bufferSize) {
@@ -138,6 +133,11 @@ class PlayerTest {
 
         @Override
         public void open(AudioFormat format) {
+            if (opened) {
+                throw new IllegalStateException("Already opened");
+            }
+
+            opened = true;
         }
 
         @Override
@@ -149,6 +149,11 @@ class PlayerTest {
 
         @Override
         public void drain() {
+            if (drained) {
+                throw new IllegalStateException("Already drained");
+            }
+
+            drained = true;
         }
 
         @Override
@@ -158,6 +163,11 @@ class PlayerTest {
 
         @Override
         public void start() {
+            if (started) {
+                throw new IllegalStateException("Already started");
+            }
+
+            started = true;
         }
 
         @Override
@@ -222,6 +232,11 @@ class PlayerTest {
 
         @Override
         public void close() {
+            if (closed) {
+                throw new IllegalStateException("Already closed");
+            }
+
+            closed = true;
         }
 
         @Override
