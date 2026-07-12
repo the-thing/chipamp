@@ -301,7 +301,7 @@ public final class Sampler {
             return EMPTY_BUFFER;
         }
 
-        int bytesPerTick = getBytesPerSample();
+        int bytesPerSample = getBytesPerSample();
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         int offset = 0;
@@ -310,7 +310,7 @@ public final class Sampler {
 
         while (sequenceIndex < mod.getLength() && readPatternCount < patternCount) {
             tick(buffer, offset);
-            offset += bytesPerTick;
+            offset += bytesPerSample;
 
             if (offset == buffer.length) {
                 buffer = Arrays.copyOf(buffer, buffer.length << 1);
@@ -341,7 +341,7 @@ public final class Sampler {
             return EMPTY_BUFFER;
         }
 
-        int bytesPerTick = getBytesPerSample();
+        int bytesPerSample = getBytesPerSample();
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         int offset = 0;
@@ -351,7 +351,7 @@ public final class Sampler {
 
         while (sequenceIndex < mod.getLength() && readRowCount < rowCount) {
             tick(buffer, offset);
-            offset += bytesPerTick;
+            offset += bytesPerSample;
 
             if (offset == buffer.length) {
                 buffer = Arrays.copyOf(buffer, buffer.length << 1);
@@ -393,19 +393,19 @@ public final class Sampler {
     public int read(byte[] output, int offset, int length) {
         checkFromIndexSize(offset, length, output.length);
 
-        int bytesPerTick = getBytesPerSample();
+        int bytesPerSample = getBytesPerSample();
 
-        if (length < bytesPerTick) {
+        if (length < bytesPerSample) {
             return 0;
         }
 
         int end = offset + length;
         int readCount = 0;
 
-        while ((sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick) && end - offset >= bytesPerTick) {
+        while ((sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick) && end - offset >= bytesPerSample) {
             tick(output, offset);
-            readCount += bytesPerTick;
-            offset += bytesPerTick;
+            readCount += bytesPerSample;
+            offset += bytesPerSample;
         }
 
         return readCount;
@@ -789,9 +789,7 @@ public final class Sampler {
      * @param enabled {@code true} to enable all effects, {@code false} to disable all effects
      */
     public void setAllEffectsEnabled(boolean enabled) {
-        for (int i = 0; i < config.effectEnabled.length; i++) {
-            config.effectEnabled[i] = enabled;
-        }
+        Arrays.fill(config.effectEnabled, enabled);
     }
 
     /**
@@ -800,9 +798,7 @@ public final class Sampler {
      * @param enabled {@code true} to enable all extended effects, {@code false} to disable all extended effects
      */
     public void setAllExtendedEffectsEnabled(boolean enabled) {
-        for (int i = 0; i < config.extendedEffectEnabled.length; i++) {
-            config.extendedEffectEnabled[i] = enabled;
-        }
+        Arrays.fill(config.extendedEffectEnabled, enabled);
     }
 
     /**
