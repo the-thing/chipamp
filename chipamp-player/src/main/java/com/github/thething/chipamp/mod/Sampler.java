@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.github.thething.chipamp.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
-import static java.util.Objects.checkFromToIndex;
 import static java.util.Objects.checkIndex;
 import static java.util.Objects.requireNonNull;
 
@@ -392,27 +391,7 @@ public final class Sampler {
      * @throws IndexOutOfBoundsException if {@code offset} and {@code length} are out of bounds for {@code output}
      */
     public int read(byte[] output, int offset, int length) {
-        return read(output, offset, length, mod.getLength());
-    }
-
-    /**
-     * Renders audio into a region of the given buffer, filling as much of that region as possible without advancing the
-     * pattern sequence past {@code endSequenceIndex}. This allows rendering to stop at a specific point in the sequence
-     * rather than at the true end of the module.
-     *
-     * @param output           the buffer to render into
-     * @param offset           the offset in {@code output} to start writing at
-     * @param length           the maximum number of bytes to write
-     * @param endSequenceIndex the position in the pattern sequence not to advance past
-     * @return the number of bytes written, which will be a multiple of {@link #getBytesPerSample()}; may be less than
-     * {@code length} if {@code endSequenceIndex} is reached first, or {@code 0} if playback has already reached that
-     * position
-     * @throws IndexOutOfBoundsException if {@code offset} and {@code length} are out of bounds for {@code output}, or
-     *                                   if {@code endSequenceIndex} is out of range
-     */
-    public int read(byte[] output, int offset, int length, int endSequenceIndex) {
         checkFromIndexSize(offset, length, output.length);
-        checkFromToIndex(0, endSequenceIndex, mod.getLength());
 
         int bytesPerTick = getBytesPerSample();
 
@@ -423,7 +402,7 @@ public final class Sampler {
         int end = offset + length;
         int readCount = 0;
 
-        while ((sequenceIndex < endSequenceIndex || sampleIndex < context.samplesPerTick) && end - offset >= bytesPerTick) {
+        while ((sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick) && end - offset >= bytesPerTick) {
             tick(output, offset);
             readCount += bytesPerTick;
             offset += bytesPerTick;
