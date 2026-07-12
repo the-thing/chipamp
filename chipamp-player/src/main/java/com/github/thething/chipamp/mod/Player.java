@@ -19,8 +19,6 @@ import static java.util.Objects.requireNonNull;
  */
 public final class Player {
 
-    private static final int DEFAULT_BUFFER_SIZE = 4096;
-
     private static final Function<AudioFormat, SourceDataLine> DEFAULT_SOURCE_DATA_LINE_FACTORY = (format) -> {
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
 
@@ -101,9 +99,13 @@ public final class Player {
         Mod mod = sampler.getMod();
         checkFromToIndex(startSequenceIndex, endSequenceIndex, mod.getLength());
 
-        sampler.seekSequence(startSequenceIndex);
+        if (startSequenceIndex != sampler.getSequenceIndex()) {
+            // only change sequence when the current one is different (if the row or sample is not the first so be it)
+            sampler.seekSequence(startSequenceIndex);
+        }
 
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        // intentionally matches sample size not to read more than end sequence
+        byte[] buffer = new byte[sampler.getBytesPerSample()];
         int sequenceIndex = startSequenceIndex;
 
         while (sequenceIndex < endSequenceIndex) {
@@ -163,7 +165,8 @@ public final class Player {
         Mod mod = sampler.getMod();
         requireNonNull(mod);
 
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        // intentionally matches sample size not to read more than end sequence
+        byte[] buffer = new byte[sampler.getBytesPerSample()];
         int lastSequenceIndex = sampler.getSequenceIndex();
         int playedPatternCount = 0;
 
@@ -228,7 +231,8 @@ public final class Player {
         Mod mod = sampler.getMod();
         requireNonNull(mod);
 
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        // intentionally matches sample size not to read more than end sequence
+        byte[] buffer = new byte[sampler.getBytesPerSample()];
 
         int sequenceIndex = sampler.getSequenceIndex();
         int rowIndex = sampler.getRowIndex();
