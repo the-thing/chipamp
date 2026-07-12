@@ -1,0 +1,33 @@
+# Maven
+target/
+*.ser
+*.ec
+
+### IntelliJ IDEA ###
+out/
+.idea/
+.run/
+*.ipr
+*.iws
+*.iml
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.metadata
+.springBeans
+.sts4-cache
+bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### Mac OS ###
+.DS_Store
