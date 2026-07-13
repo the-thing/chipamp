@@ -209,8 +209,12 @@ public final class Sampler {
         config.loggingEnabled = false;
 
         try {
-            while (sequenceIndex < mod.getLength() && skippedPatternCount < patternCount) {
-                tick(TMP_BUFFER, 0);
+            while (skippedPatternCount < patternCount) {
+                boolean ticked = tick(TMP_BUFFER, 0);
+
+                if (!ticked) {
+                    break;
+                }
 
                 if (lastSequenceIndex != sequenceIndex) {
                     skippedPatternCount++;
@@ -243,10 +247,14 @@ public final class Sampler {
         config.loggingEnabled = false;
 
         try {
-            while (sequenceIndex < mod.getLength() && skippedRowCount < rowCount) {
-                tick(TMP_BUFFER, 0);
+            while (skippedRowCount < rowCount) {
+                boolean ticked = tick(TMP_BUFFER, 0);
 
-                if (rowIndex != lastRowIndex || lastSequenceIndex != sequenceIndex) {
+                if (!ticked) {
+                    break;
+                }
+
+                if (rowIndex != lastRowIndex || sequenceIndex != lastSequenceIndex) {
                     skippedRowCount++;
                     lastRowIndex = rowIndex;
                     lastSequenceIndex = sequenceIndex;
@@ -266,7 +274,7 @@ public final class Sampler {
      * @return the rendered PCM audio, sized exactly to the number of bytes produced
      * @throws NullPointerException if no module has been loaded
      */
-    public byte[] read() {
+    public byte[] readAll() {
         requireNonNull(mod);
 
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
@@ -302,14 +310,19 @@ public final class Sampler {
         }
 
         int bytesPerSample = getBytesPerSample();
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        byte[] buffer = new byte[bytesPerSample];
 
         int offset = 0;
         int lastSequenceIndex = sequenceIndex;
         int readPatternCount = 0;
 
-        while (sequenceIndex < mod.getLength() && readPatternCount < patternCount) {
-            tick(buffer, offset);
+        while (readPatternCount < patternCount) {
+            boolean ticked = tick(buffer, offset);
+
+            if (!ticked) {
+                break;
+            }
+
             offset += bytesPerSample;
 
             if (offset == buffer.length) {
@@ -342,15 +355,20 @@ public final class Sampler {
         }
 
         int bytesPerSample = getBytesPerSample();
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        byte[] buffer = new byte[bytesPerSample];
 
         int offset = 0;
         int lastSequenceIndex = sequenceIndex;
         int lastRowIndex = rowIndex;
         int readRowCount = 0;
 
-        while (sequenceIndex < mod.getLength() && readRowCount < rowCount) {
-            tick(buffer, offset);
+        while (readRowCount < rowCount) {
+            boolean ticked = tick(buffer, offset);
+
+            if (!ticked) {
+                break;
+            }
+
             offset += bytesPerSample;
 
             if (offset == buffer.length) {
@@ -399,13 +417,19 @@ public final class Sampler {
             return 0;
         }
 
-        int end = offset + length;
         int readCount = 0;
+        int remaining = length;
 
-        while ((sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick) && end - offset >= bytesPerSample) {
-            tick(output, offset);
+        while (remaining >= bytesPerSample) {
+            boolean ticked = tick(output, offset);
+
+            if (!ticked) {
+                break;
+            }
+
             readCount += bytesPerSample;
             offset += bytesPerSample;
+            remaining -= bytesPerSample;
         }
 
         return readCount;
@@ -417,8 +441,13 @@ public final class Sampler {
      *
      * @param output the buffer to write the rendered sample into
      * @param offset the offset in {@code output} to write at; must have room for {@link #getBytesPerSample()} bytes
+     * @return {@code true} if a sample was rendered, {@code false} if the end of the module has been reached
      */
-    private void tick(byte[] output, int offset) {
+    private boolean tick(byte[] output, int offset) {
+        if (sequenceIndex >= mod.getLength() && sampleIndex >= context.samplesPerTick) {
+            return false;
+        }
+
         if (sampleIndex >= context.samplesPerTick) {
             // first tick of a row triggers new notes/effects; later ticks only apply per-tick effect updates
             if (tickIndex == 0) {
@@ -494,6 +523,8 @@ public final class Sampler {
         }
 
         sampleIndex++;
+
+        return true;
     }
 
     /**
@@ -883,12 +914,19 @@ public final class Sampler {
                 channelsBySequenceRow[0][channelIndex].copyFrom(channels[channelIndex]);
             }
 
-            while (sequenceIndex < mod.getLength() || sampleIndex < context.samplesPerTick) {
-                tick(TMP_BUFFER, 0);
+            while (true) {
+                boolean ticked = tick(TMP_BUFFER, 0);
+
+                if (!ticked) {
+                    break;
+                }
+
                 sampleCount++;
 
                 int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
 
+                // when dealing with LOOP_PATTERN effect, it is possible that already visited row could be revisited
+                // we only store the state once per row - first time we visit it
                 if (index < visited.length && !visited[index]) {
                     visited[index] = true;
                     contextBySequenceRow[index].copyFrom(context);
@@ -907,7 +945,7 @@ public final class Sampler {
     }
 
     /**
-     * Sets the lower bound clamp applied to note periods.
+     * Sets the lower-bound clamp applied to note periods.
      *
      * @param minPeriod the minimum allowed period
      * @throws IllegalArgumentException if {@code minPeriod} is negative

@@ -73,7 +73,7 @@ class PlayTest {
     @Disabled
     void playSync() throws IOException, LineUnavailableException {
         ModLoader modLoader = new ModLoader(true);
-        Mod mod = modLoader.load("chip/Captain - Space Debris.mod");
+        Mod mod = modLoader.load("chip/Tip - Stardust Memories.mod");
 
         Sampler sampler = new Sampler();
         sampler.updateMod(mod);
