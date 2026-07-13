@@ -40,7 +40,7 @@ class SamplerTest {
         Mod mod = modLoader.load("chip/Jogeir Liljedahl - Nearly There.mod");
         underTest.updateMod(mod);
 
-        byte[] audio = underTest.read();
+        byte[] audio = underTest.readAll();
         assertThat(audio.length).isEqualTo(74_889_920);
     }
 
@@ -49,7 +49,7 @@ class SamplerTest {
         Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
         underTest.updateMod(mod);
 
-        byte[] audio = underTest.read();
+        byte[] audio = underTest.readAll();
         assertThat(audio.length).isEqualTo(25_743_360);
     }
 
@@ -59,7 +59,7 @@ class SamplerTest {
         underTest.updateMod(mod);
 
         byte[] expectedAudio = Resources.readAudio("wav/axel-stereo-48kHz-pal.wav");
-        byte[] audio = underTest.read();
+        byte[] audio = underTest.readAll();
 
         assertThat(audio).containsExactly(expectedAudio);
     }

@@ -100,7 +100,8 @@ public final class Player {
         checkFromToIndex(startSequenceIndex, endSequenceIndex, mod.getLength());
 
         if (startSequenceIndex != sampler.getSequenceIndex()) {
-            // only change sequence when the current one is different (if the row or sample is not the first so be it)
+            // only change sequence when the current one is different
+            // this means we could start playing from any row, tick or sample from the current pattern
             sampler.seekSequence(startSequenceIndex);
         }
 

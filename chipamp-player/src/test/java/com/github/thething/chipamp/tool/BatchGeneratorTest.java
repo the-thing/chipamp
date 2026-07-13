@@ -77,7 +77,7 @@ class BatchGeneratorTest {
         Mod mod = modLoader.load(resourceName);
         sampler.updateMod(mod);
 
-        byte[] audio = sampler.read();
+        byte[] audio = sampler.readAll();
         Resources.saveAudio(new File(newFileName), sampler.getCompatibleAudioFormat(), audio);
     }
 
