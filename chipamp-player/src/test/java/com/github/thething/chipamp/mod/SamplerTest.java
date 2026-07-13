@@ -593,4 +593,66 @@ class SamplerTest {
             assertThat(sampler.getContext().loopCounter).isEqualTo(0);
         }
     }
+
+    @Test
+    void shouldLooseMidTickWhenSamplingRateIsChanged() throws IOException {
+        Mod mod = modLoader.load("chip/other/euroremix.mod");
+        underTest.updateMod(mod);
+
+        assertThat(underTest.getBytesPerRow()).isEqualTo(23040);
+        assertThat(underTest.getBytesPerTick()).isEqualTo(3840);
+        assertThat(underTest.getBytesPerSample()).isEqualTo(4);
+
+        byte[] buffer = new byte[underTest.getBytesPerRow()];
+        int readCount = underTest.read(buffer);
+
+        assertThat(readCount).isEqualTo(buffer.length);
+        assertThat(underTest.getSequenceIndex()).isEqualTo(0);
+        assertThat(underTest.getRowIndex()).isEqualTo(1);
+        assertThat(underTest.getTickIndex()).isEqualTo(1);
+        assertThat(underTest.getSampleIndex()).isEqualTo(960);
+
+        underTest.setSamplingRate(41_000);
+
+        assertThat(readCount).isEqualTo(buffer.length);
+        assertThat(underTest.getSequenceIndex()).isEqualTo(0);
+        assertThat(underTest.getRowIndex()).isEqualTo(1);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(1);
+
+        assertThat(underTest.getBytesPerRow()).isEqualTo(16400);
+        assertThat(underTest.getBytesPerTick()).isEqualTo(3280);
+        assertThat(underTest.getBytesPerSample()).isEqualTo(4);
+    }
+
+    @Test
+    void shouldLooseMidTickWhenClockIsChanged() throws IOException {
+        Mod mod = modLoader.load("chip/other/euroremix.mod");
+        underTest.updateMod(mod);
+
+        assertThat(underTest.getBytesPerRow()).isEqualTo(23040);
+        assertThat(underTest.getBytesPerTick()).isEqualTo(3840);
+        assertThat(underTest.getBytesPerSample()).isEqualTo(4);
+
+        byte[] buffer = new byte[underTest.getBytesPerRow()];
+        int readCount = underTest.read(buffer);
+
+        assertThat(readCount).isEqualTo(buffer.length);
+        assertThat(underTest.getSequenceIndex()).isEqualTo(0);
+        assertThat(underTest.getRowIndex()).isEqualTo(1);
+        assertThat(underTest.getTickIndex()).isEqualTo(1);
+        assertThat(underTest.getSampleIndex()).isEqualTo(960);
+
+        underTest.setClockHz(Mods.NTSC_CLOCK_HZ);
+
+        assertThat(readCount).isEqualTo(buffer.length);
+        assertThat(underTest.getSequenceIndex()).isEqualTo(0);
+        assertThat(underTest.getRowIndex()).isEqualTo(1);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(1);
+
+        assertThat(underTest.getBytesPerRow()).isEqualTo(19200);
+        assertThat(underTest.getBytesPerTick()).isEqualTo(3840);
+        assertThat(underTest.getBytesPerSample()).isEqualTo(4);
+    }
 }
