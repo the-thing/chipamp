@@ -2,6 +2,7 @@ package com.github.thething.chipamp.mod;
 
 import com.github.thething.chipamp.common.Formatters;
 import com.github.thething.chipamp.common.Maths;
+import com.github.thething.chipamp.common.VisibleForTesting;
 
 import javax.sound.sampled.AudioFormat;
 import java.util.Arrays;
@@ -57,6 +58,12 @@ public final class Sampler {
      */
     private final Context[] contextBySequenceRow;
 
+    /**
+     * Loop-detection visited-set snapshots indexed by {@code sequenceIndex * Mod.ROW_COUNT + rowIndex}, captured by
+     * {@link #recalculateMeta()} for fast seeking.
+     */
+    private final Set<State>[] visitedBySequenceRow;
+
     private Mod mod;
     private int sampleCount;
     private int sequenceIndex;
@@ -92,7 +99,13 @@ public final class Sampler {
         this.contextBySequenceRow = new Context[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
 
         for (int i = 0; i < contextBySequenceRow.length; i++) {
-            contextBySequenceRow[i] = new Context(config.samplingRate);
+            this.contextBySequenceRow[i] = new Context(config.samplingRate);
+        }
+
+        this.visitedBySequenceRow = new HashSet[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
+
+        for (int i = 0; i < visitedBySequenceRow.length; i++) {
+            this.visitedBySequenceRow[i] = new HashSet<>();
         }
     }
 
@@ -148,6 +161,9 @@ public final class Sampler {
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
             this.channels[channelIndex].copyFrom(channelsBySequenceRow[index][channelIndex]);
         }
+
+        this.visited.clear();
+        this.visited.addAll(visitedBySequenceRow[index]);
 
         if (sequenceIndex == 0 && rowIndex == 0) {
             reset();
@@ -216,7 +232,7 @@ public final class Sampler {
                     break;
                 }
 
-                if (lastSequenceIndex != sequenceIndex) {
+                if (sequenceIndex != lastSequenceIndex) {
                     skippedPatternCount++;
                     lastSequenceIndex = sequenceIndex;
                 }
@@ -238,8 +254,8 @@ public final class Sampler {
      */
     public int skipRows(int rowCount) {
         requireNonNull(mod);
-        int skippedRowCount = 0;
 
+        int skippedRowCount = 0;
         int lastSequenceIndex = sequenceIndex;
         int lastRowIndex = rowIndex;
 
@@ -914,6 +930,9 @@ public final class Sampler {
                 channelsBySequenceRow[0][channelIndex].copyFrom(channels[channelIndex]);
             }
 
+            visitedBySequenceRow[0].clear();
+            visitedBySequenceRow[0].addAll(this.visited);
+
             while (true) {
                 boolean ticked = tick(TMP_BUFFER, 0);
 
@@ -934,6 +953,9 @@ public final class Sampler {
                     for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
                         channelsBySequenceRow[index][channelIndex].copyFrom(channels[channelIndex]);
                     }
+
+                    visitedBySequenceRow[index].clear();
+                    visitedBySequenceRow[index].addAll(this.visited);
                 }
             }
 
@@ -1155,6 +1177,11 @@ public final class Sampler {
      */
     public float getRightPan(int channelIndex) {
         return channels[channelIndex].rightPan;
+    }
+
+    @VisibleForTesting
+    Context getContext() {
+        return context;
     }
 
     /**

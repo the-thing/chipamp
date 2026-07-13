@@ -463,4 +463,134 @@ class SamplerTest {
         assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.CUT_SAMPLE)).isTrue();
         assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.FINE_SLIDE_UP)).isTrue();
     }
+
+    /**
+     * 3 x 32 rows of a pattern loop (pattern 1, row 0).
+     *
+     * <pre>
+     * 0001 | 00 | F-3 0B E60 |
+     * 0001 | 01 | --- -- --- |
+     * 0001 | 02 | F-3 03 --- |
+     * 0001 | 03 | --- -- --- |
+     * 0001 | 04 | F-3 0B --- |
+     * 0001 | 05 | --- -- --- |
+     * 0001 | 06 | F-3 03 --- |
+     * 0001 | 07 | --- -- --- |
+     * 0001 | 08 | F-3 0B --- |
+     * 0001 | 09 | --- -- --- |
+     * 0001 | 10 | F-3 03 --- |
+     * 0001 | 11 | F-3 02 --- |
+     * 0001 | 12 | F-3 01 --- |
+     * 0001 | 13 | F-3 02 --- |
+     * 0001 | 14 | F-3 03 --- |
+     * 0001 | 15 | --- -- --- |
+     * 0001 | 16 | F-3 0B --- |
+     * 0001 | 17 | --- -- --- |
+     * 0001 | 18 | F-3 03 --- |
+     * 0001 | 19 | --- -- --- |
+     * 0001 | 20 | F-3 0B --- |
+     * 0001 | 21 | --- -- --- |
+     * 0001 | 22 | F-3 03 --- |
+     * 0001 | 23 | --- -- --- |
+     * 0001 | 24 | F-3 0B --- |
+     * 0001 | 25 | --- -- --- |
+     * 0001 | 26 | F-3 03 --- |
+     * 0001 | 27 | F-3 02 --- |
+     * 0001 | 28 | F-3 01 --- |
+     * 0001 | 29 | F-3 02 --- |
+     * 0001 | 30 | F-3 03 --- |
+     * 0001 | 31 | --- -- E62 |
+     * </pre>
+     */
+    @Test
+    void shouldExecuteSameLoopMultipleTimesAfterSeek() throws IOException {
+        Mod mod = modLoader.load("chip/other/euroremix.mod");
+
+        Sampler sampler = new Sampler();
+        sampler.updateMod(mod);
+
+        for (int i = 0; i < 5; i++) {
+            sampler.seekSequence(8, 0);
+
+            assertThat(sampler.getContext().loopPending).isEqualTo(false);
+            assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
+            assertThat(sampler.getContext().loopCounter).isEqualTo(0);
+
+            sampler.skipRows(32);
+
+            assertThat(sampler.getSequenceIndex()).isEqualTo(8);
+            assertThat(sampler.getRowIndex()).isEqualTo(0);
+            assertThat(sampler.getTickIndex()).isEqualTo(0);
+            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+
+            assertThat(sampler.getContext().loopPending).isEqualTo(false);
+            assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
+            assertThat(sampler.getContext().loopCounter).isEqualTo(2);
+
+            sampler.skipRows(32);
+
+            assertThat(sampler.getSequenceIndex()).isEqualTo(8);
+            assertThat(sampler.getRowIndex()).isEqualTo(0);
+            assertThat(sampler.getTickIndex()).isEqualTo(0);
+            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+
+            assertThat(sampler.getContext().loopPending).isEqualTo(false);
+            assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
+            assertThat(sampler.getContext().loopCounter).isEqualTo(1);
+
+            sampler.skipRows(32);
+
+            assertThat(sampler.getSequenceIndex()).isEqualTo(8);
+            assertThat(sampler.getRowIndex()).isEqualTo(32);
+            assertThat(sampler.getTickIndex()).isEqualTo(0);
+            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+
+            assertThat(sampler.getContext().loopPending).isEqualTo(false);
+            assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
+            assertThat(sampler.getContext().loopCounter).isEqualTo(0);
+        }
+
+        // should do the same even if we advance in the middle of the loop
+
+        for (int i = 0; i < 2; i++) {
+            sampler.seekSequence(8, 1);
+
+            assertThat(sampler.getContext().loopPending).isEqualTo(false);
+            assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
+            assertThat(sampler.getContext().loopCounter).isEqualTo(0);
+
+            sampler.skipRows(32);
+
+            assertThat(sampler.getSequenceIndex()).isEqualTo(8);
+            assertThat(sampler.getRowIndex()).isEqualTo(1);
+            assertThat(sampler.getTickIndex()).isEqualTo(0);
+            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+
+            assertThat(sampler.getContext().loopPending).isEqualTo(false);
+            assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
+            assertThat(sampler.getContext().loopCounter).isEqualTo(2);
+
+            sampler.skipRows(32);
+
+            assertThat(sampler.getSequenceIndex()).isEqualTo(8);
+            assertThat(sampler.getRowIndex()).isEqualTo(1);
+            assertThat(sampler.getTickIndex()).isEqualTo(0);
+            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+
+            assertThat(sampler.getContext().loopPending).isEqualTo(false);
+            assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
+            assertThat(sampler.getContext().loopCounter).isEqualTo(1);
+
+            sampler.skipRows(32);
+
+            assertThat(sampler.getSequenceIndex()).isEqualTo(8);
+            assertThat(sampler.getRowIndex()).isEqualTo(33);
+            assertThat(sampler.getTickIndex()).isEqualTo(0);
+            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+
+            assertThat(sampler.getContext().loopPending).isEqualTo(false);
+            assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
+            assertThat(sampler.getContext().loopCounter).isEqualTo(0);
+        }
+    }
 }
