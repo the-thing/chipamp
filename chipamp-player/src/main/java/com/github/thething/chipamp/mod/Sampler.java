@@ -127,7 +127,7 @@ public final class Sampler {
         sequenceIndex = 0;
         rowIndex = 0;
         tickIndex = 0;
-        sampleIndex = context.samplesPerTick;
+        sampleIndex = 0;
     }
 
     /**
@@ -169,13 +169,7 @@ public final class Sampler {
         this.sequenceIndex = sequenceIndex;
         this.rowIndex = rowIndex;
         this.tickIndex = 0;
-
-        if (index == 0) {
-            // before the song case - we need to trigger on row
-            this.sampleIndex = context.samplesPerTick;
-        } else {
-            this.sampleIndex = 1;
-        }
+        this.sampleIndex = 0;
     }
 
     /**
@@ -454,44 +448,22 @@ public final class Sampler {
         return readCount;
     }
 
-    /**
-     * Renders a single output sample and advances playback by one sample's worth of time, crossing tick and row
-     * boundaries as needed.
-     *
-     * @param output the buffer to write the rendered sample into
-     * @param offset the offset in {@code output} to write at; must have room for {@link #getBytesPerSample()} bytes
-     * @return {@code true} if a sample was rendered, {@code false} if the end of the module has been reached
-     */
     private boolean tick(byte[] output, int offset) {
-        if (sequenceIndex >= mod.getLength() && sampleIndex >= context.samplesPerTick) {
+        if (sequenceIndex >= mod.getLength()) {
             return false;
         }
 
-        if (sampleIndex >= context.samplesPerTick) {
-            // first tick of a row triggers new notes/effects; later ticks only apply per-tick effect updates
-            if (tickIndex == 0) {
+        if (tickIndex == 0 && sampleIndex == 0) {
+            if (config.loggingEnabled) {
                 int patternIndex = mod.getPatternIndex(sequenceIndex);
-
-                if (config.loggingEnabled) {
-                    System.out.print(Formatters.formatRow(mod, patternIndex, rowIndex));
-                    System.out.print(' ');
-                    System.out.println(Formatters.formatEffects(mod, patternIndex, rowIndex));
-                }
-
-                handleNewRow();
-            } else {
-                applyMidRowEffects();
+                System.out.print(Formatters.formatRow(mod, patternIndex, rowIndex));
+                System.out.print(' ');
+                System.out.println(Formatters.formatEffects(mod, patternIndex, rowIndex));
             }
 
-            tickIndex++;
-
-            if (tickIndex >= context.speed + context.extraDelay) {
-                tickIndex = 0;
-                context.extraDelay = 0;
-                advanceRow();
-            }
-
-            sampleIndex = 0;
+            handleNewRow();
+        } else if (sampleIndex == 0) {
+            applyMidRowEffects();
         }
 
         float left = 0.0f;
@@ -542,6 +514,17 @@ public final class Sampler {
         }
 
         sampleIndex++;
+
+        if (sampleIndex >= context.samplesPerTick) {
+            sampleIndex = 0;
+            tickIndex++;
+
+            if (tickIndex >= context.speed + context.extraDelay) {
+                tickIndex = 0;
+                context.extraDelay = 0;
+                advanceRow();
+            }
+        }
 
         return true;
     }
