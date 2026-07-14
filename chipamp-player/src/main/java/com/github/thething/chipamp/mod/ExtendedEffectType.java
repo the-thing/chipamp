@@ -343,7 +343,7 @@ public enum ExtendedEffectType implements Effect {
                 }
 
                 int index = channel.sample.getLoopStart() + channel.invertLoopPosition;
-                channel.sample.invertData(index);
+                channel.sample.invertData(index); // permanently destroys sample data
             }
         }
     },

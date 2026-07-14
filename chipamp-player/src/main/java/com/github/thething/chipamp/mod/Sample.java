@@ -1,5 +1,7 @@
 package com.github.thething.chipamp.mod;
 
+import java.util.Arrays;
+
 import static com.github.thething.chipamp.common.Requirements.requireInRange;
 import static java.util.Objects.checkFromIndexSize;
 import static java.util.Objects.requireNonNull;
@@ -107,6 +109,20 @@ public final class Sample {
     }
 
     /**
+     * Returns a copy of a range of the sample data.
+     *
+     * @param offset the start index within the sample data (inclusive)
+     * @param length the number of bytes to copy
+     * @return a new byte array containing the specified range of sample data
+     * @throws IndexOutOfBoundsException if {@code offset} and {@code length} do not describe a valid range within the
+     *                                   sample data
+     */
+    public byte[] copyOfData(int offset, int length) {
+        checkFromIndexSize(offset, length, data.length);
+        return Arrays.copyOfRange(data, offset, offset + length);
+    }
+
+    /**
      * Negates the sample byte at the given index in place.
      *
      * @param index the index into the sample data to invert
@@ -143,7 +159,7 @@ public final class Sample {
     }
 
     /**
-     * Returns the sample's fine tune value.
+     * Returns the sample's fine-tune value.
      *
      * @return the signed fine tune value (-8..7)
      */
