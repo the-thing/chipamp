@@ -48,19 +48,19 @@ public final class Sampler {
 
     /**
      * Channel state snapshots indexed by {@code sequenceIndex * Mod.ROW_COUNT + rowIndex}, captured by
-     * {@link #recalculateMeta()} for fast seeking.
+     * {@link #recalculateIndices()} for fast seeking.
      */
     private final Channel[][] channelsBySequenceRow;
 
     /**
      * Context snapshots indexed by {@code sequenceIndex * Mod.ROW_COUNT + rowIndex}, captured by
-     * {@link #recalculateMeta()} for fast seeking.
+     * {@link #recalculateIndices()} for fast seeking.
      */
     private final Context[] contextBySequenceRow;
 
     /**
      * Loop-detection visited-set snapshots indexed by {@code sequenceIndex * Mod.ROW_COUNT + rowIndex}, captured by
-     * {@link #recalculateMeta()} for fast seeking.
+     * {@link #recalculateIndices()} for fast seeking.
      */
     private final Set<State>[] visitedBySequenceRow;
 
@@ -75,6 +75,7 @@ public final class Sampler {
      * Creates a new sampler with default playback settings and no module loaded. Call {@link #updateMod(Mod)} before
      * reading any audio.
      */
+    @SuppressWarnings("unchecked")
     public Sampler() {
         this.config = new Config(Mod.MAX_CHANNEL_COUNT);
         this.channels = new Channel[Mod.MAX_CHANNEL_COUNT];
@@ -142,8 +143,8 @@ public final class Sampler {
 
     /**
      * Seeks to a specific row at a specific position in the pattern sequence, restoring channel and context state from
-     * the snapshot captured for that row by {@link #recalculateMeta()}. Seeking to sequence 0, row 0 is equivalent to
-     * calling {@link #reset()}.
+     * the snapshot captured for that row by {@link #recalculateIndices()}. Seeking to sequence 0, row 0 is equivalent
+     * to calling {@link #reset()}.
      *
      * @param sequenceIndex the position in the pattern sequence to seek to
      * @param rowIndex      the row within that pattern to seek to
@@ -165,12 +166,14 @@ public final class Sampler {
         this.visited.clear();
         this.visited.addAll(visitedBySequenceRow[index]);
 
-        if (sequenceIndex == 0 && rowIndex == 0) {
-            reset();
+        this.sequenceIndex = sequenceIndex;
+        this.rowIndex = rowIndex;
+        this.tickIndex = 0;
+
+        if (index == 0) {
+            // before the song case - we need to trigger on row
+            this.sampleIndex = context.samplesPerTick;
         } else {
-            this.sequenceIndex = sequenceIndex;
-            this.rowIndex = rowIndex;
-            this.tickIndex = 0;
             this.sampleIndex = 1;
         }
     }
@@ -544,9 +547,9 @@ public final class Sampler {
     }
 
     /**
-     * Resolves the next sequence/row position at the end of a row, applying any pending loop, position-jump or
+     * Resolves the next sequence/row position at the end of a row, applying any pending loop, position-jump, or
      * pattern-break effect in priority order (loop, then jump+break combined, then jump alone, then break alone, then a
-     * plain single-row advance), and detects infinite pattern loops if enabled.
+     * plain single-row advance). Additionally, it detects infinite pattern loops if enabled.
      */
     private void advanceRow() {
         int nextSequenceIndex = sequenceIndex;
@@ -668,7 +671,7 @@ public final class Sampler {
     }
 
     /**
-     * Returns the total playback duration of the currently loaded module, as computed by {@link #recalculateMeta()}
+     * Returns the total playback duration of the currently loaded module, as computed by {@link #recalculateIndices()}
      * when the module was loaded.
      *
      * @param unit the time unit to express the duration in
@@ -711,7 +714,7 @@ public final class Sampler {
         this.mod = mod;
 
         reset();
-        recalculateMeta();
+        recalculateIndices();
         reset();
     }
 
@@ -850,7 +853,8 @@ public final class Sampler {
 
     /**
      * Sets the module's clock frequency, used to convert note periods to playback frequencies, and immediately
-     * recalculates every channel's sample increment to reflect it.
+     * recalculates every channel's sample increment to reflect it.Mid-row tick/sample progress within the current row
+     * will be lost.
      *
      * @param clockHz the clock frequency in Hz, e.g. {@code Mods.PAL_CLOCK_HZ} or {@code Mods.NTSC_CLOCK_HZ}
      * @throws IllegalArgumentException if {@code clockHz} is not positive
@@ -863,13 +867,14 @@ public final class Sampler {
         this.config.clockHz = clockHz;
 
         if (mod != null) {
-            recalculatePeriods();
+            rebuildIndicesPreservingPosition();
         }
     }
 
     /**
-     * Sets the output sampling rate, and immediately recalculates every channel's sample increment, the hardware filter
-     * coefficient, and the seek/loop metadata to reflect it.
+     * Sets the output sampling rate and immediately recalculates every channel's sample increment, the hardware filter
+     * coefficient, and the seek/loop metadata to reflect it. Mid-row tick/sample progress within the current row will
+     * be lost.
      *
      * @param samplingRate the output sampling rate in Hz
      * @throws IllegalArgumentException if {@code samplingRate} is not positive
@@ -882,36 +887,35 @@ public final class Sampler {
         config.samplingRate = samplingRate;
 
         if (mod != null) {
-            recalculatePeriods();
-            recalculateHardwareFilter();
-            recalculateMeta();
+            rebuildIndicesPreservingPosition();
         }
     }
 
     /**
-     * Recomputes each channel's sample increment from its currently stored period, using the current clock frequency
-     * and sampling rate. Called after either changes.
+     * Fully rebuilds the seek/loop index tables under the current clockHz/samplingRate, then restores playback to the
+     * start of the row it was at before the rebuild. Mid-row tick/sample progress within that row is lost — the row
+     * will effectively restart, which may cause an audible retrigger, but playback resumes at the correct song position
+     * rather than jumping back to the beginning. This is an O(module length) operation and should not be called on
+     * every audio callback.
      */
-    private void recalculatePeriods() {
-        for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-            channels[channelIndex].updatePeriodAndIncrement(channels[channelIndex].period, config.clockHz, config.samplingRate);
+    private void rebuildIndicesPreservingPosition() {
+        int snapshotSequenceIndex = sequenceIndex;
+        int snapshotRowIndex = rowIndex;
+        boolean finished = snapshotSequenceIndex >= mod.getLength();
+
+        reset();
+        recalculateIndices();
+
+        if (!finished) {
+            seekSequence(snapshotSequenceIndex, snapshotRowIndex);
         }
     }
 
     /**
-     * Recomputes the hardware low-pass filter coefficient for the current sampling rate, if the filter is enabled.
-     */
-    private void recalculateHardwareFilter() {
-        if (context.hardwareFilterEnabled) {
-            context.updateHardwareFilterDelta(config.samplingRate);
-        }
-    }
-
-    /**
-     * Builds context and channel data for each sequence and row for fast traversal. Also calculates total amount of
+     * Builds context and channel data for each sequence and row for fast traversal. Also calculates the total number of
      * samples. It always detects infinite loops.
      */
-    private void recalculateMeta() {
+    private void recalculateIndices() {
         boolean loopDetectionEnabled = config.loopDetectionEnabled;
         boolean loggingEnabled = config.loggingEnabled;
 
@@ -924,14 +928,14 @@ public final class Sampler {
             boolean[] visited = new boolean[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
             visited[0] = true;
 
-            contextBySequenceRow[0].copyFrom(context);
+            contextBySequenceRow[0].reset(config.samplingRate);
 
             for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                channelsBySequenceRow[0][channelIndex].copyFrom(channels[channelIndex]);
+                channelsBySequenceRow[0][channelIndex].reset(config);
             }
 
             visitedBySequenceRow[0].clear();
-            visitedBySequenceRow[0].addAll(this.visited);
+            visitedBySequenceRow[0].add(INITIAL_STATE);
 
             while (true) {
                 boolean ticked = tick(TMP_BUFFER, 0);
@@ -981,7 +985,7 @@ public final class Sampler {
     }
 
     /**
-     * Sets the upper bound clamp applied to note periods.
+     * Sets the upper-bound clamp applied to note periods.
      *
      * @param maxPeriod the maximum allowed period
      * @throws IllegalArgumentException if {@code maxPeriod} is negative
@@ -1009,7 +1013,7 @@ public final class Sampler {
     }
 
     /**
-     * Enables or disables stereo output. When disabled, output is rendered as mono.
+     * Enables or disables stereo output. When disabled, the output is rendered as mono.
      *
      * @param stereoEnabled {@code true} to render stereo output, {@code false} to render mono
      */
@@ -1133,7 +1137,7 @@ public final class Sampler {
     }
 
     /**
-     * Returns the number of output bytes rendered per row at the current sampling rate, tempo and speed.
+     * Returns the number of output bytes rendered per row at the current sampling rate, tempo, and speed.
      *
      * @return the number of bytes per row
      */
@@ -1151,7 +1155,7 @@ public final class Sampler {
     }
 
     /**
-     * Returns the number of output samples rendered per row at the current sampling rate, tempo and speed.
+     * Returns the number of output samples rendered per row at the current sampling rate, tempo, and speed.
      *
      * @return the number of samples per row
      */
