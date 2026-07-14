@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.thething.chipamp</groupId>
     <artifactId>chipamp-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <name>Chipamp Parent</name>
     <packaging>pom</packaging>
     <modules>
