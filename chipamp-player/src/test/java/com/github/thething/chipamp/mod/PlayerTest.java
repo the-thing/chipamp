@@ -56,7 +56,7 @@ class PlayerTest {
         sampler.updateMod(mod);
 
         underTest.play();
-        assertThat(sourceDataLine.totalBytesWritten).isEqualTo(7_368_964);
+        assertThat(sourceDataLine.totalBytesWritten).isEqualTo(7_372_800);
     }
 
     @Test
@@ -96,7 +96,7 @@ class PlayerTest {
         int patternCount = underTest.playPatterns(3);
 
         assertThat(patternCount).isEqualTo(3);
-        assertThat(sourceDataLine.totalBytesWritten).isEqualTo(2_208_004);
+        assertThat(sourceDataLine.totalBytesWritten).isEqualTo(2_211_840);
         assertThat(sourceDataLine.opened).isTrue();
         assertThat(sourceDataLine.started).isTrue();
         assertThat(sourceDataLine.drained).isTrue();
@@ -111,7 +111,7 @@ class PlayerTest {
         int rowCount = underTest.playRows(3435);
 
         assertThat(rowCount).isEqualTo(640);
-        assertThat(sourceDataLine.totalBytesWritten).isEqualTo(7_368_964);
+        assertThat(sourceDataLine.totalBytesWritten).isEqualTo(7_372_800);
         assertThat(sourceDataLine.opened).isTrue();
         assertThat(sourceDataLine.started).isTrue();
         assertThat(sourceDataLine.drained).isTrue();

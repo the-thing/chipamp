@@ -107,8 +107,8 @@ class SamplerTest {
         underTest.updateMod(mod);
 
         byte[] sample = new byte[underTest.getBytesPerSample()];
-        int sampleCount = 0;
 
+        int sampleCount = 0;
         int sequenceIndex;
         int rowIndex;
         int tickIndex;
@@ -130,11 +130,11 @@ class SamplerTest {
             sampleCount++;
         }
 
-        assertThat(sampleCount).isEqualTo(396_023);
+        assertThat(sampleCount).isEqualTo(397_056);
         assertThat(sequenceIndex).isEqualTo(1);
         assertThat(rowIndex).isEqualTo(0);
         assertThat(tickIndex).isEqualTo(0);
-        assertThat(sampleIndex).isEqualTo(1);
+        assertThat(sampleIndex).isEqualTo(0);
     }
 
     @Test
@@ -147,21 +147,21 @@ class SamplerTest {
         assertThat(underTest.getSequenceIndex()).isEqualTo(11);
         assertThat(underTest.getRowIndex()).isEqualTo(0);
         assertThat(underTest.getTickIndex()).isEqualTo(0);
-        assertThat(underTest.getSampleIndex()).isEqualTo(1);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
 
         underTest.seekSequence(11, 33);
 
         assertThat(underTest.getSequenceIndex()).isEqualTo(11);
         assertThat(underTest.getRowIndex()).isEqualTo(33);
         assertThat(underTest.getTickIndex()).isEqualTo(0);
-        assertThat(underTest.getSampleIndex()).isEqualTo(1);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
 
         underTest.seekSequence(0);
 
         assertThat(underTest.getSequenceIndex()).isEqualTo(0);
         assertThat(underTest.getRowIndex()).isEqualTo(0);
         assertThat(underTest.getTickIndex()).isEqualTo(0);
-        assertThat(underTest.getSampleIndex()).isEqualTo(960);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
     }
 
     @Test
@@ -175,7 +175,7 @@ class SamplerTest {
         assertThat(underTest.getSequenceIndex()).isEqualTo(11);
         assertThat(underTest.getRowIndex()).isEqualTo(0);
         assertThat(underTest.getTickIndex()).isEqualTo(0);
-        assertThat(underTest.getSampleIndex()).isEqualTo(1);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
 
         sequenceIndex = underTest.seekPattern(2);
         assertThat(sequenceIndex).isEqualTo(0);
@@ -183,7 +183,7 @@ class SamplerTest {
         assertThat(underTest.getSequenceIndex()).isEqualTo(0);
         assertThat(underTest.getRowIndex()).isEqualTo(0);
         assertThat(underTest.getTickIndex()).isEqualTo(0);
-        assertThat(underTest.getSampleIndex()).isEqualTo(960);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
     }
 
     @Test
@@ -521,7 +521,7 @@ class SamplerTest {
             assertThat(sampler.getSequenceIndex()).isEqualTo(8);
             assertThat(sampler.getRowIndex()).isEqualTo(0);
             assertThat(sampler.getTickIndex()).isEqualTo(0);
-            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+            assertThat(sampler.getSampleIndex()).isEqualTo(0);
 
             assertThat(sampler.getContext().loopPending).isEqualTo(false);
             assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
@@ -532,7 +532,7 @@ class SamplerTest {
             assertThat(sampler.getSequenceIndex()).isEqualTo(8);
             assertThat(sampler.getRowIndex()).isEqualTo(0);
             assertThat(sampler.getTickIndex()).isEqualTo(0);
-            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+            assertThat(sampler.getSampleIndex()).isEqualTo(0);
 
             assertThat(sampler.getContext().loopPending).isEqualTo(false);
             assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
@@ -543,7 +543,7 @@ class SamplerTest {
             assertThat(sampler.getSequenceIndex()).isEqualTo(8);
             assertThat(sampler.getRowIndex()).isEqualTo(32);
             assertThat(sampler.getTickIndex()).isEqualTo(0);
-            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+            assertThat(sampler.getSampleIndex()).isEqualTo(0);
 
             assertThat(sampler.getContext().loopPending).isEqualTo(false);
             assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
@@ -564,7 +564,7 @@ class SamplerTest {
             assertThat(sampler.getSequenceIndex()).isEqualTo(8);
             assertThat(sampler.getRowIndex()).isEqualTo(1);
             assertThat(sampler.getTickIndex()).isEqualTo(0);
-            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+            assertThat(sampler.getSampleIndex()).isEqualTo(0);
 
             assertThat(sampler.getContext().loopPending).isEqualTo(false);
             assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
@@ -575,7 +575,7 @@ class SamplerTest {
             assertThat(sampler.getSequenceIndex()).isEqualTo(8);
             assertThat(sampler.getRowIndex()).isEqualTo(1);
             assertThat(sampler.getTickIndex()).isEqualTo(0);
-            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+            assertThat(sampler.getSampleIndex()).isEqualTo(0);
 
             assertThat(sampler.getContext().loopPending).isEqualTo(false);
             assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
@@ -586,7 +586,7 @@ class SamplerTest {
             assertThat(sampler.getSequenceIndex()).isEqualTo(8);
             assertThat(sampler.getRowIndex()).isEqualTo(33);
             assertThat(sampler.getTickIndex()).isEqualTo(0);
-            assertThat(sampler.getSampleIndex()).isEqualTo(1);
+            assertThat(sampler.getSampleIndex()).isEqualTo(0);
 
             assertThat(sampler.getContext().loopPending).isEqualTo(false);
             assertThat(sampler.getContext().loopRowIndex).isEqualTo(0);
@@ -603,14 +603,14 @@ class SamplerTest {
         assertThat(underTest.getBytesPerTick()).isEqualTo(3840);
         assertThat(underTest.getBytesPerSample()).isEqualTo(4);
 
-        byte[] buffer = new byte[underTest.getBytesPerRow()];
+        byte[] buffer = new byte[underTest.getBytesPerRow() - underTest.getBytesPerSample()];
         int readCount = underTest.read(buffer);
 
         assertThat(readCount).isEqualTo(buffer.length);
         assertThat(underTest.getSequenceIndex()).isEqualTo(0);
         assertThat(underTest.getRowIndex()).isEqualTo(1);
-        assertThat(underTest.getTickIndex()).isEqualTo(1);
-        assertThat(underTest.getSampleIndex()).isEqualTo(960);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(959);
 
         underTest.setSamplingRate(41_000);
 
@@ -618,7 +618,7 @@ class SamplerTest {
         assertThat(underTest.getSequenceIndex()).isEqualTo(0);
         assertThat(underTest.getRowIndex()).isEqualTo(1);
         assertThat(underTest.getTickIndex()).isEqualTo(0);
-        assertThat(underTest.getSampleIndex()).isEqualTo(1);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
 
         assertThat(underTest.getBytesPerRow()).isEqualTo(16400);
         assertThat(underTest.getBytesPerTick()).isEqualTo(3280);
@@ -634,14 +634,14 @@ class SamplerTest {
         assertThat(underTest.getBytesPerTick()).isEqualTo(3840);
         assertThat(underTest.getBytesPerSample()).isEqualTo(4);
 
-        byte[] buffer = new byte[underTest.getBytesPerRow()];
+        byte[] buffer = new byte[underTest.getBytesPerRow() - underTest.getBytesPerSample()];
         int readCount = underTest.read(buffer);
 
         assertThat(readCount).isEqualTo(buffer.length);
         assertThat(underTest.getSequenceIndex()).isEqualTo(0);
         assertThat(underTest.getRowIndex()).isEqualTo(1);
-        assertThat(underTest.getTickIndex()).isEqualTo(1);
-        assertThat(underTest.getSampleIndex()).isEqualTo(960);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(959);
 
         underTest.setClockHz(Mods.NTSC_CLOCK_HZ);
 
@@ -649,7 +649,7 @@ class SamplerTest {
         assertThat(underTest.getSequenceIndex()).isEqualTo(0);
         assertThat(underTest.getRowIndex()).isEqualTo(1);
         assertThat(underTest.getTickIndex()).isEqualTo(0);
-        assertThat(underTest.getSampleIndex()).isEqualTo(1);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
 
         assertThat(underTest.getBytesPerRow()).isEqualTo(19200);
         assertThat(underTest.getBytesPerTick()).isEqualTo(3840);
