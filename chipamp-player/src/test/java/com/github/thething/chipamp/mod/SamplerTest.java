@@ -655,4 +655,26 @@ class SamplerTest {
         assertThat(underTest.getBytesPerTick()).isEqualTo(3840);
         assertThat(underTest.getBytesPerSample()).isEqualTo(4);
     }
+
+    @Test
+    void shouldPermanentlyDestroySampleData() throws IOException {
+        Mod mod = modLoader.load("chip/other/euroremix.mod");
+
+        Sample sample = mod.getSample(9);
+        assertThat(sample.getName()).isEqualTo("productions, but");
+
+        byte[] subData = sample.copyOfData(40, 6);
+        assertThat(subData).containsExactly(new byte[]{-11, -11, -18, 17, 26, 26});
+
+        underTest.updateMod(mod);
+
+        subData = sample.copyOfData(40, 6);
+        assertThat(subData).containsExactly(new byte[]{-11, 11, 18, -17, -26, 26});
+
+        underTest.seekSequence(3, 1);
+        underTest.skipRows(1);
+
+        subData = sample.copyOfData(40, 6);
+        assertThat(subData).containsExactly(new byte[]{-11, -11, -18, 17, 26, 26});
+    }
 }
