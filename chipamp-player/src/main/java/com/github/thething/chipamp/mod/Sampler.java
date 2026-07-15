@@ -218,6 +218,10 @@ public final class Sampler {
     public int skipRows(int rowCount) {
         requireNonNull(mod);
 
+        if (rowCount <= 0) {
+            return 0;
+        }
+
         int skippedRowCount = 0;
         int lastSequenceIndex = sequenceIndex;
         int lastRowIndex = rowIndex;
@@ -284,7 +288,7 @@ public final class Sampler {
     public byte[] readPatterns(int patternCount) {
         requireNonNull(mod);
 
-        if (patternCount < 0) {
+        if (patternCount <= 0) {
             return EMPTY_BUFFER;
         }
 
@@ -329,7 +333,7 @@ public final class Sampler {
     public byte[] readRows(int rowCount) {
         requireNonNull(mod);
 
-        if (rowCount < 0) {
+        if (rowCount <= 0) {
             return EMPTY_BUFFER;
         }
 
@@ -931,7 +935,7 @@ public final class Sampler {
      */
     public void setMinPeriod(int minPeriod) {
         if (minPeriod < 0) {
-            throw new IllegalArgumentException("minPeriod must be greater than zero");
+            throw new IllegalArgumentException("minPeriod must be greater than or equal to zero");
         }
 
         this.config.minPeriod = minPeriod;
@@ -945,7 +949,7 @@ public final class Sampler {
      */
     public void setMaxPeriod(int maxPeriod) {
         if (maxPeriod < 0) {
-            throw new IllegalArgumentException("maxPeriod must be greater than zero");
+            throw new IllegalArgumentException("maxPeriod must be greater than or equal to zero");
         }
 
         this.config.maxPeriod = maxPeriod;
