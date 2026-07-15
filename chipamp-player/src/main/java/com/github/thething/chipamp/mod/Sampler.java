@@ -40,29 +40,14 @@ public final class Sampler {
     private final Config config;
     private final Channel[] channels;
     private final Context context;
+    private final Index index;
+    private final boolean[] tmpEffectEnabled;
+    private final boolean[] tmpExtendedEffectEnabled;
 
     /**
      * Sequence/row/loop signatures seen so far this playthrough, used to detect infinite pattern loops.
      */
     private final Set<State> visited;
-
-    /**
-     * Channel state snapshots indexed by {@code sequenceIndex * Mod.ROW_COUNT + rowIndex}, captured by
-     * {@link #recalculateIndices()} for fast seeking.
-     */
-    private final Channel[][] channelsBySequenceRow;
-
-    /**
-     * Context snapshots indexed by {@code sequenceIndex * Mod.ROW_COUNT + rowIndex}, captured by
-     * {@link #recalculateIndices()} for fast seeking.
-     */
-    private final Context[] contextBySequenceRow;
-
-    /**
-     * Loop-detection visited-set snapshots indexed by {@code sequenceIndex * Mod.ROW_COUNT + rowIndex}, captured by
-     * {@link #recalculateIndices()} for fast seeking.
-     */
-    private final Set<State>[] visitedBySequenceRow;
 
     private Mod mod;
     private int sampleCount;
@@ -75,7 +60,6 @@ public final class Sampler {
      * Creates a new sampler with default playback settings and no module loaded. Call {@link #updateMod(Mod)} before
      * reading any audio.
      */
-    @SuppressWarnings("unchecked")
     public Sampler() {
         this.config = new Config(Mod.MAX_CHANNEL_COUNT);
         this.channels = new Channel[Mod.MAX_CHANNEL_COUNT];
@@ -86,28 +70,10 @@ public final class Sampler {
         }
 
         this.context = new Context(config.samplingRate);
+        this.index = new Index(config);
+        this.tmpEffectEnabled = new boolean[Mods.EFFECT_COUNT];
+        this.tmpExtendedEffectEnabled = new boolean[Mods.EFFECT_COUNT];
         this.visited = new HashSet<>();
-
-        this.channelsBySequenceRow = new Channel[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT][Mod.MAX_CHANNEL_COUNT];
-
-        for (int i = 0; i < channelsBySequenceRow.length; i++) {
-            for (int channelIndex = 0; channelIndex < channelsBySequenceRow[i].length; channelIndex++) {
-                boolean right = (i & 3) == 1 || (i & 3) == 2; // (LRRL) repeating pattern
-                this.channelsBySequenceRow[i][channelIndex] = new Channel(config, right);
-            }
-        }
-
-        this.contextBySequenceRow = new Context[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
-
-        for (int i = 0; i < contextBySequenceRow.length; i++) {
-            this.contextBySequenceRow[i] = new Context(config.samplingRate);
-        }
-
-        this.visitedBySequenceRow = new HashSet[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
-
-        for (int i = 0; i < visitedBySequenceRow.length; i++) {
-            this.visitedBySequenceRow[i] = new HashSet<>();
-        }
     }
 
     /**
@@ -143,8 +109,8 @@ public final class Sampler {
 
     /**
      * Seeks to a specific row at a specific position in the pattern sequence, restoring channel and context state from
-     * the snapshot captured for that row by {@link #recalculateIndices()}. Seeking to sequence 0, row 0 is equivalent
-     * to calling {@link #reset()}.
+     * the snapshot captured for that row by {@link #rebuildIndex()}. Seeking to sequence 0, row 0 is equivalent to
+     * calling {@link #reset()}.
      *
      * @param sequenceIndex the position in the pattern sequence to seek to
      * @param rowIndex      the row within that pattern to seek to
@@ -156,15 +122,15 @@ public final class Sampler {
         checkIndex(sequenceIndex, mod.getLength());
         checkIndex(rowIndex, Mod.ROW_COUNT);
 
-        int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
-        this.context.copyFrom(contextBySequenceRow[index]);
+        int sequenceRow = sequenceIndex * Mod.ROW_COUNT + rowIndex;
+        this.context.copyFrom(index.contextBySequenceRow[sequenceRow]);
 
         for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-            this.channels[channelIndex].copyFrom(channelsBySequenceRow[index][channelIndex]);
+            this.channels[channelIndex].copyFrom(index.channelsBySequenceRow[sequenceRow][channelIndex]);
         }
 
         this.visited.clear();
-        this.visited.addAll(visitedBySequenceRow[index]);
+        this.visited.addAll(index.visitedBySequenceRow[sequenceRow]);
 
         this.sequenceIndex = sequenceIndex;
         this.rowIndex = rowIndex;
@@ -654,8 +620,8 @@ public final class Sampler {
     }
 
     /**
-     * Returns the total playback duration of the currently loaded module, as computed by {@link #recalculateIndices()}
-     * when the module was loaded.
+     * Returns the total playback duration of the currently loaded module, as computed by {@link #rebuildIndex()} when
+     * the module was loaded.
      *
      * @param unit the time unit to express the duration in
      * @return the module's total playback duration in the requested unit
@@ -697,7 +663,7 @@ public final class Sampler {
         this.mod = mod;
 
         reset();
-        recalculateIndices();
+        rebuildIndex();
         reset();
     }
 
@@ -887,7 +853,7 @@ public final class Sampler {
         boolean finished = snapshotSequenceIndex >= mod.getLength();
 
         reset();
-        recalculateIndices();
+        rebuildIndex();
 
         if (!finished) {
             seekSequence(snapshotSequenceIndex, snapshotRowIndex);
@@ -898,12 +864,21 @@ public final class Sampler {
      * Builds context and channel data for each sequence and row for fast traversal. Also calculates the total number of
      * samples. It always detects infinite loops.
      */
-    private void recalculateIndices() {
+    private void rebuildIndex() {
+        index.reset(config);
+
+        // store config copy and enable loop detect and disable logging
         boolean loopDetectionEnabled = config.loopDetectionEnabled;
         boolean loggingEnabled = config.loggingEnabled;
-
         config.loopDetectionEnabled = true;
         config.loggingEnabled = false;
+
+        // store config copy and enable all effects except INVERT_LOOP
+        System.arraycopy(config.effectEnabled, 0, tmpEffectEnabled, 0, config.effectEnabled.length);
+        System.arraycopy(config.extendedEffectEnabled, 0, tmpExtendedEffectEnabled, 0, config.extendedEffectEnabled.length);
+        Arrays.fill(config.effectEnabled, true);
+        Arrays.fill(config.extendedEffectEnabled, true);
+        config.extendedEffectEnabled[ExtendedEffectType.INVERT_LOOP.getCode()] = false;
 
         try {
             int sampleCount = 0;
@@ -911,14 +886,7 @@ public final class Sampler {
             boolean[] visited = new boolean[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
             visited[0] = true;
 
-            contextBySequenceRow[0].reset(config.samplingRate);
-
-            for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                channelsBySequenceRow[0][channelIndex].reset(config);
-            }
-
-            visitedBySequenceRow[0].clear();
-            visitedBySequenceRow[0].add(INITIAL_STATE);
+            index.reset(config);
 
             while (true) {
                 boolean ticked = tick(TMP_BUFFER, 0);
@@ -929,20 +897,19 @@ public final class Sampler {
 
                 sampleCount++;
 
-                int index = sequenceIndex * Mod.ROW_COUNT + rowIndex;
+                int sequenceRow = sequenceIndex * Mod.ROW_COUNT + rowIndex;
 
                 // when dealing with LOOP_PATTERN effect, it is possible that already visited row could be revisited
                 // we only store the state once per row - first time we visit it
-                if (index < visited.length && !visited[index]) {
-                    visited[index] = true;
-                    contextBySequenceRow[index].copyFrom(context);
+                if (sequenceRow < visited.length && !visited[sequenceRow]) {
+                    visited[sequenceRow] = true;
+                    index.contextBySequenceRow[sequenceRow].copyFrom(context);
 
                     for (int channelIndex = 0; channelIndex < mod.getChannelCount(); channelIndex++) {
-                        channelsBySequenceRow[index][channelIndex].copyFrom(channels[channelIndex]);
+                        index.channelsBySequenceRow[sequenceRow][channelIndex].copyFrom(channels[channelIndex]);
                     }
 
-                    visitedBySequenceRow[index].clear();
-                    visitedBySequenceRow[index].addAll(this.visited);
+                    index.visitedBySequenceRow[sequenceRow].addAll(this.visited);
                 }
             }
 
@@ -950,6 +917,9 @@ public final class Sampler {
         } finally {
             config.loopDetectionEnabled = loopDetectionEnabled;
             config.loggingEnabled = loggingEnabled;
+
+            System.arraycopy(tmpEffectEnabled, 0, config.effectEnabled, 0, config.effectEnabled.length);
+            System.arraycopy(tmpExtendedEffectEnabled, 0, config.extendedEffectEnabled, 0, config.extendedEffectEnabled.length);
         }
     }
 
@@ -1176,5 +1146,86 @@ public final class Sampler {
      * if the exact same signature recurs, the module is looping without ever reaching its end.
      */
     private record State(int patternIndex, int rowIndex, boolean loopPending, int loopRowIndex, int loopCounter) {
+    }
+
+    /**
+     * Precomputed seek/loop metadata tables for a loaded module, built once by {@link #rebuildIndex()} and used by
+     * {@link #seekSequence(int, int)} to restore playback state at any sequence/row position without replaying the
+     * module from the beginning.
+     */
+    private static final class Index {
+
+        /**
+         * Channel state snapshots indexed by {@code sequenceIndex * Mod.ROW_COUNT + rowIndex}, captured by
+         * {@link #rebuildIndex()} for fast seeking.
+         */
+
+        private final Channel[][] channelsBySequenceRow;
+
+        /**
+         * Context snapshots indexed by {@code sequenceIndex * Mod.ROW_COUNT + rowIndex}, captured by
+         * {@link #rebuildIndex()} for fast seeking.
+         */
+        private final Context[] contextBySequenceRow;
+
+        /**
+         * Loop-detection visited-set snapshots indexed by {@code sequenceIndex * Mod.ROW_COUNT + rowIndex}, captured by
+         * {@link #rebuildIndex()} for fast seeking.
+         */
+        private final Set<State>[] visitedBySequenceRow;
+
+        /**
+         * Allocates and initializes all snapshot arrays, creating fresh {@link Channel} and {@link Context} instances
+         * at every slot and leaving all visited sets empty.
+         *
+         * @param config the shared playback configuration, used to initialize channels and the hardware filter
+         */
+        @SuppressWarnings("unchecked")
+        private Index(Config config) {
+            this.channelsBySequenceRow = new Channel[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT][Mod.MAX_CHANNEL_COUNT];
+
+            for (int i = 0; i < channelsBySequenceRow.length; i++) {
+                for (int channelIndex = 0; channelIndex < channelsBySequenceRow[i].length; channelIndex++) {
+                    boolean right = (i & 3) == 1 || (i & 3) == 2; // (LRRL) repeating pattern
+                    this.channelsBySequenceRow[i][channelIndex] = new Channel(config, right);
+                }
+            }
+
+            this.contextBySequenceRow = new Context[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
+
+            for (int i = 0; i < contextBySequenceRow.length; i++) {
+                this.contextBySequenceRow[i] = new Context(config.samplingRate);
+            }
+
+            this.visitedBySequenceRow = new HashSet[Mod.PATTERN_SEQUENCE_COUNT * Mod.ROW_COUNT];
+
+            for (int i = 0; i < visitedBySequenceRow.length; i++) {
+                this.visitedBySequenceRow[i] = new HashSet<>();
+            }
+        }
+
+        /**
+         * Resets all snapshot arrays to their initial state, clearing channel and context state and emptying every
+         * visited set, so that {@link #rebuildIndex()} can repopulate them cleanly.
+         *
+         * @param config the shared playback configuration, used to reset channels and the hardware filter
+         */
+        private void reset(Config config) {
+            for (Channel[] channels : channelsBySequenceRow) {
+                for (Channel channel : channels) {
+                    channel.reset(config);
+                }
+            }
+
+            for (Context context : contextBySequenceRow) {
+                context.reset(config.samplingRate);
+            }
+
+            for (Set<State> visited : visitedBySequenceRow) {
+                visited.clear();
+            }
+
+            visitedBySequenceRow[0].add(INITIAL_STATE);
+        }
     }
 }

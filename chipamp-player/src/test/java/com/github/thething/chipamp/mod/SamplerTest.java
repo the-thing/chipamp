@@ -54,6 +54,51 @@ class SamplerTest {
     }
 
     @Test
+    void shouldMoveOutsideOfPatternRangeOnInfiniteLoopSeek() throws IOException {
+        Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
+        underTest.updateMod(mod);
+
+        // move to the infinite loop position jump
+        underTest.seekSequence(18, 15);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(18);
+        assertThat(underTest.getRowIndex()).isEqualTo(15);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
+
+        // if loop detection is enabled
+        underTest.skipRows(1);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(129);
+        assertThat(underTest.getRowIndex()).isEqualTo(0);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
+    }
+
+    @Test
+    void shouldAllowReadingAfterSeekingOutsideOfLoopDetection() throws IOException {
+        Mod mod = modLoader.load("chip/Allister Brimble - Superfrog Intro.mod");
+        underTest.updateMod(mod);
+
+        // move to after the infinite loop position jump
+        underTest.seekSequence(18, 16);
+
+        assertThat(underTest.getSequenceIndex()).isEqualTo(18);
+        assertThat(underTest.getRowIndex()).isEqualTo(16);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
+
+        // we seeked outside of loop so we can actually read some empty rows
+        int skippedRowCount = underTest.skipRows(100);
+
+        assertThat(skippedRowCount).isEqualTo(48);
+        assertThat(underTest.getSequenceIndex()).isEqualTo(19);
+        assertThat(underTest.getRowIndex()).isEqualTo(0);
+        assertThat(underTest.getTickIndex()).isEqualTo(0);
+        assertThat(underTest.getSampleIndex()).isEqualTo(0);
+    }
+
+    @Test
     void shouldGenerateAudioFile() throws IOException, UnsupportedAudioFileException {
         Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
         underTest.updateMod(mod);
@@ -669,6 +714,12 @@ class SamplerTest {
         underTest.updateMod(mod);
 
         subData = sample.copyOfData(40, 6);
+        assertThat(subData).containsExactly(new byte[]{-11, -11, -18, 17, 26, 26});
+
+        underTest.seekSequence(3, 1);
+        underTest.skipRows(1);
+
+        subData = sample.copyOfData(40, 6);
         assertThat(subData).containsExactly(new byte[]{-11, 11, 18, -17, -26, 26});
 
         underTest.seekSequence(3, 1);
@@ -676,5 +727,34 @@ class SamplerTest {
 
         subData = sample.copyOfData(40, 6);
         assertThat(subData).containsExactly(new byte[]{-11, -11, -18, 17, 26, 26});
+    }
+
+    @Test
+    void shouldBuildIndexWithAllEffects() throws IOException {
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+
+        for (int i = 0; i < Mods.EFFECT_COUNT; i++) {
+            underTest.setEffectEnabled(EffectType.valueOf(i), false);
+            underTest.setExtendedEffectEnabled(ExtendedEffectType.valueOf(i), false);
+        }
+
+        // should re-enable all effects except invert loop when rebuilding index
+        underTest.updateMod(mod);
+
+        // all effects are still disabled
+        for (int i = 0; i < Mods.EFFECT_COUNT; i++) {
+            assertThat(underTest.isEffectEnabled(EffectType.valueOf(i))).isFalse();
+            assertThat(underTest.isExtendedEffectEnabled(ExtendedEffectType.valueOf(i))).isFalse();
+        }
+
+        // tempo / speed at row 0 (default)
+        assertThat(underTest.getContext().speed).isEqualTo(6);
+        assertThat(underTest.getContext().tempo).isEqualTo(125);
+
+        underTest.seekSequence(0, 1);
+
+        // index was rebuild with SET_SPEED effect enabled (even when explicitely disabled) so the valid tempo was set
+        assertThat(underTest.getContext().speed).isEqualTo(6);
+        assertThat(underTest.getContext().tempo).isEqualTo(116);
     }
 }
