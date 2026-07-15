@@ -20,6 +20,11 @@ import static com.github.thething.chipamp.common.Requirements.requireInRange;
 public final class Mods {
 
     /**
+     * The total number of effect types in the MOD format.
+     */
+    public static final int EFFECT_COUNT = 16;
+
+    /**
      * PAL system clock frequency in Hertz (3,546,895 Hz). Used for period-to-frequency conversion in PAL systems.
      */
     public static final int PAL_CLOCK_HZ = 3_546_895;
@@ -582,8 +587,8 @@ public final class Mods {
      * For example, period 428 (middle C, C-3) produces 8287 Hz on PAL systems. The mixer then resamples this to the
      * output sample rate.
      *
-     * @param period the period value
-     * @param clockHz  the clockHz frequency in Hz (typically PAL_CLOCK_HZ or NTSC_CLOCK_HZ)
+     * @param period  the period value
+     * @param clockHz the clockHz frequency in Hz (typically PAL_CLOCK_HZ or NTSC_CLOCK_HZ)
      * @return the frequency in Hz, or 0 if the period is non-positive
      */
     public static float convertPeriodToHz(int period, float clockHz) {

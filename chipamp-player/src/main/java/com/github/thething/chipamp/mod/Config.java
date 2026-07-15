@@ -51,9 +51,9 @@ final class Config {
      */
     Config(int channelCount) {
         this.muted = new boolean[channelCount];
-        this.effectEnabled = new boolean[16];
+        this.effectEnabled = new boolean[Mods.EFFECT_COUNT];
         Arrays.fill(this.effectEnabled, DEFAULT_EFFECT_ENABLED);
-        this.extendedEffectEnabled = new boolean[16];
+        this.extendedEffectEnabled = new boolean[Mods.EFFECT_COUNT];
         Arrays.fill(this.extendedEffectEnabled, DEFAULT_EFFECT_ENABLED);
         reset();
     }
