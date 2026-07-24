@@ -30,22 +30,9 @@ jobs:
           cache: 'maven'
       - name: Test with Maven
         run: mvn -B clean test
-
-  test-coverage:
-    runs-on: ubuntu-latest
-    name: Run tests and upload coverage
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up JDK
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          java-version: 17
-          cache: 'maven'
-      - name: Test with Maven
-        run: mvn -B clean test
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v7
+        if: matrix.os == 'ubuntu-latest' && matrix.java == 21
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: the-thing/chipamp
