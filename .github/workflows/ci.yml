@@ -31,7 +31,7 @@ jobs:
       - name: Test with Maven
         run: mvn -B clean test
       - name: Upload coverage reports to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.java == 21
+        if: matrix.os == 'ubuntu-latest' && matrix.java == 21 && github.repository == 'the-thing/chipamp'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
