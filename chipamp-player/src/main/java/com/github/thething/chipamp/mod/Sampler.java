@@ -51,6 +51,8 @@ public final class Sampler {
 
     private Mod mod;
     private int sampleCount;
+    private long modLengthMicros;
+
     private int sequenceIndex;
     private int rowIndex;
     private int tickIndex;
@@ -631,8 +633,7 @@ public final class Sampler {
      * @return the module's total playback duration in the requested unit
      */
     public long getModLength(TimeUnit unit) {
-        long milliseconds = sampleCount * 1_000L / config.samplingRate * 1_000L;
-        return unit.convert(milliseconds, TimeUnit.MICROSECONDS);
+        return unit.convert(modLengthMicros, TimeUnit.MICROSECONDS);
     }
 
     /**
@@ -918,6 +919,7 @@ public final class Sampler {
             }
 
             this.sampleCount = sampleCount;
+            this.modLengthMicros = sampleCount * 1_000L / config.samplingRate * 1_000L;
         } finally {
             config.loopDetectionEnabled = loopDetectionEnabled;
             config.loggingEnabled = loggingEnabled;
