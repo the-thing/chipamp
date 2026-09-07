@@ -757,4 +757,42 @@ class SamplerTest {
         assertThat(underTest.getContext().speed).isEqualTo(6);
         assertThat(underTest.getContext().tempo).isEqualTo(116);
     }
+
+    @Test
+    void shouldRetainChannelPanningAfterSettingSamplingRate() throws IOException {
+        Mod mod = modLoader.load("chip/DJ Metune - Axel F.mod");
+        underTest.updateMod(mod);
+
+        assertThat(underTest.getLeftPan(0)).isEqualTo(0.36f);
+        assertThat(underTest.getLeftPan(1)).isEqualTo(0.25f);
+        assertThat(underTest.getLeftPan(2)).isEqualTo(0.25f);
+        assertThat(underTest.getLeftPan(3)).isEqualTo(0.36f);
+        assertThat(underTest.getRightPan(0)).isEqualTo(0.64f);
+        assertThat(underTest.getRightPan(1)).isEqualTo(0.75f);
+        assertThat(underTest.getRightPan(2)).isEqualTo(0.75f);
+        assertThat(underTest.getRightPan(3)).isEqualTo(0.64f);
+
+        underTest.setLeftPan(1.0f);
+        underTest.setRightPan(1.0f);
+
+        assertThat(underTest.getLeftPan(0)).isEqualTo(1.0f);
+        assertThat(underTest.getLeftPan(1)).isEqualTo(0.0f);
+        assertThat(underTest.getLeftPan(2)).isEqualTo(0.0f);
+        assertThat(underTest.getLeftPan(3)).isEqualTo(1.0f);
+        assertThat(underTest.getRightPan(0)).isEqualTo(0.0f);
+        assertThat(underTest.getRightPan(1)).isEqualTo(1.0f);
+        assertThat(underTest.getRightPan(2)).isEqualTo(1.0f);
+        assertThat(underTest.getRightPan(3)).isEqualTo(0.0f);
+
+        underTest.setSamplingRate(22_050);
+
+        assertThat(underTest.getLeftPan(0)).isEqualTo(1.0f);
+        assertThat(underTest.getLeftPan(1)).isEqualTo(0.0f);
+        assertThat(underTest.getLeftPan(2)).isEqualTo(0.0f);
+        assertThat(underTest.getLeftPan(3)).isEqualTo(1.0f);
+        assertThat(underTest.getRightPan(0)).isEqualTo(0.0f);
+        assertThat(underTest.getRightPan(1)).isEqualTo(1.0f);
+        assertThat(underTest.getRightPan(2)).isEqualTo(1.0f);
+        assertThat(underTest.getRightPan(3)).isEqualTo(0.0f);
+    }
 }
