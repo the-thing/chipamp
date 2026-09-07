@@ -1192,7 +1192,7 @@ public final class Sampler {
 
             for (int i = 0; i < channelsBySequenceRow.length; i++) {
                 for (int channelIndex = 0; channelIndex < channelsBySequenceRow[i].length; channelIndex++) {
-                    boolean right = (i & 3) == 1 || (i & 3) == 2; // (LRRL) repeating pattern
+                    boolean right = (channelIndex & 3) == 1 || (channelIndex & 3) == 2; // (LRRL) repeating pattern
                     this.channelsBySequenceRow[i][channelIndex] = new Channel(config, right);
                 }
             }
