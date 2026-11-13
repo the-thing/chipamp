@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>17</java.version>
         <miglayout.version>11.5.2</miglayout.version>
-        <flatlaf.version>3.7.1</flatlaf.version>
+        <flatlaf.version>3.8</flatlaf.version>
         <junit.version>6.1.3</junit.version>
         <mockito.version>5.24.0</mockito.version>
         <assert4j.version>3.27.7</assert4j.version>
